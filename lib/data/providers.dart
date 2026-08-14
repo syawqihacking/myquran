@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_constants.dart';
+import '../core/quran_palette.dart';
 import '../core/window_state_service.dart';
 import 'db/quran_database.dart';
 import 'db/user_database.dart';
@@ -144,6 +145,7 @@ class SettingsState {
     this.alignArabicRight = true,
     this.tafsirOpenByDefault = false,
     this.restoreLastRead = true,
+    this.paperTheme = PaperTheme.hangat,
   });
 
   final ThemeMode themeMode;
@@ -152,6 +154,7 @@ class SettingsState {
   final bool alignArabicRight;
   final bool tafsirOpenByDefault;
   final bool restoreLastRead;
+  final PaperTheme paperTheme;
 
   SettingsState copyWith({
     ThemeMode? themeMode,
@@ -160,6 +163,7 @@ class SettingsState {
     bool? alignArabicRight,
     bool? tafsirOpenByDefault,
     bool? restoreLastRead,
+    PaperTheme? paperTheme,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -168,6 +172,7 @@ class SettingsState {
       alignArabicRight: alignArabicRight ?? this.alignArabicRight,
       tafsirOpenByDefault: tafsirOpenByDefault ?? this.tafsirOpenByDefault,
       restoreLastRead: restoreLastRead ?? this.restoreLastRead,
+      paperTheme: paperTheme ?? this.paperTheme,
     );
   }
 }
@@ -179,6 +184,7 @@ class SettingsController extends Notifier<SettingsState> {
   static const _kAlign = 'align_arabic_right';
   static const _kTafsirDefault = 'tafsir_open_default';
   static const _kRestoreLastRead = 'restore_last_read';
+  static const _kPaperTheme = 'paper_theme';
 
   @override
   SettingsState build() {
@@ -192,6 +198,9 @@ class SettingsController extends Notifier<SettingsState> {
       alignArabicRight: prefs.getBool(_kAlign) ?? true,
       tafsirOpenByDefault: prefs.getBool(_kTafsirDefault) ?? false,
       restoreLastRead: prefs.getBool(_kRestoreLastRead) ?? true,
+      paperTheme:
+          PaperTheme.values.asNameMap()[prefs.getString(_kPaperTheme)] ??
+              PaperTheme.hangat,
     );
   }
 
@@ -204,6 +213,7 @@ class SettingsController extends Notifier<SettingsState> {
     prefs.setBool(_kAlign, s.alignArabicRight);
     prefs.setBool(_kTafsirDefault, s.tafsirOpenByDefault);
     prefs.setBool(_kRestoreLastRead, s.restoreLastRead);
+    prefs.setString(_kPaperTheme, s.paperTheme.name);
   }
 
   void setThemeMode(ThemeMode m) {
@@ -240,6 +250,11 @@ class SettingsController extends Notifier<SettingsState> {
 
   void setRestoreLastRead(bool v) {
     state = state.copyWith(restoreLastRead: v);
+    _save();
+  }
+
+  void setPaperTheme(PaperTheme p) {
+    state = state.copyWith(paperTheme: p);
     _save();
   }
 }

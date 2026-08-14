@@ -151,10 +151,34 @@ abstract final class S {
   static const sujudMark = 'Tandai sujud tilawah';
   static const sujudUnmark = 'Hapus tanda sujud';
 
+  // Reader — zen mode (mode fokus membaca).
+  static const zenEnter = 'Mode fokus (Ctrl B)';
+  static const zenExit = 'Keluar mode fokus (Esc)';
+  static const zenSnackbarExitHint = 'Keluar dengan Esc atau Ctrl B.';
+
+  // Reader — salin ayat.
+  static const copyAyah = 'Salin';
+  static const copyAyahDone = 'Ayat tersalin ke papan klip.';
+
   // Home — riwayat baca.
   static const historyEyebrow = 'RIWAYAT BACA';
   static const historyProgressOf = 'dari';
   static const historyReadLabel = 'Ayat';
 
   static const changeTheme = 'Ganti tema';
+
+  // Settings — tema kertas.
+  static const paperThemeLabel = 'Tema kertas';
+  static const paperThemeSublabel =
+      'Warna kertas kolom baca — hangat di kedua mode.';
+  static const paperHangat = 'Hangat';
+  static const paperKlasik = 'Klasik';
+  static const paperPucat = 'Pucat';
+
+  // Spiritual content (Tahlil, Doa, Ratib Al-Haddad).
+  static const tahlilTitle = 'Tahlil & Doa';
+  static const tahlilCaption = 'Bacaan tahlil lengkap dengan doanya';
+  static const ratibTitle = 'Ratib Al-Haddad';
+  static const ratibCaption = 'Wirid malam karya Habib Abdullah Al-Haddad';
+  static const spiritualNav = 'Wirid & Doa';
 }

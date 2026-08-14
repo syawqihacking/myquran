@@ -16,6 +16,7 @@ import '../../data/repositories/user_repositories.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/ornament.dart';
 import '../widgets/quran_text_view.dart';
+import 'zen_mode_provider.dart';
 
 /// Reader (§15–§18): paper column, ayah tiles, tafsir, current-ayah tracking,
 /// jump pill, and the end-of-surah block.
@@ -281,6 +282,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   void _closeTafsir() => setState(() => _openTafsirAyahNumber = null);
 
+  void _enterZen() => ref.read(zenModeProvider.notifier).set(true);
+
   void _changeStep(int delta) {
     final controller = ref.read(settingsProvider.notifier);
     final current = ref.read(settingsProvider).quranFontStep;
@@ -396,6 +399,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
+    final zen = ref.watch(zenModeProvider);
     final ayahsAsync = ref.watch(ayahsProvider(widget.surahId));
     final surahAsync = ref.watch(surahByIdProvider(widget.surahId));
     final bookmarksAsync = ref.watch(bookmarksProvider);
@@ -422,7 +426,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         const SingleActivator(LogicalKeyboardKey.minus, control: true): () =>
             _changeStep(-1),
         const SingleActivator(LogicalKeyboardKey.escape): () {
-          if (_openTafsirAyahNumber != null) {
+          if (ref.read(zenModeProvider)) {
+            ref.read(zenModeProvider.notifier).set(false);
+          } else if (_openTafsirAyahNumber != null) {
             _closeTafsir();
           } else {
             Navigator.of(context).maybePop();
@@ -434,36 +440,59 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         child: Scaffold(
           body: Column(
             children: [
-              _ReaderTopBar(
-                surah: surah,
-                ayahCount: ayahs?.length,
-                fontStep: settings.quranFontStep,
-                currentAyahNumber: _currentAyahNumber,
-                isCurrentBookmarked:
-                    _currentAyahNumber != null && bookmarked.contains(
-                          _ayahIdFor(_currentAyahNumber),
+              // Zen mode: the top chrome collapses quietly away (200 ms,
+              // easeInOutCubic) so only the paper column remains. The scroll
+              // offset is never touched — the ListView keeps its position.
+              AnimatedSize(
+                duration: AppLayout.durBase,
+                curve: Curves.easeInOutCubic,
+                alignment: Alignment.topCenter,
+                child: zen
+                    ? const SizedBox(width: double.infinity)
+                    : AnimatedOpacity(
+                        duration: AppLayout.durQuick,
+                        opacity: 1,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _ReaderTopBar(
+                              surah: surah,
+                              ayahCount: ayahs?.length,
+                              fontStep: settings.quranFontStep,
+                              currentAyahNumber: _currentAyahNumber,
+                              isCurrentBookmarked: _currentAyahNumber != null &&
+                                  bookmarked.contains(
+                                    _ayahIdFor(_currentAyahNumber),
+                                  ),
+                              isCurrentSajda:
+                                  _isSajdaAyah(_currentAyahNumber),
+                              isCurrentSajdaDone:
+                                  _currentAyahNumber != null &&
+                                  sajdaDone.contains(
+                                    _ayahIdFor(_currentAyahNumber),
+                                  ),
+                              onBack: () => Navigator.of(context).maybePop(),
+                              onFontSmaller: () => _changeStep(-1),
+                              onFontLarger: () => _changeStep(1),
+                              onToggleZen: _enterZen,
+                              onToggleBookmark: () {
+                                final id = _ayahIdFor(_currentAyahNumber);
+                                if (id != null) {
+                                  ref
+                                      .read(bookmarkRepositoryProvider)
+                                      .toggleBookmark(id);
+                                }
+                              },
+                              onToggleSajda: () {
+                                final ayah = _ayahFor(_currentAyahNumber);
+                                if (ayah != null) _toggleSajda(ayah);
+                              },
+                            ),
+                            _ProgressBar(progress: _progress),
+                          ],
                         ),
-                isCurrentSajda: _isSajdaAyah(_currentAyahNumber),
-                isCurrentSajdaDone:
-                    _currentAyahNumber != null &&
-                    sajdaDone.contains(
-                      _ayahIdFor(_currentAyahNumber),
-                    ),
-                onBack: () => Navigator.of(context).maybePop(),
-                onFontSmaller: () => _changeStep(-1),
-                onFontLarger: () => _changeStep(1),
-                onToggleBookmark: () {
-                  final id = _ayahIdFor(_currentAyahNumber);
-                  if (id != null) {
-                    ref.read(bookmarkRepositoryProvider).toggleBookmark(id);
-                  }
-                },
-                onToggleSajda: () {
-                  final ayah = _ayahFor(_currentAyahNumber);
-                  if (ayah != null) _toggleSajda(ayah);
-                },
+                      ),
               ),
-              _ProgressBar(progress: _progress),
               Expanded(
                 child: Stack(
                   children: [
@@ -495,7 +524,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                         ),
                       ),
                     ),
-                    if (ayahs != null && ayahs.isNotEmpty)
+                    if (!zen && ayahs != null && ayahs.isNotEmpty)
                       Positioned(
                         left: 24,
                         bottom: 24,
@@ -637,6 +666,7 @@ class _ReaderTopBar extends StatelessWidget {
     required this.onBack,
     required this.onFontSmaller,
     required this.onFontLarger,
+    required this.onToggleZen,
     required this.onToggleBookmark,
     required this.onToggleSajda,
   });
@@ -651,6 +681,7 @@ class _ReaderTopBar extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onFontSmaller;
   final VoidCallback onFontLarger;
+  final VoidCallback onToggleZen;
   final VoidCallback onToggleBookmark;
   final VoidCallback onToggleSajda;
 
@@ -707,6 +738,11 @@ class _ReaderTopBar extends StatelessWidget {
             icon: const Icon(Icons.text_increase_rounded),
           ),
           const SizedBox(width: AppLayout.sp1),
+          IconButton(
+            onPressed: onToggleZen,
+            tooltip: S.zenEnter,
+            icon: const Icon(Icons.fullscreen_rounded),
+          ),
           if (currentAyahNumber != null)
             IconButton(
               onPressed: onToggleBookmark,

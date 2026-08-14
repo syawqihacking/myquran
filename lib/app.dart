@@ -11,6 +11,7 @@ import 'features/bookmarks/bookmarks_screen.dart';
 import 'features/browse/browse_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/spiritual/spiritual_screen.dart';
 import 'features/stats/stats_screen.dart';
 
 /// App root: watches the theme setting and applies the MyQuran theme.
@@ -23,8 +24,8 @@ class MyQuranApp extends ConsumerWidget {
     return MaterialApp(
       title: S.appName,
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(Brightness.light),
-      darkTheme: buildAppTheme(Brightness.dark),
+      theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
+      darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
       themeMode: settings.themeMode,
       home: const AppShell(),
     );
@@ -39,7 +40,7 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-enum _View { home, browse, bookmarks, stats, settings }
+enum _View { home, browse, spiritual, bookmarks, stats, settings }
 
 class _AppShellState extends ConsumerState<AppShell> {
   _View _view = _View.home;
@@ -77,9 +78,10 @@ class _AppShellState extends ConsumerState<AppShell> {
       index: switch (_view) {
         _View.home => 0,
         _View.browse => 1,
-        _View.bookmarks => 2,
-        _View.stats => 3,
-        _View.settings => 4,
+        _View.spiritual => 2,
+        _View.bookmarks => 3,
+        _View.stats => 4,
+        _View.settings => 5,
       },
       children: [
         HomeScreen(
@@ -87,6 +89,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           onOpenJuzs: () => _openBrowse(BrowseSegment.juz),
         ),
         BrowseScreen(state: _browseState, focusTick: _searchFocusTick),
+        const SpiritualScreen(),
         const BookmarksScreen(),
         const StatsScreen(),
         const SettingsScreen(),
@@ -178,6 +181,13 @@ class _Sidebar extends StatelessWidget {
             label: S.browseTitle,
             selected: view == _View.browse,
             onTap: () => onSelect(_View.browse),
+          ),
+          _NavItem(
+            rail: rail,
+            icon: Icons.brightness_5_rounded,
+            label: S.spiritualNav,
+            selected: view == _View.spiritual,
+            onTap: () => onSelect(_View.spiritual),
           ),
           const SizedBox(height: AppLayout.sp2),
           if (rail)

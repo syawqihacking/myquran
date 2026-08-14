@@ -142,13 +142,13 @@ void main() {
       await db.into(db.bookmarks).insert(
           BookmarksCompanion.insert(ayahId: 1, createdAt: 1));
       await db.into(db.lastReads).insert(
-          LastReadsCompanion.insert(ayahId: 1, updatedAt: 1));
+          LastRead(id: 0, ayahId: 1, updatedAt: 1));
       await db.into(db.readingLog).insert(ReadingLogCompanion.insert(
           epochDay: 1, juz: 1, ayahId: 1, createdAt: 1));
       await db.into(db.sajdaLog).insert(
           SajdaLogCompanion.insert(ayahId: 1, createdAt: 1));
-      await db.into(db.khatamTargets).insert(KhatamTargetsCompanion.insert(
-          startDate: 1, createdAt: 1));
+      await db.into(db.khatamTargets).insert(
+          KhatamTarget(id: 0, targetDate: null, startDate: 1, createdAt: 1));
       await db.into(db.surahPositions).insert(
           SurahPosition(surahId: 1, ayahId: 1, updatedAt: 1));
       await db.into(db.ayahAudio).insert(AyahAudioCompanion.insert(

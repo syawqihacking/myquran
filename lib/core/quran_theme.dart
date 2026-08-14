@@ -7,7 +7,12 @@ import 'quran_palette.dart';
 ///
 /// Material 3, seed `#1D6B58`, `tonalSpot`, then role values are pinned with
 /// `copyWith` so the palette is reproducible regardless of upstream drift.
-ThemeData buildAppTheme(Brightness brightness) {
+/// The [paper] theme selects which warm reading-surface variant the
+/// [QuranPalette] extension resolves to (§1.5).
+ThemeData buildAppTheme(
+  Brightness brightness, {
+  PaperTheme paper = PaperTheme.hangat,
+}) {
   final dark = brightness == Brightness.dark;
   final scheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF1D6B58),
@@ -52,7 +57,7 @@ ThemeData buildAppTheme(Brightness brightness) {
     colorScheme: scheme,
     brightness: brightness,
     scaffoldBackgroundColor: scheme.surface,
-    extensions: [dark ? QuranPalette.dark : QuranPalette.light],
+    extensions: [QuranPalette.of(paper, dark)],
     textTheme: _textTheme(scheme),
     visualDensity: VisualDensity.standard,
   );

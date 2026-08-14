@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+/// Selectable reading-paper variants (design system §1.5).
+///
+/// All variants stay warm in both brightness modes — the chrome/paper split
+/// is the identity device, and cold paper would break it. [hangat] is the
+/// default; its dark surface is warmed past the original §1.5 value so it
+/// reads as warm near-black rather than olive (paper-over-glass, §2.2).
+enum PaperTheme { hangat, klasik, pucat }
+
 /// The reading-surface ("paper") tokens (design system §1.5).
 ///
 /// The reading column uses these; all chrome uses the M3 roles. This
@@ -38,7 +46,9 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
   );
 
   static const QuranPalette dark = QuranPalette(
-    quranSurface: Color(0xFF151710),
+    // Warm brown-black (not olive): the paper/glass split stays visible in
+    // dark mode against the cool-olive chrome surface (§1.5 "warm near-black").
+    quranSurface: Color(0xFF171510),
     quranInk: Color(0xFFF0EADA),
     quranInkSecondary: Color(0xFFBDB7A8),
     quranAccent: Color(0xFFC9A545),
@@ -47,6 +57,68 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranBookmarkTint: Color(0x4D544200), // #544200 @ 30%
     quranHeaderGlow: Color(0x0DA8D4C0), // #A8D4C0 @ 5%
   );
+
+  /// Klasik: aged, slightly deeper cream — reads like an old hand-bound
+  /// edition. Warm and AA-safe in both modes.
+  static const QuranPalette klasik = QuranPalette(
+    quranSurface: Color(0xFFF7F0DE),
+    quranInk: Color(0xFF211C0E),
+    quranInkSecondary: Color(0xFF403A27),
+    quranAccent: Color(0xFF7A5C00),
+    quranRule: Color(0xFFE2D6B6),
+    quranHighlight: Color(0x73D0EAE0),
+    quranBookmarkTint: Color(0x4DF6E177),
+    quranHeaderGlow: Color(0x0A3B6B5C),
+  );
+
+  static const QuranPalette klasikDark = QuranPalette(
+    quranSurface: Color(0xFF1A1A12),
+    quranInk: Color(0xFFEFE8D3),
+    quranInkSecondary: Color(0xFFC0B9A6),
+    quranAccent: Color(0xFFD1AD50),
+    quranRule: Color(0xFF333027),
+    quranHighlight: Color(0x732E5246),
+    quranBookmarkTint: Color(0x4D544200),
+    quranHeaderGlow: Color(0x0DA8D4C0),
+  );
+
+  /// Pucat: soft, airy warm-white — quieter, closer to the chrome paper,
+  /// still warm (never cold) in both modes.
+  static const QuranPalette pucat = QuranPalette(
+    quranSurface: Color(0xFFFCFAF3),
+    quranInk: Color(0xFF1F1C12),
+    quranInkSecondary: Color(0xFF3D3A2F),
+    quranAccent: Color(0xFF7C5E00),
+    quranRule: Color(0xFFE9E3D2),
+    quranHighlight: Color(0x73D0EAE0),
+    quranBookmarkTint: Color(0x4DF6E177),
+    quranHeaderGlow: Color(0x0A3B6B5C),
+  );
+
+  static const QuranPalette pucatDark = QuranPalette(
+    // Same warm brown-black family as [dark] — quiet, never olive-green.
+    quranSurface: Color(0xFF161510),
+    quranInk: Color(0xFFF0ECDE),
+    quranInkSecondary: Color(0xFFBDB9AC),
+    quranAccent: Color(0xFFC5A243),
+    quranRule: Color(0xFF2C2B23),
+    quranHighlight: Color(0x732E5246),
+    quranBookmarkTint: Color(0x4D544200),
+    quranHeaderGlow: Color(0x0DA8D4C0),
+  );
+
+  /// Resolves the paper palette for a [PaperTheme] and brightness.
+  /// [hangat] intentionally resolves to the canonical [light]/[dark] tokens.
+  static QuranPalette of(PaperTheme theme, bool dark) {
+    switch (theme) {
+      case PaperTheme.hangat:
+        return dark ? QuranPalette.dark : QuranPalette.light;
+      case PaperTheme.klasik:
+        return dark ? klasikDark : klasik;
+      case PaperTheme.pucat:
+        return dark ? pucatDark : pucat;
+    }
+  }
 
   @override
   QuranPalette copyWith({
