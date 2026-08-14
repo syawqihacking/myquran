@@ -14,6 +14,11 @@ abstract final class S {
   static const juzSegment = 'Juz';
   static const ayatCount = 'ayat';
 
+  // Prayer times.
+  static const prayerTimesEyebrow = 'WAKTU SHOLAT';
+  static const nextPrayerLabel = 'Sholat berikutnya';
+  static const prayerCountdownPrefix = 'dalam';
+
   // Browse (unified surah/juz/search page).
   static const browseEyebrow = 'BACA';
   static const browseTitle = 'Al-Qur\'an';

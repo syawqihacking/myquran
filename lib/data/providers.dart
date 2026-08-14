@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_constants.dart';
@@ -13,6 +14,7 @@ import 'repositories/reading_stats_repository.dart';
 import 'repositories/spiritual_repository.dart';
 import 'repositories/user_repositories.dart';
 import 'services/audio_service.dart';
+import 'services/prayer_time_service.dart';
 
 /// Overridden in `main()` with the awaited instance.
 final sharedPreferencesProvider = Provider<SharedPreferences>(
@@ -100,6 +102,53 @@ final audioServiceProvider = Provider<AudioService>((ref) {
   final s = NoopAudioService();
   ref.onDispose(s.dispose);
   return s;
+});
+
+final prayerTimeServiceProvider = Provider<PrayerTimeService>(
+    (ref) => PrayerTimeService());
+
+/// Streams prayer schedule, refreshing every 30 seconds for live countdown.
+/// Uses GPS location with Jakarta fallback if permission is denied.
+final prayerScheduleProvider = StreamProvider<PrayerSchedule>((ref) async* {
+  final service = ref.watch(prayerTimeServiceProvider);
+
+  // Try to get the device location; fall back to Jakarta.
+  double lat = -6.2088;
+  double lng = 106.8456;
+  String locName = 'Jakarta';
+
+  try {
+    final perm = await Geolocator.checkPermission();
+    LocationPermission effectivePerm = perm;
+    if (perm == LocationPermission.denied) {
+      effectivePerm = await Geolocator.requestPermission();
+    }
+    if (effectivePerm == LocationPermission.whileInUse ||
+        effectivePerm == LocationPermission.always) {
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 5),
+        ),
+      );
+      lat = pos.latitude;
+      lng = pos.longitude;
+      locName = 'Lokasi Anda';
+    }
+  } catch (_) {
+    // Keep Jakarta defaults.
+  }
+
+  // Emit immediately, then every 30 s so the countdown stays fresh.
+  while (true) {
+    yield service.calculate(
+      latitude: lat,
+      longitude: lng,
+      now: DateTime.now(),
+      locationName: locName,
+    );
+    await Future<void>.delayed(const Duration(seconds: 30));
+  }
 });
 
 // ---- Streams -------------------------------------------------------------

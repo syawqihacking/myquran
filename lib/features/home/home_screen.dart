@@ -8,6 +8,7 @@ import '../../data/repositories/reading_history_repository.dart';
 import '../browse/browse_screen.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/quran_text_view.dart';
+import 'prayer_times_card.dart';
 
 /// Beranda (design §2/§13): header, last-read hero, reading history, and quick
 /// access into the unified Al-Qur'an page (surah/juz lists + search) via the
@@ -31,6 +32,8 @@ class HomeScreen extends ConsumerWidget {
       ),
       children: [
         const _HomeHeader(),
+        const SizedBox(height: AppLayout.sp6),
+        const PrayerTimesCard(),
         const SizedBox(height: AppLayout.sp6),
         const _ContinueHero(),
         const _ReadingHistory(),
