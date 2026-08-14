@@ -568,11 +568,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final endIndex = ayahStartIndex + ayahs.length;
     final itemCount = endIndex + 1;
 
+    final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+    
     return ListView.builder(
       controller: _scroll,
       key: _viewportKey,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? AppLayout.sp3 : AppLayout.sp6,
         vertical: AppLayout.sp6,
       ),
       itemCount: itemCount,
@@ -1008,13 +1010,15 @@ class _AyahTileState extends State<_AyahTile> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        color: _bg,
-        padding: EdgeInsets.only(bottom: gap),
-        child: Stack(
-          children: [
+      child: SizedBox(
+        width: double.infinity,
+        child: AnimatedContainer(
+          duration: AppLayout.durBase,
+          curve: Curves.easeOut,
+          color: _bg,
+          padding: EdgeInsets.only(bottom: gap),
+          child: Stack(
+            children: [
             Positioned(
               left: 0,
               top: 16,
@@ -1152,6 +1156,7 @@ class _AyahTileState extends State<_AyahTile> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

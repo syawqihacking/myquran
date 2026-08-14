@@ -43,6 +43,7 @@ class AppConstants {
   static const double sidebarFullWidth = 264;
   static const double sidebarRailWidth = 76;
   static const double sidebarBreakpoint = 1040;
+  static const double mobileBreakpoint = 600;
   static const double contentColumnMaxWidth = 760;
   static const double readerMaxWidth = 1040;
   static const double readerMinWidth = 680;

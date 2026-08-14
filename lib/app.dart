@@ -96,31 +96,123 @@ class _AppShellState extends ConsumerState<AppShell> {
       ],
     );
 
+    final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): _openSearch,
       },
       child: Scaffold(
+        bottomNavigationBar: isMobile
+            ? _BottomNav(
+                view: _view,
+                onSelect: (v) => setState(() => _view = v),
+              )
+            : null,
         body: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Sidebar(
-              view: _view,
-              onSelect: (v) => setState(() => _view = v),
-            ),
+            if (!isMobile)
+              _Sidebar(
+                view: _view,
+                onSelect: (v) => setState(() => _view = v),
+              ),
             Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: AppConstants.contentColumnMaxWidth,
+              child: Stack(
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: AppConstants.contentColumnMaxWidth,
+                      ),
+                      child: body,
+                    ),
                   ),
-                  child: body,
-                ),
+                  if (_view != _View.settings)
+                    Positioned(
+                      top: AppLayout.sp4,
+                      right: AppLayout.sp4,
+                      child: SafeArea(
+                        child: IconButton(
+                          icon: const Icon(Icons.settings_rounded),
+                          tooltip: 'Pengaturan',
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.8),
+                          ),
+                          onPressed: () => setState(() => _view = _View.settings),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BottomNav extends StatelessWidget {
+  const _BottomNav({
+    required this.view,
+    required this.onSelect,
+  });
+
+  final _View view;
+  final ValueChanged<_View> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    int selectedIndex = switch (view) {
+      _View.home => 0,
+      _View.browse => 1,
+      _View.spiritual => 2,
+      _View.bookmarks => 3,
+      _View.stats => 4,
+      _ => 0, // Fallback for settings
+    };
+
+    return NavigationBar(
+      selectedIndex: selectedIndex,
+      onDestinationSelected: (idx) {
+        final v = switch (idx) {
+          0 => _View.home,
+          1 => _View.browse,
+          2 => _View.spiritual,
+          3 => _View.bookmarks,
+          4 => _View.stats,
+          _ => _View.home,
+        };
+        onSelect(v);
+      },
+      destinations: [
+        const NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home_rounded),
+          label: 'Beranda',
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.menu_book_outlined),
+          selectedIcon: const Icon(Icons.menu_book_rounded),
+          label: S.browseTitle,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.brightness_5_outlined),
+          selectedIcon: const Icon(Icons.brightness_5_rounded),
+          label: S.spiritualNav,
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.bookmark_border_rounded),
+          selectedIcon: Icon(Icons.bookmark_rounded),
+          label: 'Penanda',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.insights_outlined),
+          selectedIcon: Icon(Icons.insights_rounded),
+          label: 'Statistik',
+        ),
+      ],
     );
   }
 }
@@ -219,13 +311,7 @@ class _Sidebar extends StatelessWidget {
             selected: view == _View.stats,
             onTap: () => onSelect(_View.stats),
           ),
-          _NavItem(
-            rail: rail,
-            icon: Icons.settings_rounded,
-            label: 'Pengaturan',
-            selected: view == _View.settings,
-            onTap: () => onSelect(_View.settings),
-          ),
+
           const Spacer(),
           _SidebarFooter(rail: rail),
         ],

@@ -16,9 +16,11 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final controller = ref.read(settingsProvider.notifier);
 
+    final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+    
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? AppLayout.sp4 : AppLayout.sp6,
         vertical: AppLayout.sp8,
       ),
       children: [
@@ -38,29 +40,32 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.brightness_6_rounded,
               title: S.themeModeLabel,
               subtitle: S.themeModeSublabel,
-              trailing: SegmentedButton<ThemeMode>(
-                segments: const [
-                  ButtonSegment(
-                    value: ThemeMode.system,
-                    label: Text(S.themeSystem),
-                    icon: Icon(Icons.brightness_auto_rounded, size: 16),
+              bottom: SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<ThemeMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: ThemeMode.system,
+                      label: Text(S.themeSystem),
+                      icon: Icon(Icons.brightness_auto_rounded, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.light,
+                      label: Text(S.themeLight),
+                      icon: Icon(Icons.light_mode_rounded, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.dark,
+                      label: Text(S.themeDark),
+                      icon: Icon(Icons.dark_mode_rounded, size: 16),
+                    ),
+                  ],
+                  selected: {settings.themeMode},
+                  onSelectionChanged: (s) => controller.setThemeMode(s.first),
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
                   ),
-                  ButtonSegment(
-                    value: ThemeMode.light,
-                    label: Text(S.themeLight),
-                    icon: Icon(Icons.light_mode_rounded, size: 16),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.dark,
-                    label: Text(S.themeDark),
-                    icon: Icon(Icons.dark_mode_rounded, size: 16),
-                  ),
-                ],
-                selected: {settings.themeMode},
-                onSelectionChanged: (s) => controller.setThemeMode(s.first),
-                showSelectedIcon: false,
-                style: ButtonStyle(
-                  visualDensity: VisualDensity.compact,
                 ),
               ),
             ),
@@ -96,16 +101,19 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.format_align_right_rounded,
               title: S.alignLabel,
               subtitle: S.alignNote,
-              trailing: SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true, label: Text(S.alignRight)),
-                  ButtonSegment(value: false, label: Text(S.alignCenter)),
-                ],
-                selected: {settings.alignArabicRight},
-                onSelectionChanged: (s) =>
-                    controller.setAlignArabicRight(s.first),
-                showSelectedIcon: false,
-                style: ButtonStyle(visualDensity: VisualDensity.compact),
+              bottom: SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(value: true, label: Text(S.alignRight)),
+                    ButtonSegment(value: false, label: Text(S.alignCenter)),
+                  ],
+                  selected: {settings.alignArabicRight},
+                  onSelectionChanged: (s) =>
+                      controller.setAlignArabicRight(s.first),
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                ),
               ),
             ),
           ],
@@ -272,6 +280,7 @@ class _SettingRow extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.bottom,
     this.destructive = false,
   });
 
@@ -279,6 +288,7 @@ class _SettingRow extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget? trailing;
+  final Widget? bottom;
 
   /// When true, the row is rendered in the error color (destructive action).
   final bool destructive;
@@ -294,6 +304,7 @@ class _SettingRow extends StatelessWidget {
         vertical: AppLayout.sp3,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: accent),
           const SizedBox(width: AppLayout.sp3),
@@ -316,11 +327,17 @@ class _SettingRow extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (bottom != null) ...[
+                  const SizedBox(height: AppLayout.sp3),
+                  bottom!,
+                ],
               ],
             ),
           ),
-          const SizedBox(width: AppLayout.sp3),
-          if (trailing != null) trailing!,
+          if (trailing != null) ...[
+            const SizedBox(width: AppLayout.sp3),
+            trailing!,
+          ],
         ],
       ),
     );

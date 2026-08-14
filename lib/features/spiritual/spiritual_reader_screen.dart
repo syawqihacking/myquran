@@ -393,7 +393,7 @@ class _SpiritualItemTileState extends State<_SpiritualItemTile> {
               crossFadeState: _expanded
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
-              firstChild: const SizedBox(width: double.infinity),
+              firstChild: const SizedBox.shrink(),
               secondChild: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppLayout.sp4,

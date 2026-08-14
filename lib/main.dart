@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'dart:io';
+
 import 'app.dart';
 import 'core/app_constants.dart';
 import 'data/providers.dart';
@@ -11,10 +13,12 @@ import 'data/providers.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
-  await windowManager.setMinimumSize(
-    const Size(AppConstants.minWindowWidth, AppConstants.minWindowHeight),
-  );
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    await windowManager.setMinimumSize(
+      const Size(AppConstants.minWindowWidth, AppConstants.minWindowHeight),
+    );
+  }
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -23,11 +27,13 @@ Future<void> main() async {
     sharedPreferencesProvider.overrideWithValue(prefs),
   ]);
 
-  // Restore the previous window geometry (or center on first launch), then
-  // persist future resize/move events.
-  final windowState = container.read(windowStateServiceProvider);
-  await windowState.restore(windowManager);
-  windowState.attach(windowManager);
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    // Restore the previous window geometry (or center on first launch), then
+    // persist future resize/move events.
+    final windowState = container.read(windowStateServiceProvider);
+    await windowState.restore(windowManager);
+    windowState.attach(windowManager);
+  }
 
   runApp(
     UncontrolledProviderScope(
