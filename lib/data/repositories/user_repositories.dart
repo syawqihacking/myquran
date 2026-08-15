@@ -89,3 +89,42 @@ class LastReadRepository {
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       ));
 }
+
+/// Bookmarks for daily prayers (doa harian) — a separate store from ayah
+/// bookmarks, keyed by the doa slug (`DoaHarian.id`).
+class DoaBookmarkRepository {
+  DoaBookmarkRepository(this._user);
+
+  final UserDatabase _user;
+
+  Stream<Set<String>> watchBookmarkedIds() {
+    return _user.select(_user.doaBookmarks).watch().map(
+          (rows) => {for (final r in rows) r.doaId},
+        );
+  }
+
+  Future<bool> isBookmarked(String doaId) async {
+    final r = await (_user.select(_user.doaBookmarks)
+          ..where((t) => t.doaId.equals(doaId)))
+        .getSingleOrNull();
+    return r != null;
+  }
+
+  Future<void> toggleBookmark(String doaId) async {
+    final existing = await (_user.select(_user.doaBookmarks)
+          ..where((t) => t.doaId.equals(doaId)))
+        .getSingleOrNull();
+    if (existing != null) {
+      await (_user.delete(_user.doaBookmarks)
+            ..where((t) => t.doaId.equals(doaId)))
+          .go();
+    } else {
+      await _user.into(_user.doaBookmarks).insert(
+            DoaBookmarksCompanion.insert(
+              doaId: doaId,
+              createdAt: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
+    }
+  }
+}

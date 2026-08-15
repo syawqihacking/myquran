@@ -69,6 +69,7 @@ void main() {
       await db.customSelect('SELECT * FROM sajda_log LIMIT 1').get();
       await db.customSelect('SELECT * FROM khatam_targets LIMIT 1').get();
       await db.customSelect('SELECT * FROM surah_positions LIMIT 1').get();
+      await db.customSelect('SELECT * FROM doa_bookmarks LIMIT 1').get();
       // onCreate must also seed the default qari list.
       final reciters = await db.select(db.reciters).get();
       expect(reciters.length, 4);
@@ -151,6 +152,8 @@ void main() {
           KhatamTarget(id: 0, targetDate: null, startDate: 1, createdAt: 1));
       await db.into(db.surahPositions).insert(
           SurahPosition(surahId: 1, ayahId: 1, updatedAt: 1));
+      await db.into(db.doaBookmarks).insert(
+          DoaBookmarksCompanion.insert(doaId: 'doa-pagi-hari', createdAt: 1));
       await db.into(db.ayahAudio).insert(AyahAudioCompanion.insert(
           ayahId: 1, reciterId: 1, filePathOrUrl: 'file:///tmp/a.mp3'));
       await db.customStatement(
@@ -165,6 +168,7 @@ void main() {
       expect(await db.sajdaLog.count().getSingle(), 0);
       expect(await db.khatamTargets.count().getSingle(), 0);
       expect(await db.surahPositions.count().getSingle(), 0);
+      expect(await db.doaBookmarks.count().getSingle(), 0);
       expect(await db.ayahAudio.count().getSingle(), 0);
 
       // App-managed rows survive: seeded qari list and app_meta.
@@ -206,6 +210,8 @@ Future<void> _downgradeTo(UserDatabase raw, int version) async {
   await raw.customStatement('DROP TABLE IF EXISTS sajda_log');
   await raw.customStatement('DROP TABLE IF EXISTS khatam_targets');
   await raw.customStatement('DROP TABLE IF EXISTS surah_positions');
+  // v4-only table (absent in v1–v3 on-disk shapes).
+  await raw.customStatement('DROP TABLE IF EXISTS doa_bookmarks');
   // v3-only columns.
   await raw.customStatement('ALTER TABLE reciters DROP COLUMN url_template');
   await raw.customStatement(

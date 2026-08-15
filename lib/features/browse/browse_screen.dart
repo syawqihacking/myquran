@@ -10,13 +10,14 @@ import '../../core/app_strings.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/quran_repositories.dart';
+import '../../data/repositories/user_repositories.dart';
 import '../reader/reader_screen.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Segments of the unified Al-Qur'an page (the list tabs). Pencarian bukan
 /// segmen — ia mode yang menimpa area daftar (lihat [BrowseState.searchOpen]).
-enum BrowseSegment { surah, juz }
+enum BrowseSegment { surah, juz, favorit }
 
 /// Full state of the browse page: which list tab is active and whether the
 /// inline search panel is open. Owned by the shell so it survives IndexedStack
@@ -38,8 +39,9 @@ class BrowseState {
   }
 }
 
-/// Satu halaman untuk semua navigasi baca (design §2): daftar surah dan juz
-/// lewat segmen, plus pencarian ayat/terjemahan yang dibuka lewat ikon search.
+/// Satu halaman untuk semua navigasi baca (design §2): daftar surah, juz, dan
+/// favorit lewat segmen, plus pencarian yang dibuka lewat bilah pencarian atau
+/// ikon search.
 class BrowseScreen extends ConsumerStatefulWidget {
   const BrowseScreen({
     super.key,
@@ -79,104 +81,371 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   }
 
   void _toggleSearch() {
-    widget.state.value = widget.state.value
-        .copyWith(searchOpen: !widget.state.value.searchOpen);
+    widget.state.value =
+        widget.state.value.copyWith(searchOpen: !widget.state.value.searchOpen);
+  }
+
+  void _openSearchPanel() {
+    widget.state.value = widget.state.value.copyWith(searchOpen: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final state = widget.state.value;
     final showSurah = !state.searchOpen && state.segment == BrowseSegment.surah;
     final showJuz = !state.searchOpen && state.segment == BrowseSegment.juz;
+    final showFavorit =
+        !state.searchOpen && state.segment == BrowseSegment.favorit;
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
-        vertical: AppLayout.sp8,
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _BrowseAppBar(
+            searchOpen: state.searchOpen,
+            onToggleSearch: _toggleSearch,
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppLayout.sp6,
+                AppLayout.sp5,
+                AppLayout.sp6,
+                AppLayout.sp8,
+              ),
+              children: [
+                // The design's inline search bar. Tapping it opens the search
+                // panel (which owns the real field, auto-focused). While the
+                // panel is open the bar is hidden — the panel's own field
+                // takes its place below the tabs.
+                if (!state.searchOpen) ...[
+                  _SearchBarTrigger(onTap: _openSearchPanel),
+                  const SizedBox(height: AppLayout.sp4),
+                ],
+                _SegmentTabs(segment: state.segment, onChanged: _selectSegment),
+                const SizedBox(height: AppLayout.sp5),
+                // Visibility(maintainState) keeps each panel alive so the
+                // search query and segment state survive switching tabs/views.
+                Visibility(
+                  visible: showSurah,
+                  maintainState: true,
+                  child: const _SurahList(),
+                ),
+                Visibility(
+                  visible: showJuz,
+                  maintainState: true,
+                  child: const _JuzList(),
+                ),
+                Visibility(
+                  visible: showFavorit,
+                  maintainState: true,
+                  child: const _FavoritList(),
+                ),
+                Visibility(
+                  visible: state.searchOpen,
+                  maintainState: true,
+                  child: _SearchTab(
+                    active: state.searchOpen,
+                    focusTick: widget.focusTick,
+                    onClose: _toggleSearch,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      children: [
-        Text(
-          S.browseEyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.tertiary,
-          ),
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        Row(
-          children: [
-            Expanded(
-              child: Text(S.browseTitle, style: theme.textTheme.displaySmall),
-            ),
-            IconButton(
-              tooltip: state.searchOpen ? S.closeSearch : S.openSearch,
-              isSelected: state.searchOpen,
-              onPressed: _toggleSearch,
-              icon: const Icon(Icons.search_rounded),
-              selectedIcon: const Icon(Icons.close_rounded),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        Text(
-          S.browseCaption,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppLayout.sp6),
-        _SegmentControl(segment: state.segment, onChanged: _selectSegment),
-        const SizedBox(height: AppLayout.sp5),
-        // Visibility(maintainState) keeps each panel alive so the search
-        // query and segment state survive switching tabs / views.
-        Visibility(
-          visible: showSurah,
-          maintainState: true,
-          child: const _SurahList(),
-        ),
-        Visibility(
-          visible: showJuz,
-          maintainState: true,
-          child: const _JuzList(),
-        ),
-        Visibility(
-          visible: state.searchOpen,
-          maintainState: true,
-          child: _SearchTab(
-            active: state.searchOpen,
-            focusTick: widget.focusTick,
-            onClose: _toggleSearch,
-          ),
-        ),
-      ],
     );
   }
 }
 
-class _SegmentControl extends StatelessWidget {
-  const _SegmentControl({required this.segment, required this.onChanged});
+// ---------------------------------------------------------------------------
+// Pinned app bar (Stitch Daftar Surah §1)
+// ---------------------------------------------------------------------------
+
+/// Pinned top bar: centered "Al-Qur'an" title with the search action on the
+/// right. Mirrors the home app bar so the shell's settings gear can sit below
+/// it the same way (see app.dart). The hamburger from the Stitch design is
+/// omitted: the shell already owns navigation (sidebar on desktop, bottom bar
+/// on mobile), so a drawer affordance here would be a dead button.
+class _BrowseAppBar extends StatelessWidget {
+  const _BrowseAppBar({
+    required this.searchOpen,
+    required this.onToggleSearch,
+  });
+
+  final bool searchOpen;
+  final VoidCallback onToggleSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      height: AppLayout.sp10,
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
+      decoration: BoxDecoration(
+        color: scheme.surface.withValues(alpha: 0.92),
+        border: Border(
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            S.browseTitle,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.primary,
+            ),
+          ),
+          Positioned(
+            right: 0,
+            child: IconButton(
+              tooltip: searchOpen ? S.closeSearch : S.openSearch,
+              isSelected: searchOpen,
+              onPressed: onToggleSearch,
+              icon: Icon(Icons.search_rounded, color: scheme.primary),
+              selectedIcon: Icon(Icons.close_rounded, color: scheme.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inline search bar (Stitch Daftar Surah §2)
+// ---------------------------------------------------------------------------
+
+/// The design's full-width rounded search bar. Not a real field — it opens the
+/// search panel (which auto-focuses its own field). Hover turns the border
+/// primary, echoing the design's focus state on desktop.
+class _SearchBarTrigger extends StatefulWidget {
+  const _SearchBarTrigger({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  State<_SearchBarTrigger> createState() => _SearchBarTriggerState();
+}
+
+class _SearchBarTriggerState extends State<_SearchBarTrigger> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: AppLayout.durBase,
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+          border: Border.all(
+            color: _hovered ? scheme.primary : scheme.outlineVariant,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppLayout.sp4,
+                vertical: AppLayout.sp3,
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search_rounded, color: scheme.outline),
+                  const SizedBox(width: AppLayout.sp3),
+                  Text(
+                    S.browseSearchHint,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Segment tabs (Stitch Daftar Surah §3)
+// ---------------------------------------------------------------------------
+
+/// Surah / Juz / Favorit tabs: headline-sized labels, a 2px primary underline
+/// on the active tab, and a thin divider under the whole strip.
+class _SegmentTabs extends StatelessWidget {
+  const _SegmentTabs({required this.segment, required this.onChanged});
 
   final BrowseSegment segment;
   final ValueChanged<BrowseSegment> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<BrowseSegment>(
-      segments: const [
-        ButtonSegment(value: BrowseSegment.surah, label: Text(S.surahSegment)),
-        ButtonSegment(value: BrowseSegment.juz, label: Text(S.juzSegment)),
-      ],
-      selected: {segment},
-      onSelectionChanged: (s) => onChanged(s.first),
-      showSelectedIcon: false,
-      expandedInsets: EdgeInsets.zero,
-      style: ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 48,
+      child: Stack(
+        children: [
+          // Thin divider under the whole tab strip.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: 1,
+              color: scheme.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _TabButton(
+                label: S.surahSegment,
+                selected: segment == BrowseSegment.surah,
+                onTap: () => onChanged(BrowseSegment.surah),
+              ),
+              const SizedBox(width: AppLayout.sp6),
+              _TabButton(
+                label: S.juzSegment,
+                selected: segment == BrowseSegment.juz,
+                onTap: () => onChanged(BrowseSegment.juz),
+              ),
+              const SizedBox(width: AppLayout.sp6),
+              _TabButton(
+                label: S.favoritSegment,
+                selected: segment == BrowseSegment.favorit,
+                onTap: () => onChanged(BrowseSegment.favorit),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  const _TabButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp1),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected ? scheme.primary : Colors.transparent,
+              width: 2,
+            ),
+          ),
         ),
-        side: WidgetStatePropertyAll(
-          BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+        child: Center(
+          child: Text(
+            label,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontSize: 20,
+              height: 28 / 20,
+              fontWeight: FontWeight.w600,
+              color: selected ? scheme.primary : scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared card surface (Stitch Daftar Surah §4)
+// ---------------------------------------------------------------------------
+
+/// Rounded-xl card on `surfaceContainerLowest` with a soft emerald shadow.
+/// On hover the shadow deepens and a primary @ 10% border appears.
+class _HoverCard extends StatefulWidget {
+  const _HoverCard({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_HoverCard> createState() => _HoverCardState();
+}
+
+class _HoverCardState extends State<_HoverCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: AppLayout.durBase,
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.all(AppLayout.sp4),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          border: Border.all(
+            color: _hovered
+                ? scheme.primary.withValues(alpha: 0.10)
+                : Colors.transparent,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.04),
+              blurRadius: _hovered ? 32 : 20,
+              offset: Offset(0, _hovered ? 12 : 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -209,50 +478,233 @@ class _SurahList extends ConsumerWidget {
       data: (list) {
         if (list.isEmpty) return const SizedBox.shrink();
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [...list.map((s) => _SurahRow(surah: s))],
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < list.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppLayout.sp3),
+              _SurahCard(
+                surah: list[i],
+                onTap: () => openSurah(context, list[i].id),
+              ),
+            ],
+          ],
         );
       },
     );
   }
 }
 
-class _SurahRow extends StatelessWidget {
-  const _SurahRow({required this.surah});
+class _SurahCard extends StatelessWidget {
+  const _SurahCard({required this.surah, required this.onTap});
 
   final Surah surah;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HoverCard(
+      onTap: onTap,
+      child: _SurahRowContent(
+        surah: surah,
+        metaTrailing: '${surah.ayahCount} ${S.ayatCount}',
+      ),
+    );
+  }
+}
+
+/// The card's inner row: number badge, name + meta column, Arabic name.
+/// Shared by the surah list and the Favorit tab (which swaps the meta
+/// trailing text for a bookmark count).
+class _SurahRowContent extends StatelessWidget {
+  const _SurahRowContent({required this.surah, required this.metaTrailing});
+
+  final Surah surah;
+  final String metaTrailing;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final meta = surah.revelationType == 0 ? S.makkiyah : S.madaniyah;
+    final scheme = theme.colorScheme;
+    final isFirst = surah.id == 1;
+    final isMakki = surah.revelationType == 0;
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
-    return HoverTile(
-      onTap: () => openSurah(context, surah.id),
-      child: Row(
-        children: [
-          QTextDisplay(text: surah.nameArabic, step: 5),
-          const SizedBox(width: AppLayout.sp4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(surah.nameLatin, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 2),
-                Text(
-                  '$meta · ${surah.ayahCount} ${S.ayatCount}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+    return Row(
+      children: [
+        _NumberBadge(number: surah.id, isFirst: isFirst),
+        const SizedBox(width: AppLayout.sp4),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                surah.nameLatin,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  height: 28 / 20,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onSurface,
                 ),
-              ],
+              ),
+              const SizedBox(height: 2),
+              _MetaRow(
+                translation: surah.nameIndonesian,
+                trailing: metaTrailing,
+                meta: isMakki ? S.makkiyah : S.madaniyah,
+                isMakki: isMakki,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppLayout.sp3),
+        // Arabic name (Amiri, primary). Sized down on mobile so the row stays
+        // readable; right-aligned at the card edge like the design.
+        Flexible(
+          child: QTextDisplay(
+            text: surah.nameArabic,
+            step: isMobile ? 5 : 7,
+            color: scheme.primary,
+            maxLines: 1,
+            overflow: TextOverflow.clip,
+            alignment: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 48×48 circle number badge with a faint dot-grid watermark. Al-Fatihah
+/// (surah 1) uses the sage `secondaryContainer`; the rest use `surfaceContainer`.
+class _NumberBadge extends StatelessWidget {
+  const _NumberBadge({required this.number, required this.isFirst});
+
+  final int number;
+  final bool isFirst;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final bg = isFirst ? scheme.secondaryContainer : scheme.surfaceContainer;
+    final fg = isFirst ? scheme.onSecondaryContainer : scheme.onSurfaceVariant;
+
+    return Container(
+      width: 48,
+      height: 48,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Subtle dot-grid watermark (design: 1px dots on a 6px grid @ 5%).
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.05,
+              child: CustomPaint(painter: _DotGridPainter(color: fg)),
             ),
           ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
+          Text(
+            '$number',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontSize: 20,
+              height: 1,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DotGridPainter extends CustomPainter {
+  const _DotGridPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    const spacing = 6.0;
+    const radius = 1.0;
+    var y = spacing / 2;
+    while (y < size.height) {
+      var x = spacing / 2;
+      while (x < size.width) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+        x += spacing;
+      }
+      y += spacing;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DotGridPainter oldDelegate) => oldDelegate.color != color;
+}
+
+/// Uppercase meta line: translation • X Ayat • Makkiyah/Madaniyah icon.
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({
+    required this.translation,
+    required this.trailing,
+    required this.meta,
+    required this.isMakki,
+  });
+
+  final String translation;
+  final String trailing;
+  final String meta;
+  final bool isMakki;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final style = theme.textTheme.labelSmall?.copyWith(
+      fontSize: 12,
+      height: 16 / 12,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.5,
+      color: scheme.onSurfaceVariant,
+    );
+    return Wrap(
+      spacing: AppLayout.sp2,
+      runSpacing: AppLayout.sp1,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(translation.toUpperCase(), style: style),
+        const _MetaDot(),
+        Text(trailing.toUpperCase(), style: style),
+        const _MetaDot(),
+        Tooltip(
+          message: meta,
+          child: Icon(
+            isMakki ? Icons.location_city_rounded : Icons.mosque_rounded,
+            size: 16,
+            color: isMakki ? scheme.tertiary : scheme.secondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MetaDot extends StatelessWidget {
+  const _MetaDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 4,
+      height: 4,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.outlineVariant,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -288,20 +740,26 @@ class _JuzList extends ConsumerWidget {
       data: (list) {
         if (list.isEmpty) return const SizedBox.shrink();
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ...list.map((j) {
-              final first = surahMap[j.firstSurahId];
-              final last = surahMap[j.lastSurahId];
-              final range = first == null || last == null
-                  ? ''
-                  : '${first.nameLatin} — ${last.nameLatin}';
-              return _JuzRow(juz: j, range: range);
-            }),
+            for (var i = 0; i < list.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppLayout.sp3),
+              _JuzRow(
+                juz: list[i],
+                range: _juzRange(surahMap, list[i]),
+              ),
+            ],
           ],
         );
       },
     );
+  }
+
+  String _juzRange(Map<int, Surah> surahMap, JuzInfo juz) {
+    final first = surahMap[juz.firstSurahId];
+    final last = surahMap[juz.lastSurahId];
+    if (first == null || last == null) return '';
+    return '${first.nameLatin} — ${last.nameLatin}';
   }
 }
 
@@ -314,7 +772,8 @@ class _JuzRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return HoverTile(
+    final scheme = theme.colorScheme;
+    return _HoverCard(
       onTap: () => openSurah(context, juz.firstSurahId,
           initialAyahId: juz.firstAyahId),
       child: Row(
@@ -324,15 +783,16 @@ class _JuzRow extends StatelessWidget {
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+              color: scheme.surfaceContainer,
+              shape: BoxShape.circle,
             ),
             child: Text(
               toArabicIndic(juz.juz),
               style: TextStyle(
                 fontFamily: AppConstants.fontQuran,
                 fontSize: 22,
-                color: theme.colorScheme.tertiary,
+                color: scheme.tertiary,
+                letterSpacing: 0, // never letter-space Arabic
               ),
             ),
           ),
@@ -341,21 +801,142 @@ class _JuzRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Juz ${juz.juz}', style: theme.textTheme.titleMedium),
+                Text(
+                  'Juz ${juz.juz}',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontSize: 20,
+                    height: 28 / 20,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   range,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
+          const SizedBox(width: AppLayout.sp3),
+          Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Favorit tab
+// ---------------------------------------------------------------------------
+
+/// Favorit = surah yang punya minimal satu penanda ayat. Dibaca dari
+/// [bookmarksProvider] yang sudah ada (tanpa plumbing baru); setiap baris
+/// membuka surah ke ayat penanda pertama. Kosong → empty state yang sopan.
+class _FavoritList extends ConsumerWidget {
+  const _FavoritList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final bookmarks = ref.watch(bookmarksProvider);
+
+    return bookmarks.when(
+      loading: () => const Center(child: Padding(
+        padding: EdgeInsets.all(48),
+        child: CircularProgressIndicator(),
+      )),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48),
+          child: Text('Gagal memuat data.', style: theme.textTheme.bodyMedium),
+        ),
+      ),
+      data: (entries) {
+        final bySurah = <int, List<BookmarkEntry>>{};
+        for (final e in entries) {
+          bySurah.putIfAbsent(e.surah.id, () => []).add(e);
+        }
+        final ids = bySurah.keys.toList()..sort();
+        if (ids.isEmpty) return const _FavoritEmpty();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < ids.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppLayout.sp3),
+              _FavoritRow(
+                surah: bySurah[ids[i]]!.first.surah,
+                firstAyahId: bySurah[ids[i]]!.first.ayah.id,
+                count: bySurah[ids[i]]!.length,
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FavoritRow extends StatelessWidget {
+  const _FavoritRow({
+    required this.surah,
+    required this.firstAyahId,
+    required this.count,
+  });
+
+  final Surah surah;
+  final int firstAyahId;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HoverCard(
+      onTap: () => openSurah(context, surah.id, initialAyahId: firstAyahId),
+      child: _SurahRowContent(
+        surah: surah,
+        metaTrailing: '$count ${S.penandaCount}',
+      ),
+    );
+  }
+}
+
+class _FavoritEmpty extends StatelessWidget {
+  const _FavoritEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppLayout.sp10),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.bookmark_border_rounded,
+              size: 28,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp4),
+          Text(S.favoritEmptyTitle, style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppLayout.sp2),
+          Text(
+            S.favoritEmptyMessage,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -528,44 +1109,50 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppConstants.searchCardWidth,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _controller,
-              focusNode: _searchNode,
-              onChanged: _onChanged,
-              onSubmitted: (_) =>
-                  _activateIndex(_selected >= 0 ? _selected : 0),
-              decoration: InputDecoration(
-                hintText: S.searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _controller.text.isEmpty
-                    ? null
-                    : IconButton(
-                        onPressed: () {
-                          _controller.clear();
-                          _onChanged('');
-                          _searchNode.requestFocus();
-                        },
-                        tooltip: S.cancel,
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-                ),
-              ),
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _controller,
+          focusNode: _searchNode,
+          onChanged: _onChanged,
+          onSubmitted: (_) =>
+              _activateIndex(_selected >= 0 ? _selected : 0),
+          decoration: InputDecoration(
+            hintText: S.browseSearchHint,
+            prefixIcon: const Icon(Icons.search_rounded),
+            prefixIconColor: scheme.outline,
+            suffixIcon: _controller.text.isEmpty
+                ? null
+                : IconButton(
+                    onPressed: () {
+                      _controller.clear();
+                      _onChanged('');
+                      _searchNode.requestFocus();
+                    },
+                    tooltip: S.cancel,
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+            filled: true,
+            fillColor: scheme.surfaceContainerLowest,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: AppLayout.sp3,
+              horizontal: AppLayout.sp4,
             ),
-            const SizedBox(height: AppLayout.sp3),
-            _buildResults(),
-          ],
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+              borderSide: BorderSide(color: scheme.outlineVariant),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+              borderSide: BorderSide(color: scheme.primary),
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: AppLayout.sp3),
+        _buildResults(),
+      ],
     );
   }
 

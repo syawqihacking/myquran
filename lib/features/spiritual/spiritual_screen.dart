@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
-import '../../data/models/ratib_data.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/models/tahlil_doa_data.dart';
+import 'doa_harian_screen.dart';
+import 'dzikir_pagi_petang_screen.dart';
+import 'amalan_ibadah_screen.dart';
+import 'niat_shalat_screen.dart';
+import 'ratibul_haddad_screen.dart';
 import 'spiritual_reader_screen.dart';
+import 'tadabbur_harian_screen.dart';
 
 /// Spiritual home — the browse page for Tahlil, Doa, and Ratib Al-Haddad.
 class SpiritualScreen extends StatelessWidget {
@@ -14,11 +19,20 @@ class SpiritualScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
-        vertical: AppLayout.sp8,
+    final scheme = theme.colorScheme;
+    
+    return Scaffold(
+      backgroundColor: scheme.surface,
+      appBar: AppBar(
+        title: Text(S.spiritualNav),
+        backgroundColor: scheme.surface.withValues(alpha: 0.9),
+        surfaceTintColor: Colors.transparent,
       ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.sp6,
+          vertical: AppLayout.sp8,
+        ),
       children: [
         Text(
           'IBADAH',
@@ -30,12 +44,27 @@ class SpiritualScreen extends StatelessWidget {
         Text('Wirid & Doa', style: theme.textTheme.displaySmall),
         const SizedBox(height: AppLayout.sp2),
         Text(
-          'Tahlil, kumpulan doa harian, dan Ratib Al-Haddad lengkap dengan teks Arab dan terjemahan.',
+          'Tahlil, doa harian, Ratib Al-Haddad, dan pelacak amalan harian.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: AppLayout.sp7),
+
+        // --- Doa Harian card ---
+        _SpiritualCard(
+          icon: Icons.wb_sunny_rounded,
+          title: S.doaHarianTitle,
+          caption: S.doaHarianCaption,
+          gradient: [
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const DoaHarianScreen()),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
 
         // --- Tahlil & Doa card ---
         _SpiritualCard(
@@ -65,12 +94,78 @@ class SpiritualScreen extends StatelessWidget {
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.4),
           ],
-          onTap: () => _openReader(
-            context,
-            title: S.ratibTitle,
-            subtitle: S.ratibCaption,
-            items: ratibAlHaddadItems,
-            icon: Icons.brightness_5_rounded,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const RatibulHaddadScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
+
+        // --- Amalan Ibadah card ---
+        _SpiritualCard(
+          icon: Icons.checklist_rounded,
+          title: S.amalanIbadahTitle,
+          caption: S.amalanIbadahCaption,
+          gradient: [
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const AmalanIbadahScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
+
+        // --- Dzikir Pagi & Petang card ---
+        _SpiritualCard(
+          icon: Icons.self_improvement_rounded,
+          title: S.dzikirTitle,
+          caption: S.dzikirCaption,
+          gradient: [
+            theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const DzikirPagiPetangScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
+
+        // --- Niat Shalat card ---
+        _SpiritualCard(
+          icon: Icons.wc_rounded,
+          title: S.niatShalatTitle,
+          caption: S.niatShalatCaption,
+          gradient: [
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const NiatShalatScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
+
+        // --- Tadabbur Harian card ---
+        _SpiritualCard(
+          icon: Icons.auto_awesome_rounded,
+          title: S.tadabburTitle,
+          caption: S.tadabburCaption,
+          gradient: [
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const TadabburHarianScreen(),
+            ),
           ),
         ),
         const SizedBox(height: AppLayout.sp7),
@@ -102,7 +197,8 @@ class SpiritualScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ),
+  );
   }
 
   void _openReader(

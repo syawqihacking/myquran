@@ -34,11 +34,23 @@ class PrayerSchedule {
     required this.entries,
     required this.now,
     required this.locationName,
+    this.sunrise,
+    this.latitude = 0,
+    this.longitude = 0,
   });
 
   final List<PrayerEntry> entries;
   final DateTime now;
   final String locationName;
+
+  /// Sunrise (Terbit) — not one of the five prayers, shown on the prayer
+  /// screen's list. Additive: the home card keeps using [entries] only.
+  final DateTime? sunrise;
+
+  /// Coordinates the schedule was computed for — used by the prayer screen
+  /// to derive the qibla bearing. Additive; the home card ignores them.
+  final double latitude;
+  final double longitude;
 
   /// The next upcoming prayer (or Subuh of the following day if Isya has
   /// already passed).
@@ -113,6 +125,9 @@ class PrayerTimeService {
       entries: entries,
       now: now,
       locationName: locationName,
+      sunrise: times.sunrise,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 }

@@ -1,14 +1,22 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/quran_palette.dart';
+import '../../core/app_strings.dart';
 import '../../data/models/spiritual_content.dart';
+import '../widgets/quran_text_view.dart';
 
-/// Reader screen for spiritual content (Tahlil, Doa, Ratib Al-Haddad).
-/// Mirrors the Quran reader's paper-column aesthetic while adapting layout
-/// for discrete items (doa entries) rather than continuous surah text.
+/// Reader screen for spiritual content (Tahlil, Doa, Ratib Al-Haddad),
+/// remodeled to the Stitch "Tahlil & Doa" design: a pinned app bar, a scroll
+/// progress bar, a header card with an Islamic geometric watermark, numbered
+/// card tiles (badge + title, Arabic, transliteration, translation, repeat
+/// chip), and an audio FAB that honestly reports "coming soon".
+///
+/// Used from three places — the Tahlil hub, the Ratib hub, and the Doa Harian
+/// detail — so the header card derives its title/description from the passed
+/// [title]/[subtitle] (with a dedicated Tahlil copy when the title matches).
 class SpiritualReaderScreen extends StatefulWidget {
   const SpiritualReaderScreen({
     super.key,
@@ -52,8 +60,26 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
     }
   }
 
+  /// The Tahlil hub passes `S.tahlilTitle`; give that screen the design's
+  /// dedicated header copy, and fall back to title/subtitle for everyone else
+  /// (Ratib, Doa Harian detail).
+  bool get _isTahlil => widget.title == S.tahlilTitle;
+
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(S.audioComingSoon),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 1800),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.escape): () =>
@@ -62,41 +88,38 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Column(
+          backgroundColor: scheme.surface,
+          body: Stack(
             children: [
-              _TopBar(
-                title: widget.title,
-                onBack: () => Navigator.of(context).maybePop(),
-              ),
-              _ProgressBar(progress: _progress),
-              Expanded(
-                child: Scrollbar(
-                  controller: _scroll,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppLayout.sp6),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 760),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: context.quran.quranSurface,
-                            borderRadius:
-                                BorderRadius.circular(AppLayout.radiusLg),
-                          ),
-                          clipBehavior: Clip.antiAlias,
+              Column(
+                children: [
+                  _TopBar(
+                    title: widget.title,
+                    onBack: () => Navigator.of(context).maybePop(),
+                  ),
+                  _ProgressBar(progress: _progress),
+                  Expanded(
+                    child: Scrollbar(
+                      controller: _scroll,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
                           child: ListView.builder(
                             controller: _scroll,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppLayout.sp6,
-                              vertical: AppLayout.sp6,
+                            padding: const EdgeInsets.fromLTRB(
+                              AppLayout.sp6,
+                              AppLayout.sp4,
+                              AppLayout.sp6,
+                              AppLayout.sp8,
                             ),
                             itemCount: widget.items.length + 2, // header + items + footer
                             itemBuilder: (context, index) {
                               if (index == 0) {
                                 return _SpiritualHeader(
-                                  title: widget.title,
-                                  subtitle: widget.subtitle,
-                                  icon: widget.icon,
+                                  title:
+                                      _isTahlil ? S.tahlilHeaderTitle : widget.title,
+                                  description:
+                                      _isTahlil ? S.tahlilHeaderDesc : widget.subtitle,
                                   itemCount: widget.items.length,
                                 );
                               }
@@ -115,10 +138,33 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
                       ),
                     ),
                   ),
+                ],
+              ),
+              // Gradient fade from the surface behind the FAB (design §FAB).
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          scheme.surface,
+                          scheme.surface.withValues(alpha: 0.9),
+                          scheme.surface.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
+          floatingActionButton: _AudioFab(onPressed: _showComingSoon),
         ),
       ),
     );
@@ -126,7 +172,7 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// Top bar
+// Top bar (Stitch §1): back + centered title, no more_vert.
 // ---------------------------------------------------------------------------
 
 class _TopBar extends StatelessWidget {
@@ -138,31 +184,41 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Container(
-      height: AppLayout.readerTopBarHeight,
+      height: AppLayout.sp10,
       padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: scheme.surface.withValues(alpha: 0.9),
         border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outlineVariant),
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.4),
+          ),
         ),
       ),
       child: Row(
         children: [
           IconButton(
             onPressed: onBack,
-            tooltip: 'Kembali',
+            tooltip: S.back,
             icon: const Icon(Icons.arrow_back_rounded),
+            color: scheme.primary,
           ),
           Expanded(
             child: Text(
               title,
-              style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                height: 28 / 20,
+                fontWeight: FontWeight.w600,
+                color: scheme.primary,
+              ),
             ),
           ),
-          const SizedBox(width: 48), // balance the back button
+          const SizedBox(width: 48), // balances the back button
         ],
       ),
     );
@@ -170,7 +226,7 @@ class _TopBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Progress bar
+// Progress bar (kept — existing scroll-progress feature).
 // ---------------------------------------------------------------------------
 
 class _ProgressBar extends StatelessWidget {
@@ -197,233 +253,284 @@ class _ProgressBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Header
+// Header card (Stitch §2): watermark pattern + title + description + count.
 // ---------------------------------------------------------------------------
 
 class _SpiritualHeader extends StatelessWidget {
   const _SpiritualHeader({
     required this.title,
-    required this.subtitle,
-    required this.icon,
+    required this.description,
     required this.itemCount,
   });
 
   final String title;
-  final String subtitle;
-  final IconData icon;
+  final String description;
   final int itemCount;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppLayout.sp6),
-      child: Column(
-        children: [
-          const SizedBox(height: AppLayout.sp6),
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            ),
-            child: Icon(
-              icon,
-              size: 36,
-              color: theme.colorScheme.onPrimaryContainer,
-            ),
+      child: Container(
+        padding: const EdgeInsets.all(AppLayout.sp6),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
           ),
-          const SizedBox(height: AppLayout.sp4),
-          Text(
-            title,
-            style: theme.textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppLayout.sp2),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppLayout.sp2),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppLayout.sp3,
-              vertical: AppLayout.sp1,
-            ),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-            ),
-            child: Text(
-              '$itemCount bacaan',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            // Subtle 8-pointed-star watermark at ~5% opacity (prayer_screen
+            // pattern), echoing the design's geometric background.
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.05,
+                child: CustomPaint(
+                  painter: _GeometricPatternPainter(color: scheme.primary),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppLayout.sp6),
-          Divider(color: theme.colorScheme.outlineVariant),
-        ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 24,
+                    height: 32 / 24,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.primary,
+                  ),
+                ),
+                const SizedBox(height: AppLayout.sp3),
+                Text(
+                  description,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 16,
+                    height: 24 / 16,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: AppLayout.sp4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppLayout.sp3,
+                    vertical: AppLayout.sp1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.secondaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                  ),
+                  child: Text(
+                    '$itemCount bacaan',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: scheme.secondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Item tile
+// Item tile (Stitch §3): numbered card with Arabic, transliteration,
+// translation, and an optional repeat chip.
 // ---------------------------------------------------------------------------
 
-class _SpiritualItemTile extends StatefulWidget {
-  const _SpiritualItemTile({
-    required this.item,
-    required this.number,
-  });
+class _SpiritualItemTile extends StatelessWidget {
+  const _SpiritualItemTile({required this.item, required this.number});
 
   final SpiritualItem item;
   final int number;
 
   @override
-  State<_SpiritualItemTile> createState() => _SpiritualItemTileState();
-}
-
-class _SpiritualItemTileState extends State<_SpiritualItemTile> {
-  bool _expanded = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final item = widget.item;
+    final scheme = theme.colorScheme;
+    final item = this.item;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppLayout.sp4),
       child: Container(
+        padding: const EdgeInsets.all(AppLayout.sp6),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: scheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppLayout.radiusMd),
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: scheme.outlineVariant.withValues(alpha: 0.2),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Title bar
-            InkWell(
-              onTap: () => setState(() => _expanded = !_expanded),
-              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-              child: Padding(
-                padding: const EdgeInsets.all(AppLayout.sp4),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius:
-                            BorderRadius.circular(AppLayout.radiusSm),
-                      ),
-                      child: Text(
-                        '${widget.number}',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+            // Number badge + title.
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: scheme.secondaryContainer,
+                  ),
+                  child: Text(
+                    '$number',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontSize: 14,
+                      height: 20 / 14,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSecondaryContainer,
                     ),
-                    const SizedBox(width: AppLayout.sp3),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          if (item.repeatCount > 1 || item.note.isNotEmpty)
-                            Text(
-                              item.note.isNotEmpty
-                                  ? item.note
-                                  : '${item.repeatCount}×',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.tertiary,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    AnimatedRotation(
-                      turns: _expanded ? 0.5 : 0,
-                      duration: AppLayout.durBase,
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+                const SizedBox(width: AppLayout.sp3),
+                Expanded(
+                  child: Text(
+                    item.title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontSize: 20,
+                      height: 28 / 20,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Short instruction note, when present (e.g. "Lanjut membaca
+            // Al-Fatihah").
+            if (item.note.isNotEmpty) ...[
+              const SizedBox(height: AppLayout.sp2),
+              Text(
+                item.note,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: scheme.tertiary,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppLayout.sp6),
+            // Arabic, Amiri, right-aligned.
+            QTextDisplay(
+              text: item.arabic,
+              step: 4,
+              alignment: TextAlign.right,
+              color: scheme.onSurface,
+            ),
+            const SizedBox(height: AppLayout.sp6),
+            // Transliteration (only when present).
+            if (item.transliteration.isNotEmpty) ...[
+              Text(
+                item.transliteration,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: 16,
+                  height: 24 / 16,
+                  fontStyle: FontStyle.italic,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(height: AppLayout.sp3),
+            ],
+            // Translation.
+            Text(
+              item.translation,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                height: 24 / 16,
+                color: scheme.onSurfaceVariant,
               ),
             ),
-            // Arabic text (always visible)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp4,
-              ),
-              child: Text(
-                item.arabic,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: AppConstants.fontQuran,
-                  fontSize: 26,
-                  height: 2.0,
-                  color: context.quran.quranInk,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppLayout.sp3),
-            // Expanded content: transliteration + translation
-            AnimatedCrossFade(
-              duration: AppLayout.durBase,
-              crossFadeState: _expanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppLayout.sp4,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (item.transliteration.isNotEmpty) ...[
-                      Text(
-                        item.transliteration,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: theme.colorScheme.tertiary,
-                        ),
-                      ),
-                      const SizedBox(height: AppLayout.sp3),
-                    ],
-                    Text(
-                      item.translation,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+            // Repeat chip (only when repeated).
+            if (item.repeatCount > 1) ...[
+              const SizedBox(height: AppLayout.sp6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppLayout.sp3,
+                    vertical: AppLayout.sp1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.secondaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                  ),
+                  child: Text(
+                    S.readNTimes(item.repeatCount),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.6, // tracking-wider on label-sm
+                      color: scheme.secondary,
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppLayout.sp4),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Audio FAB (Stitch §FAB): 56px primary circle with a strong shadow. Audio is
+// not available yet — the tap gives honest "coming soon" feedback.
+// ---------------------------------------------------------------------------
+
+class _AudioFab extends StatelessWidget {
+  const _AudioFab({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.15),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        tooltip: S.audioPlay,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        highlightElevation: 0,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.play_arrow_rounded, size: 28),
       ),
     );
   }
@@ -466,10 +573,63 @@ class _EndFooter extends StatelessWidget {
           const SizedBox(height: AppLayout.sp6),
           FilledButton.tonal(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text('Kembali ke Beranda'),
+            child: const Text(S.back),
           ),
         ],
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Islamic geometric watermark: a grid of 8-pointed stars (two squares per
+// cell, one rotated 45°). Purely decorative — same pattern as the qibla card.
+// ---------------------------------------------------------------------------
+
+class _GeometricPatternPainter extends CustomPainter {
+  const _GeometricPatternPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    const cell = 56.0;
+    for (var y = -cell; y < size.height + cell; y += cell) {
+      for (var x = -cell; x < size.width + cell; x += cell) {
+        final c = Offset(x + cell / 2, y + cell / 2);
+        final r = cell * 0.34;
+        _drawSquare(canvas, paint, c, r, 0);
+        _drawSquare(canvas, paint, c, r, math.pi / 4);
+      }
+    }
+  }
+
+  void _drawSquare(
+    Canvas canvas,
+    Paint paint,
+    Offset center,
+    double r,
+    double rotation,
+  ) {
+    final path = Path();
+    for (var i = 0; i < 4; i++) {
+      final a = rotation + i * math.pi / 2;
+      final p = center + Offset(math.cos(a), math.sin(a)) * r;
+      if (i == 0) {
+        path.moveTo(p.dx, p.dy);
+      } else {
+        path.lineTo(p.dx, p.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_GeometricPatternPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

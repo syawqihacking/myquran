@@ -46,3 +46,5 @@ app.*.map.json
 
 # Deepwork state (git-local)
 .slim/deepwork/
+opencode.jsonc
+opencode.jsonc

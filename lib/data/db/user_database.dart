@@ -123,6 +123,17 @@ class ReadingLog extends Table {
   List<Set<Column>> get uniqueKeys => [{epochDay, ayahId}];
 }
 
+/// Bookmarked daily prayers (doa harian), keyed by the doa slug — a separate
+/// store from ayah bookmarks so the two lists never mix.
+@DataClassName('DoaBookmark')
+class DoaBookmarks extends Table {
+  TextColumn get doaId => text()();
+  IntColumn get createdAt => integer()(); // epoch ms
+
+  @override
+  Set<Column> get primaryKey => {doaId};
+}
+
 /// Runtime-created user database (bookmarks, last-read, meta, audio seam).
 @DriftDatabase(tables: [
   Bookmarks,
@@ -134,6 +145,7 @@ class ReadingLog extends Table {
   SajdaLog,
   KhatamTargets,
   SurahPositions,
+  DoaBookmarks,
 ])
 class UserDatabase extends _$UserDatabase {
   /// `executor` is injectable for tests; production opens `user.db` in the
@@ -159,6 +171,7 @@ class UserDatabase extends _$UserDatabase {
             await m.addColumn(ayahAudio, ayahAudio.lastAccessedAt);
             await _seedReciters(this);
           }
+          if (from < 4) await m.createTable(doaBookmarks);
         },
       );
 
@@ -175,6 +188,7 @@ class UserDatabase extends _$UserDatabase {
       await delete(khatamTargets).go();
       await delete(surahPositions).go();
       await delete(ayahAudio).go();
+      await delete(doaBookmarks).go();
     });
   }
 

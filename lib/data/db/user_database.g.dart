@@ -2542,6 +2542,221 @@ class SurahPositionsCompanion extends UpdateCompanion<SurahPosition> {
   }
 }
 
+class $DoaBookmarksTable extends DoaBookmarks
+    with TableInfo<$DoaBookmarksTable, DoaBookmark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DoaBookmarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _doaIdMeta = const VerificationMeta('doaId');
+  @override
+  late final GeneratedColumn<String> doaId = GeneratedColumn<String>(
+    'doa_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [doaId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'doa_bookmarks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DoaBookmark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('doa_id')) {
+      context.handle(
+        _doaIdMeta,
+        doaId.isAcceptableOrUnknown(data['doa_id']!, _doaIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_doaIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {doaId};
+  @override
+  DoaBookmark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DoaBookmark(
+      doaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doa_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DoaBookmarksTable createAlias(String alias) {
+    return $DoaBookmarksTable(attachedDatabase, alias);
+  }
+}
+
+class DoaBookmark extends DataClass implements Insertable<DoaBookmark> {
+  final String doaId;
+  final int createdAt;
+  const DoaBookmark({required this.doaId, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['doa_id'] = Variable<String>(doaId);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  DoaBookmarksCompanion toCompanion(bool nullToAbsent) {
+    return DoaBookmarksCompanion(
+      doaId: Value(doaId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DoaBookmark.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DoaBookmark(
+      doaId: serializer.fromJson<String>(json['doaId']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'doaId': serializer.toJson<String>(doaId),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  DoaBookmark copyWith({String? doaId, int? createdAt}) => DoaBookmark(
+    doaId: doaId ?? this.doaId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DoaBookmark copyWithCompanion(DoaBookmarksCompanion data) {
+    return DoaBookmark(
+      doaId: data.doaId.present ? data.doaId.value : this.doaId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DoaBookmark(')
+          ..write('doaId: $doaId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(doaId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DoaBookmark &&
+          other.doaId == this.doaId &&
+          other.createdAt == this.createdAt);
+}
+
+class DoaBookmarksCompanion extends UpdateCompanion<DoaBookmark> {
+  final Value<String> doaId;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const DoaBookmarksCompanion({
+    this.doaId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DoaBookmarksCompanion.insert({
+    required String doaId,
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : doaId = Value(doaId),
+       createdAt = Value(createdAt);
+  static Insertable<DoaBookmark> custom({
+    Expression<String>? doaId,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (doaId != null) 'doa_id': doaId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DoaBookmarksCompanion copyWith({
+    Value<String>? doaId,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return DoaBookmarksCompanion(
+      doaId: doaId ?? this.doaId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (doaId.present) {
+      map['doa_id'] = Variable<String>(doaId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DoaBookmarksCompanion(')
+          ..write('doaId: $doaId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$UserDatabase extends GeneratedDatabase {
   _$UserDatabase(QueryExecutor e) : super(e);
   $UserDatabaseManager get managers => $UserDatabaseManager(this);
@@ -2554,6 +2769,7 @@ abstract class _$UserDatabase extends GeneratedDatabase {
   late final $SajdaLogTable sajdaLog = $SajdaLogTable(this);
   late final $KhatamTargetsTable khatamTargets = $KhatamTargetsTable(this);
   late final $SurahPositionsTable surahPositions = $SurahPositionsTable(this);
+  late final $DoaBookmarksTable doaBookmarks = $DoaBookmarksTable(this);
   late final Index idxBookmarksAyah = Index(
     'idx_bookmarks_ayah',
     'CREATE INDEX idx_bookmarks_ayah ON bookmarks (ayah_id)',
@@ -2572,6 +2788,7 @@ abstract class _$UserDatabase extends GeneratedDatabase {
     sajdaLog,
     khatamTargets,
     surahPositions,
+    doaBookmarks,
     idxBookmarksAyah,
   ];
 }
@@ -4071,6 +4288,149 @@ typedef $$SurahPositionsTableProcessedTableManager =
       SurahPosition,
       PrefetchHooks Function()
     >;
+typedef $$DoaBookmarksTableCreateCompanionBuilder =
+    DoaBookmarksCompanion Function({
+      required String doaId,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$DoaBookmarksTableUpdateCompanionBuilder =
+    DoaBookmarksCompanion Function({
+      Value<String> doaId,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+class $$DoaBookmarksTableFilterComposer
+    extends Composer<_$UserDatabase, $DoaBookmarksTable> {
+  $$DoaBookmarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get doaId => $composableBuilder(
+    column: $table.doaId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DoaBookmarksTableOrderingComposer
+    extends Composer<_$UserDatabase, $DoaBookmarksTable> {
+  $$DoaBookmarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get doaId => $composableBuilder(
+    column: $table.doaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DoaBookmarksTableAnnotationComposer
+    extends Composer<_$UserDatabase, $DoaBookmarksTable> {
+  $$DoaBookmarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get doaId =>
+      $composableBuilder(column: $table.doaId, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$DoaBookmarksTableTableManager
+    extends
+        RootTableManager<
+          _$UserDatabase,
+          $DoaBookmarksTable,
+          DoaBookmark,
+          $$DoaBookmarksTableFilterComposer,
+          $$DoaBookmarksTableOrderingComposer,
+          $$DoaBookmarksTableAnnotationComposer,
+          $$DoaBookmarksTableCreateCompanionBuilder,
+          $$DoaBookmarksTableUpdateCompanionBuilder,
+          (
+            DoaBookmark,
+            BaseReferences<_$UserDatabase, $DoaBookmarksTable, DoaBookmark>,
+          ),
+          DoaBookmark,
+          PrefetchHooks Function()
+        > {
+  $$DoaBookmarksTableTableManager(_$UserDatabase db, $DoaBookmarksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DoaBookmarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DoaBookmarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DoaBookmarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> doaId = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DoaBookmarksCompanion(
+                doaId: doaId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String doaId,
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DoaBookmarksCompanion.insert(
+                doaId: doaId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DoaBookmarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$UserDatabase,
+      $DoaBookmarksTable,
+      DoaBookmark,
+      $$DoaBookmarksTableFilterComposer,
+      $$DoaBookmarksTableOrderingComposer,
+      $$DoaBookmarksTableAnnotationComposer,
+      $$DoaBookmarksTableCreateCompanionBuilder,
+      $$DoaBookmarksTableUpdateCompanionBuilder,
+      (
+        DoaBookmark,
+        BaseReferences<_$UserDatabase, $DoaBookmarksTable, DoaBookmark>,
+      ),
+      DoaBookmark,
+      PrefetchHooks Function()
+    >;
 
 class $UserDatabaseManager {
   final _$UserDatabase _db;
@@ -4093,4 +4453,6 @@ class $UserDatabaseManager {
       $$KhatamTargetsTableTableManager(_db, _db.khatamTargets);
   $$SurahPositionsTableTableManager get surahPositions =>
       $$SurahPositionsTableTableManager(_db, _db.surahPositions);
+  $$DoaBookmarksTableTableManager get doaBookmarks =>
+      $$DoaBookmarksTableTableManager(_db, _db.doaBookmarks);
 }

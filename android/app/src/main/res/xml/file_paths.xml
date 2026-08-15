@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider paths. getApplicationDocumentsDirectory() (path_provider)
+     returns the Flutter engine data dir: <dataDir>/app_flutter/. That is NOT
+     the <files-path> root (which is <dataDir>/files/), so we map the app data
+     dir root here. The downloaded adzan mp3s live under <dataDir>/app_flutter/adzan/. -->
+<paths>
+    <root-path name="adzan" path="." />
+</paths>

@@ -1,77 +1,869 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
+import '../../data/models/tahlil_doa_data.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../browse/browse_screen.dart';
+import '../hijri/hijri_calendar_screen.dart';
+import '../learning/learning_screen.dart';
+import '../mosque/mosque_screen.dart';
+import '../personality/personality_screen.dart';
+import '../spiritual/amalan_ibadah_screen.dart';
+import '../spiritual/doa_harian_screen.dart';
+import '../spiritual/ratibul_haddad_screen.dart';
+import '../spiritual/spiritual_reader_screen.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/quran_text_view.dart';
 import 'prayer_times_card.dart';
 
-/// Beranda (design §2/§13): header, last-read hero, reading history, and quick
-/// access into the unified Al-Qur'an page (surah/juz lists + search) via the
-/// shell callbacks.
+/// Beranda — the Stitch remodel: a pinned app bar (Al-Qur'an + search), a
+/// greeting, the last-read hero, a quick-actions bento, the Jadwal Sholat
+/// strip, and Ayat Hari Ini. The reading history and the full surah/juz links
+/// from the previous design stay on below, so nothing useful is lost.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({
     super.key,
     required this.onOpenSurahs,
     required this.onOpenJuzs,
+    required this.onOpenSearch,
+    required this.onOpenPrayer,
   });
 
   final VoidCallback onOpenSurahs;
   final VoidCallback onOpenJuzs;
+  final VoidCallback onOpenSearch;
+  final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
-        vertical: AppLayout.sp8,
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _HomeAppBar(onOpenSearch: onOpenSearch),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppLayout.sp6,
+                AppLayout.sp5,
+                AppLayout.sp6,
+                AppLayout.sp8,
+              ),
+              children: [
+                const _Greeting(),
+                const SizedBox(height: AppLayout.sp6),
+                const _LastReadHero(),
+                const SizedBox(height: AppLayout.sp6),
+                _QuickActionsBento(
+                  onOpenPrayer: onOpenPrayer,
+                ),
+                const SizedBox(height: AppLayout.sp3),
+                const _LearningCard(),
+                const SizedBox(height: AppLayout.sp7),
+                const PrayerTimesCard(),
+                const SizedBox(height: AppLayout.sp7),
+                const _DailyVerseCard(),
+                const SizedBox(height: AppLayout.sp7),
+                const _ReadingHistory(),
+                const SizedBox(height: AppLayout.sp7),
+                _QuickAccess(
+                  onOpenSurahs: onOpenSurahs,
+                  onOpenJuzs: onOpenJuzs,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      children: [
-        const _HomeHeader(),
-        const SizedBox(height: AppLayout.sp6),
-        const PrayerTimesCard(),
-        const SizedBox(height: AppLayout.sp6),
-        const _ContinueHero(),
-        const _ReadingHistory(),
-        const SizedBox(height: AppLayout.sp7),
-        _QuickAccess(onOpenSurahs: onOpenSurahs, onOpenJuzs: onOpenJuzs),
-      ],
     );
   }
 }
 
-class _HomeHeader extends StatelessWidget {
-  const _HomeHeader();
+// ── Pinned app bar ───────────────────────────────────────────────────────
+
+/// Pinned app bar: centered "Al-Qur'an" title with the search action on the
+/// right. The hamburger menu is omitted — the shell has no drawer — and the
+/// shell's settings gear is positioned below this bar on the home view.
+class _HomeAppBar extends StatelessWidget {
+  const _HomeAppBar({required this.onOpenSearch});
+
+  final VoidCallback onOpenSearch;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          S.homeEyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.tertiary,
+    final scheme = theme.colorScheme;
+    return Container(
+      height: AppLayout.sp10,
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
+      decoration: BoxDecoration(
+        color: scheme.surface.withValues(alpha: 0.92),
+        border: Border(
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.4),
           ),
         ),
-        const SizedBox(height: AppLayout.sp2),
-        Text(S.homeTitle, style: theme.textTheme.displaySmall),
-        const SizedBox(height: AppLayout.sp2),
-        Text(
-          S.homeCaption,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            S.browseTitle,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.primary,
+            ),
+          ),
+          Positioned(
+            right: 0,
+            child: IconButton(
+              onPressed: onOpenSearch,
+              tooltip: S.openSearch,
+              icon: Icon(Icons.search_rounded, color: scheme.onSurfaceVariant),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Greeting ─────────────────────────────────────────────────────────────
+
+class _Greeting extends ConsumerWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final name = ref.watch(profileNameProvider);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                S.homeGreeting,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                name,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontSize: 24,
+                  height: 32 / 24,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 }
+
+// ── Last-read hero card ──────────────────────────────────────────────────
+
+/// Deep-emerald gradient hero for the most recent reading: history label,
+/// surah name, ayah/juz position, a "Lanjutkan" pill, and a watermark open
+/// book at 10% opacity (Stitch Beranda §3).
+class _LastReadHero extends ConsumerWidget {
+  const _LastReadHero();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final detail = ref.watch(lastReadDetailProvider);
+
+    return Container(
+      height: 176,
+      padding: const EdgeInsets.all(AppLayout.sp5),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [scheme.primary, scheme.surfaceTint],
+        ),
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // Watermark — open book in the bottom-right corner.
+          Positioned(
+            right: -36,
+            bottom: -40,
+            child: Icon(
+              Icons.menu_book_rounded,
+              size: 150,
+              color: scheme.onPrimary.withValues(alpha: 0.10),
+            ),
+          ),
+          detail.when(
+            loading: () => const SizedBox(
+              height: 128,
+              child: Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
+            error: (_, __) => _HeroHint(onStart: () => openSurah(context, 1)),
+            data: (d) {
+              if (d == null) {
+                return _HeroHint(onStart: () => openSurah(context, 1));
+              }
+              final surah = d.surah;
+              final ayah = d.ayah;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.history_rounded,
+                        size: 20,
+                        color: scheme.onPrimary,
+                      ),
+                      const SizedBox(width: AppLayout.sp2),
+                      Text(
+                        S.lastReadLabel.toUpperCase(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onPrimary,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              surah.nameArabic,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: AppConstants.fontQuran,
+                                fontSize: 22,
+                                height: 1.25,
+                                color: scheme.onPrimary.withValues(alpha: 0.95),
+                                letterSpacing: 0, // never letter-space Arabic
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              surah.nameLatin,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontSize: 24,
+                                height: 1.2,
+                                fontWeight: FontWeight.w700,
+                                color: scheme.onPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ayat ${toArabicIndic(ayah.ayahNumber)} • '
+                              'Juz ${toArabicIndic(ayah.juz)}',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: scheme.primaryFixedDim,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppLayout.sp4),
+                      _ContinuePill(
+                        onTap: () => openSurah(
+                          context,
+                          surah.id,
+                          initialAyahId: ayah.id,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Friendly empty state shown inside the hero before the first reading.
+class _HeroHint extends StatelessWidget {
+  const _HeroHint({required this.onStart});
+
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Spacer(),
+        Text(
+          S.noHistoryTitle,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: scheme.onPrimary,
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp3),
+        FilledButton.tonalIcon(
+          onPressed: onStart,
+          icon: const Icon(Icons.menu_book_rounded, size: 18),
+          label: const Text(S.startFromFatihah),
+        ),
+      ],
+    );
+  }
+}
+
+/// The "Lanjutkan" pill on the hero — emerald container, mint label + arrow.
+class _ContinuePill extends StatelessWidget {
+  const _ContinuePill({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.primaryContainer,
+      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppLayout.sp4,
+            vertical: AppLayout.sp2,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                S.continueButton,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: AppLayout.sp1),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: scheme.onPrimaryContainer,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Quick actions bento ──────────────────────────────────────────────────
+
+/// Four equal quick-action tiles (Kiblat, Doa Harian, Zakat, Masjid Terdekat).
+/// "Kiblat" opens the prayer screen; "Doa Harian" opens the spiritual view;
+/// the rest are not built yet and show a "Segera hadir" SnackBar rather than
+/// a placeholder screen.
+class _QuickActionsBento extends StatelessWidget {
+  const _QuickActionsBento({
+    required this.onOpenPrayer,
+  });
+
+  final VoidCallback onOpenPrayer;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final contentWidth = math.min(screenWidth, AppConstants.contentColumnMaxWidth) - AppLayout.sp6 * 2;
+    // Base width on 4 visible items, so the first 4 look identical to before
+    final itemWidth = (contentWidth - (AppLayout.sp2 * 3)) / 4;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.explore_rounded,
+              label: S.qaKiblat,
+              onTap: onOpenPrayer,
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.volunteer_activism_rounded,
+              label: S.qaDoaHarian,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const DoaHarianScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.monetization_on_rounded,
+              label: S.qaZakat,
+              onTap: () => _comingSoon(context),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.mosque_rounded,
+              label: S.qaMasjidTerdekat,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const MosqueScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.psychology_rounded,
+              label: 'Kepribadian', // Shortened label
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const PersonalityScreen(),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.calendar_month_rounded,
+              label: S.qaKalenderHijriah,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const HijriCalendarScreen(),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.auto_stories_rounded,
+              label: S.tahlilTitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => SpiritualReaderScreen(
+                    title: S.tahlilTitle,
+                    subtitle: S.tahlilCaption,
+                    items: tahlilDoaItems,
+                    icon: Icons.auto_stories_rounded,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.brightness_5_rounded,
+              label: S.ratibTitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const RatibulHaddadScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.checklist_rounded,
+              label: S.amalanIbadahTitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const AmalanIbadahScreen()),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _comingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(S.comingSoon),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 1800),
+        ),
+      );
+  }
+}
+
+/// Pusat Belajar entry card — a full-width tappable card below the quick
+/// actions bento (same house card style: surfaceContainerLowest, radius-lg,
+/// outlineVariant border). Pushes the learning screen.
+class _LearningCard extends StatelessWidget {
+  const _LearningCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLowest,
+      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const LearningScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(AppLayout.sp5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+            border: Border.all(color: scheme.outlineVariant),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                ),
+                child: Icon(Icons.school_rounded, color: scheme.primary),
+              ),
+              const SizedBox(width: AppLayout.sp4),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.learningHomeEntryTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      S.learningHomeEntrySubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: scheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One bento tile: a sage 48px circle with a filled icon and a label below,
+/// on a `surfaceContainerLowest` card with a soft shadow. The circle gently
+/// scales up on hover (desktop delight).
+class _QuickActionTile extends StatefulWidget {
+  const _QuickActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_QuickActionTile> createState() => _QuickActionTileState();
+}
+
+class _QuickActionTileState extends State<_QuickActionTile> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: AppLayout.durBase,
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: _hovered
+              ? scheme.surfaceContainerLow
+              : scheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppLayout.sp3,
+                horizontal: AppLayout.sp1,
+              ),
+              child: Column(
+                children: [
+                  AnimatedScale(
+                    duration: AppLayout.durBase,
+                    scale: _hovered ? 1.06 : 1.0,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: scheme.secondaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: scheme.onSecondaryContainer,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppLayout.sp2),
+                  Text(
+                    widget.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Ayat Hari Ini ────────────────────────────────────────────────────────
+
+/// The daily-verse card: Amiri Arabic verse (right-aligned), italic
+/// translation, and a primary reference — with a share action and a faint
+/// rotated mosque watermark (Stitch Beranda §6). Wired to the offline DB via
+/// [dailyAyahProvider] (a day-of-year rotation over beloved ayahs).
+class _DailyVerseCard extends ConsumerWidget {
+  const _DailyVerseCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final verseAsync = ref.watch(dailyAyahProvider);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.35),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // Decorative mosque watermark, rotated 12°, ~3-4% opacity.
+          Positioned(
+            right: -32,
+            top: -36,
+            child: Transform.rotate(
+              angle: 12 * math.pi / 180,
+              child: Icon(
+                Icons.mosque_rounded,
+                size: 150,
+                color: scheme.primary.withValues(alpha: 0.04),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppLayout.sp5),
+            child: verseAsync.when(
+              loading: () => const SizedBox(
+                height: 120,
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (_, __) => SizedBox(
+                height: 120,
+                child: Center(child: Text(S.dailyVerseError)),
+              ),
+              data: (d) => _VerseContent(ayah: d.ayah, surah: d.surah),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VerseContent extends StatelessWidget {
+  const _VerseContent({required this.ayah, required this.surah});
+
+  final Ayah ayah;
+  final Surah surah;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.auto_stories_rounded, size: 20, color: scheme.primary),
+            const SizedBox(width: AppLayout.sp2),
+            Text(
+              S.dailyVerseLabel.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: () => _share(context),
+              tooltip: S.shareVerse,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                Icons.share_outlined,
+                size: 20,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppLayout.sp4),
+        QTextDisplay(
+          text: ayah.textUthmani,
+          step: 4, // ≈34px — the card's "quran-text" display size
+          color: scheme.onSurface,
+        ),
+        const SizedBox(height: AppLayout.sp3),
+        Text(
+          '"${ayah.translation}"',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: scheme.onSurfaceVariant,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp3),
+        Text(
+          '${surah.nameLatin} : ${ayah.ayahNumber}',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: scheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// No share_plus dependency yet — the share action copies the verse and
+  /// confirms with a SnackBar.
+  Future<void> _share(BuildContext context) async {
+    await Clipboard.setData(
+      ClipboardData(
+        text: '${ayah.textUthmani}\n\n"${ayah.translation}"\n'
+            '${surah.nameLatin} : ${ayah.ayahNumber}',
+      ),
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(S.copyAyahDone),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 1800),
+        ),
+      );
+  }
+}
+
+// ── Surah / juz quick links ──────────────────────────────────────────────
 
 class _QuickAccess extends StatelessWidget {
   const _QuickAccess({
@@ -169,113 +961,7 @@ class _QuickLink extends StatelessWidget {
   }
 }
 
-class _ContinueHero extends ConsumerWidget {
-  const _ContinueHero();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final detail = ref.watch(lastReadDetailProvider);
-
-    final gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        theme.colorScheme.surfaceContainerLow,
-        theme.colorScheme.primaryContainer.withValues(alpha: 0.40),
-      ],
-    );
-
-    return Container(
-      padding: const EdgeInsets.all(AppLayout.sp6),
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-      ),
-      child: detail.when(
-        loading: () => const SizedBox(height: 140),
-        error: (_, __) => _HintCard(onStart: () => openSurah(context, 1)),
-        data: (d) {
-          if (d == null) {
-            return _HintCard(onStart: () => openSurah(context, 1));
-          }
-          final surah = d.surah;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                S.continueEyebrow,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.tertiary,
-                ),
-              ),
-              const SizedBox(height: AppLayout.sp3),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        QTextDisplay(text: surah.nameArabic, step: 6),
-                        const SizedBox(height: AppLayout.sp2),
-                        Text(
-                          '${surah.nameLatin} · ${surah.nameIndonesian}',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.bookmark_rounded,
-                    color: theme.colorScheme.tertiary,
-                    size: 20,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppLayout.sp5),
-              Text(
-                'Ayat ${toArabicIndic(d.ayah.ayahNumber)}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: AppLayout.sp4),
-              FilledButton.icon(
-                onPressed: () => openSurah(context, surah.id,
-                    initialAyahId: d.ayah.id),
-                icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                label: const Text(S.continueButton),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _HintCard extends StatelessWidget {
-  const _HintCard({required this.onStart});
-
-  final VoidCallback onStart;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(S.noHistoryTitle, style: theme.textTheme.titleMedium),
-        const SizedBox(height: AppLayout.sp3),
-        FilledButton.tonal(
-          onPressed: onStart,
-          child: const Text(S.startFromFatihah),
-        ),
-      ],
-    );
-  }
-}
+// ── Reading history ──────────────────────────────────────────────────────
 
 /// Riwayat baca: the 4 most recent surahs (the newest one already sits in the
 /// hero above), each with a thin progress bar and a jump back to the last read
@@ -299,7 +985,6 @@ class _ReadingHistory extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: AppLayout.sp7),
         Text(
           S.historyEyebrow,
           style: theme.textTheme.labelSmall?.copyWith(

@@ -9,6 +9,7 @@ import '../../core/app_strings.dart';
 import '../../data/db/user_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_stats_repository.dart';
+import '../personality/personality_screen.dart';
 
 /// Statistik: reading stats (streak, today), khatam planner (target + ring),
 /// 30-day reading calendar, and totals. Follows the house header (eyebrow +
@@ -69,6 +70,8 @@ class StatsScreen extends ConsumerWidget {
             const _CalendarCard(),
             const SizedBox(height: AppLayout.sp7),
             _SummaryRow(stats: s),
+            const SizedBox(height: AppLayout.sp7),
+            const _PersonalityCard(),
             const SizedBox(height: AppLayout.sp8),
           ],
         ),
@@ -727,4 +730,70 @@ String _formatCount(int n) {
     buf.write(s[i]);
   }
   return buf.toString();
+}
+
+/// Tappable entry card into the Analisis Kepribadian screen — house card
+/// style (surfaceContainerLowest, radius-lg, outlineVariant border) like
+/// `_KhatamCard`.
+class _PersonalityCard extends StatelessWidget {
+  const _PersonalityCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLowest,
+      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const PersonalityScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(AppLayout.sp5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+            border: Border.all(color: scheme.outlineVariant),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                ),
+                child: Icon(Icons.psychology_rounded, color: scheme.primary),
+              ),
+              const SizedBox(width: AppLayout.sp4),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.statsPersonalityTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      S.statsPersonalityCaption,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: scheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

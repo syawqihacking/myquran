@@ -10,8 +10,8 @@ import 'data/providers.dart';
 import 'features/bookmarks/bookmarks_screen.dart';
 import 'features/browse/browse_screen.dart';
 import 'features/home/home_screen.dart';
-import 'features/settings/settings_screen.dart';
-import 'features/spiritual/spiritual_screen.dart';
+import 'features/prayer/prayer_screen.dart';
+import 'features/profile/profile_screen.dart';
 import 'features/stats/stats_screen.dart';
 
 /// App root: watches the theme setting and applies the MyQuran theme.
@@ -21,6 +21,11 @@ class MyQuranApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    // Keep prayer notifications in sync with the toggle + schedule for the
+    // whole session (the service skips redundant rescheduling).
+    ref.watch(prayerNotificationSyncProvider);
+    // Keep the dzikir reminders in sync with their toggle for the whole session.
+    ref.watch(dzikirReminderSyncProvider);
     return MaterialApp(
       title: S.appName,
       debugShowCheckedModeBanner: false,
@@ -40,7 +45,7 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-enum _View { home, browse, spiritual, bookmarks, stats, settings }
+enum _View { home, browse, bookmarks, stats, profile }
 
 class _AppShellState extends ConsumerState<AppShell> {
   _View _view = _View.home;
@@ -78,21 +83,23 @@ class _AppShellState extends ConsumerState<AppShell> {
       index: switch (_view) {
         _View.home => 0,
         _View.browse => 1,
-        _View.spiritual => 2,
-        _View.bookmarks => 3,
-        _View.stats => 4,
-        _View.settings => 5,
+        _View.bookmarks => 2,
+        _View.stats => 3,
+        _View.profile => 4,
       },
       children: [
         HomeScreen(
           onOpenSurahs: () => _openBrowse(BrowseSegment.surah),
           onOpenJuzs: () => _openBrowse(BrowseSegment.juz),
+          onOpenSearch: _openSearch,
+          onOpenPrayer: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PrayerScreen()),
+          ),
         ),
         BrowseScreen(state: _browseState, focusTick: _searchFocusTick),
-        const SpiritualScreen(),
         const BookmarksScreen(),
         const StatsScreen(),
-        const SettingsScreen(),
+        const ProfileScreen(),
       ],
     );
 
@@ -118,32 +125,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                 onSelect: (v) => setState(() => _view = v),
               ),
             Expanded(
-              child: Stack(
-                children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: AppConstants.contentColumnMaxWidth,
-                      ),
-                      child: body,
-                    ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppConstants.contentColumnMaxWidth,
                   ),
-                  if (_view != _View.settings)
-                    Positioned(
-                      top: AppLayout.sp4,
-                      right: AppLayout.sp4,
-                      child: SafeArea(
-                        child: IconButton(
-                          icon: const Icon(Icons.settings_rounded),
-                          tooltip: 'Pengaturan',
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.8),
-                          ),
-                          onPressed: () => setState(() => _view = _View.settings),
-                        ),
-                      ),
-                    ),
-                ],
+                  child: body,
+                ),
               ),
             ),
           ],
@@ -167,10 +155,9 @@ class _BottomNav extends StatelessWidget {
     int selectedIndex = switch (view) {
       _View.home => 0,
       _View.browse => 1,
-      _View.spiritual => 2,
-      _View.bookmarks => 3,
-      _View.stats => 4,
-      _ => 0, // Fallback for settings
+      _View.bookmarks => 2,
+      _View.stats => 3,
+      _View.profile => 4,
     };
 
     return NavigationBar(
@@ -179,9 +166,9 @@ class _BottomNav extends StatelessWidget {
         final v = switch (idx) {
           0 => _View.home,
           1 => _View.browse,
-          2 => _View.spiritual,
-          3 => _View.bookmarks,
-          4 => _View.stats,
+          2 => _View.bookmarks,
+          3 => _View.stats,
+          4 => _View.profile,
           _ => _View.home,
         };
         onSelect(v);
@@ -197,11 +184,6 @@ class _BottomNav extends StatelessWidget {
           selectedIcon: const Icon(Icons.menu_book_rounded),
           label: S.browseTitle,
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.brightness_5_outlined),
-          selectedIcon: const Icon(Icons.brightness_5_rounded),
-          label: S.spiritualNav,
-        ),
         const NavigationDestination(
           icon: Icon(Icons.bookmark_border_rounded),
           selectedIcon: Icon(Icons.bookmark_rounded),
@@ -211,6 +193,11 @@ class _BottomNav extends StatelessWidget {
           icon: Icon(Icons.insights_outlined),
           selectedIcon: Icon(Icons.insights_rounded),
           label: 'Statistik',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.person_outline_rounded),
+          selectedIcon: Icon(Icons.person_rounded),
+          label: S.profileTitle,
         ),
       ],
     );
@@ -274,13 +261,6 @@ class _Sidebar extends StatelessWidget {
             selected: view == _View.browse,
             onTap: () => onSelect(_View.browse),
           ),
-          _NavItem(
-            rail: rail,
-            icon: Icons.brightness_5_rounded,
-            label: S.spiritualNav,
-            selected: view == _View.spiritual,
-            onTap: () => onSelect(_View.spiritual),
-          ),
           const SizedBox(height: AppLayout.sp2),
           if (rail)
             const Divider(height: 1)
@@ -310,6 +290,13 @@ class _Sidebar extends StatelessWidget {
             label: 'Statistik',
             selected: view == _View.stats,
             onTap: () => onSelect(_View.stats),
+          ),
+          _NavItem(
+            rail: rail,
+            icon: Icons.person_rounded,
+            label: S.profileTitle,
+            selected: view == _View.profile,
+            onTap: () => onSelect(_View.profile),
           ),
 
           const Spacer(),

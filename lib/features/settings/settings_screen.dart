@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../../data/models/adzan_voice.dart';
 import '../../data/providers.dart';
 
 /// Settings (design §21).
@@ -17,22 +19,25 @@ class SettingsScreen extends ConsumerWidget {
     final controller = ref.read(settingsProvider.notifier);
 
     final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
-    
-    return ListView(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? AppLayout.sp4 : AppLayout.sp6,
-        vertical: AppLayout.sp8,
-      ),
-      children: [
-        Text(
-          S.settingsEyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.tertiary,
-          ),
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: _SettingsAppBar(),
+      body: ListView(
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? AppLayout.sp4 : AppLayout.sp6,
+          vertical: AppLayout.sp8,
         ),
-        const SizedBox(height: AppLayout.sp2),
-        Text(S.settingsTitle, style: theme.textTheme.displaySmall),
-        const SizedBox(height: AppLayout.sp6),
+        children: [
+          Text(
+            S.settingsEyebrow,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.tertiary,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp2),
+          Text(S.settingsTitle, style: theme.textTheme.displaySmall),
+          const SizedBox(height: AppLayout.sp6),
         _Section(
           title: S.appearanceSection,
           children: [
@@ -131,6 +136,16 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const _DividerRow(),
             _SettingRow(
+              icon: Icons.palette_rounded,
+              title: S.tajwidColorLabel,
+              subtitle: S.tajwidColorSublabel,
+              trailing: Switch(
+                value: settings.tajwidColor,
+                onChanged: controller.setTajwidColor,
+              ),
+            ),
+            const _DividerRow(),
+            _SettingRow(
               icon: Icons.history_rounded,
               title: S.restoreLastReadLabel,
               trailing: Switch(
@@ -140,6 +155,84 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+        // Prayer notifications are a mobile feature (Android/iOS alarms);
+        // hidden on desktop where scheduling is not supported.
+        if (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)
+          _Section(
+            title: S.notificationsSection,
+            children: [
+              _SettingRow(
+                icon: Icons.notifications_active_rounded,
+                title: S.prayerNotificationsLabel,
+                subtitle: S.prayerNotificationsSublabel,
+                trailing: Switch(
+                  value: ref.watch(prayerNotificationsEnabledProvider),
+                  onChanged: (v) async {
+                    final ok = await ref
+                        .read(prayerNotificationsEnabledProvider.notifier)
+                        .setEnabled(v);
+                    if (!ok && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(S.prayerNotificationsDenied)),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.self_improvement_rounded,
+                title: S.dzikirReminderLabel,
+                subtitle: S.dzikirReminderSublabel,
+                trailing: Switch(
+                  value: ref.watch(dzikirReminderEnabledProvider),
+                  onChanged: (v) async {
+                    final ok = await ref
+                        .read(dzikirReminderEnabledProvider.notifier)
+                        .setEnabled(v);
+                    if (!ok && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(S.dzikirReminderDenied)),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const _DividerRow(),
+              InkWell(
+                onTap: () => _pickAdzanVoice(context, ref),
+                child: _SettingRow(
+                  icon: Icons.volume_up_rounded,
+                  title: S.adzanVoiceLabel,
+                  subtitle:
+                      adzanVoiceById(ref.watch(selectedAdzanVoiceProvider)).name,
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.notifications_rounded,
+                title: S.prayerNotificationsTest,
+                subtitle: S.prayerNotificationsTestSublabel,
+                trailing: TextButton(
+                  onPressed: () async {
+                    final voiceId =
+                        ref.read(selectedAdzanVoiceProvider);
+                    await ref
+                        .read(prayerNotificationsProvider)
+                        .showTestNotification(voiceId: voiceId);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(S.prayerNotificationsTestSent)),
+                      );
+                    }
+                  },
+                  child: const Text(S.prayerNotificationsTestSend),
+                ),
+              ),
+            ],
+          ),
         _Section(
           title: S.dataSection,
           children: [
@@ -197,7 +290,8 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: AppLayout.sp6),
-      ],
+        ],
+      ),
     );
   }
 
@@ -238,6 +332,126 @@ class SettingsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(S.resetDataDone)),
+    );
+  }
+
+  /// Lets the user pick an adzan voice: shows the list, downloads the chosen
+  /// mp3 (blocking progress dialog), then switches the selection — the sync
+  /// provider reschedules the prayers on the new voice's channel.
+  Future<void> _pickAdzanVoice(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(selectedAdzanVoiceProvider);
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(S.adzanVoiceLabel),
+        children: [
+          RadioGroup<String>(
+            groupValue: current,
+            onChanged: (id) {
+              if (id != null) Navigator.of(ctx).pop(id);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final v in adzanVoices)
+                  RadioListTile<String>(
+                    value: v.id,
+                    title: Text(v.name),
+                    subtitle: Text(v.license),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    if (selected == null || selected == current) return;
+    if (!context.mounted) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: AppLayout.sp4),
+            Expanded(child: Text(S.adzanVoiceDownloading)),
+          ],
+        ),
+      ),
+    );
+    try {
+      await ref
+          .read(prayerNotificationsProvider)
+          .ensureVoiceDownloaded(adzanVoiceById(selected));
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close the progress dialog
+      await ref.read(selectedAdzanVoiceProvider.notifier).select(selected);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.adzanVoiceChanged)),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // close the progress dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.adzanVoiceDownloadFailed)),
+      );
+    }
+  }
+}
+
+/// App bar for the pushed Settings route: a back button and a centered title,
+/// matching the Profile screen's header so the two feel like one flow.
+class _SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _SettingsAppBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(AppLayout.sp10);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(AppLayout.sp10),
+      child: Container(
+        height: AppLayout.sp10,
+        padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
+        decoration: BoxDecoration(
+          color: scheme.surface.withValues(alpha: 0.9),
+          border: Border(
+            bottom: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              tooltip: S.back,
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            Expanded(
+              child: Text(
+                S.settingsTitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontSize: 20,
+                  height: 28 / 20,
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 48), // balances the back button
+          ],
+        ),
+      ),
     );
   }
 }

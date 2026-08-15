@@ -11,7 +11,10 @@ enum PaperTheme { hangat, klasik, pucat }
 /// The reading-surface ("paper") tokens (design system §1.5).
 ///
 /// The reading column uses these; all chrome uses the M3 roles. This
-/// chrome/paper split is the core identity device of the app.
+/// chrome/paper split is the core identity device of the app. Under "Sacred
+/// Path" the paper accents carry the warm-gold heritage family (accent,
+/// bookmark tint) and the emerald identity (highlight, header glow), keeping
+/// paper warm in both modes against the emerald-tinted chrome.
 @immutable
 class QuranPalette extends ThemeExtension<QuranPalette> {
   const QuranPalette({
@@ -38,11 +41,11 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranSurface: Color(0xFFFDFAF2),
     quranInk: Color(0xFF211D12),
     quranInkSecondary: Color(0xFF3F3A2E),
-    quranAccent: Color(0xFF8A6A00),
+    quranAccent: Color(0xFF8F6C00), // warm gold, harmonized with tertiary #735C00
     quranRule: Color(0xFFE7E1D2),
-    quranHighlight: Color(0x73D0EAE0), // #D0EAE0 @ 45%
-    quranBookmarkTint: Color(0x4DF6E177), // #F6E177 @ 30%
-    quranHeaderGlow: Color(0x0A3B6B5C), // #3B6B5C @ 4%
+    quranHighlight: Color(0x4D064E3B), // emerald container #064E3B @ 30%
+    quranBookmarkTint: Color(0x4DE9C349), // gold #E9C349 @ 30%
+    quranHeaderGlow: Color(0x0D003527), // emerald #003527 @ 5%
   );
 
   static const QuranPalette dark = QuranPalette(
@@ -51,11 +54,11 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranSurface: Color(0xFF171510),
     quranInk: Color(0xFFF0EADA),
     quranInkSecondary: Color(0xFFBDB7A8),
-    quranAccent: Color(0xFFC9A545),
+    quranAccent: Color(0xFFD4AD4E), // antique gold toward tertiary #E9C349
     quranRule: Color(0xFF2C2B22),
-    quranHighlight: Color(0x732E5246), // #2E5246 @ 45%
-    quranBookmarkTint: Color(0x4D544200), // #544200 @ 30%
-    quranHeaderGlow: Color(0x0DA8D4C0), // #A8D4C0 @ 5%
+    quranHighlight: Color(0x66B0F0D6), // luminous emerald #B0F0D6 @ 40%
+    quranBookmarkTint: Color(0x4DD4AD4E), // gold #D4AD4E @ 30%
+    quranHeaderGlow: Color(0x0D95D3BA), // #95D3BA @ 5%
   );
 
   /// Klasik: aged, slightly deeper cream — reads like an old hand-bound
@@ -64,22 +67,22 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranSurface: Color(0xFFF7F0DE),
     quranInk: Color(0xFF211C0E),
     quranInkSecondary: Color(0xFF403A27),
-    quranAccent: Color(0xFF7A5C00),
+    quranAccent: Color(0xFF7E5F00), // deeper antique gold for aged paper
     quranRule: Color(0xFFE2D6B6),
-    quranHighlight: Color(0x73D0EAE0),
-    quranBookmarkTint: Color(0x4DF6E177),
-    quranHeaderGlow: Color(0x0A3B6B5C),
+    quranHighlight: Color(0x4D064E3B),
+    quranBookmarkTint: Color(0x4DE9C349),
+    quranHeaderGlow: Color(0x0D003527),
   );
 
   static const QuranPalette klasikDark = QuranPalette(
     quranSurface: Color(0xFF1A1A12),
     quranInk: Color(0xFFEFE8D3),
     quranInkSecondary: Color(0xFFC0B9A6),
-    quranAccent: Color(0xFFD1AD50),
+    quranAccent: Color(0xFFD8B258), // brass gold
     quranRule: Color(0xFF333027),
-    quranHighlight: Color(0x732E5246),
-    quranBookmarkTint: Color(0x4D544200),
-    quranHeaderGlow: Color(0x0DA8D4C0),
+    quranHighlight: Color(0x66B0F0D6),
+    quranBookmarkTint: Color(0x4DD4AD4E),
+    quranHeaderGlow: Color(0x0D95D3BA),
   );
 
   /// Pucat: soft, airy warm-white — quieter, closer to the chrome paper,
@@ -88,11 +91,11 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranSurface: Color(0xFFFCFAF3),
     quranInk: Color(0xFF1F1C12),
     quranInkSecondary: Color(0xFF3D3A2F),
-    quranAccent: Color(0xFF7C5E00),
+    quranAccent: Color(0xFF866500), // quiet gold
     quranRule: Color(0xFFE9E3D2),
-    quranHighlight: Color(0x73D0EAE0),
-    quranBookmarkTint: Color(0x4DF6E177),
-    quranHeaderGlow: Color(0x0A3B6B5C),
+    quranHighlight: Color(0x4D064E3B),
+    quranBookmarkTint: Color(0x4DE9C349),
+    quranHeaderGlow: Color(0x0D003527),
   );
 
   static const QuranPalette pucatDark = QuranPalette(
@@ -100,11 +103,11 @@ class QuranPalette extends ThemeExtension<QuranPalette> {
     quranSurface: Color(0xFF161510),
     quranInk: Color(0xFFF0ECDE),
     quranInkSecondary: Color(0xFFBDB9AC),
-    quranAccent: Color(0xFFC5A243),
+    quranAccent: Color(0xFFD0A946), // quiet gold
     quranRule: Color(0xFF2C2B23),
-    quranHighlight: Color(0x732E5246),
-    quranBookmarkTint: Color(0x4D544200),
-    quranHeaderGlow: Color(0x0DA8D4C0),
+    quranHighlight: Color(0x66B0F0D6),
+    quranBookmarkTint: Color(0x4DD4AD4E),
+    quranHeaderGlow: Color(0x0D95D3BA),
   );
 
   /// Resolves the paper palette for a [PaperTheme] and brightness.

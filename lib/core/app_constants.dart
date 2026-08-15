@@ -17,7 +17,8 @@ class AppConstants {
   // v2 = reading_log table (reading stats / khatam plan).
   // v3 = sajda_log, khatam_targets, surah_positions tables; reciters.url_template
   //      and ayah_audio.last_accessed_at columns (audio phase-2 seam); reciter seed.
-  static const int userDbSchemaVersion = 3;
+  // v4 = doa_bookmarks table (doa harian bookmarks).
+  static const int userDbSchemaVersion = 4;
 
   // Quran font scale steps (design system §2.4).
   static const int minQuranFontStep = 1;
@@ -34,6 +35,7 @@ class AppConstants {
   static const String fontQuran = 'AmiriQuran';
   static const String fontUi = 'Inter';
   static const String fontArabic = 'NotoSansArabic';
+  static const String fontUiHeadline = 'Plus Jakarta Sans';
 
   // Window.
   static const double minWindowWidth = 800;
