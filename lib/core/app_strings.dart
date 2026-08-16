@@ -75,6 +75,8 @@ abstract final class S {
       'Gagal mengunduh suara adzan. Periksa koneksi internet.';
   static const adzanVoiceSholatLabel = 'Suara Adzan Sholat';
   static const adzanVoiceFajrLabel = 'Suara Adzan Fajr/Subuh';
+  static const adzanVoiceSholatHint = 'Dipakai untuk sholat selain subuh';
+  static const adzanVoiceFajrHint = 'Dipakai khusus untuk adzan subuh';
   static const adzanTestSholat = 'Suara Sholat';
   static const adzanTestFajr = 'Suara Fajr';
 
@@ -194,6 +196,8 @@ abstract final class S {
   // Settings.
   static const settingsEyebrow = 'PENGATURAN';
   static const settingsTitle = 'Pengaturan';
+  static const settingsCaption =
+      'Atur tampilan, notifikasi, dan data sesuai keinginanmu.';
   static const appearanceSection = 'Tampilan';
   static const themeModeLabel = 'Mode tema';
   static const themeModeSublabel = 'Ikuti tema sistem operasi.';
