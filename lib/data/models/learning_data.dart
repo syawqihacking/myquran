@@ -44,10 +44,13 @@ extension LearningCategoryX on LearningCategory {
 /// One lesson inside a course. [content] is the lesson body; paragraphs are
 /// separated by a blank line (`\n\n`).
 class Lesson {
-  const Lesson({required this.title, required this.content});
+  const Lesson({required this.title, required this.content, this.imageAsset});
 
   final String title;
   final String content;
+
+  /// Optional asset path to an illustration shown at the top of the lesson.
+  final String? imageAsset;
 }
 
 /// One course: a curated sequence of real lessons.
@@ -82,6 +85,7 @@ const List<Course> learningCourses = [
     lessons: [
       Lesson(
         title: 'Niat',
+        imageAsset: "assets/wudu'/niat.svg",
         content:
             'Niat wudhu dilakukan dalam hati, bersamaan dengan membasuh wajah '
             '(bagian wudhu yang pertama). Niat membedakan wudhu dari sekadar '
@@ -92,6 +96,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Membasuh Telapak Tangan',
+        imageAsset: "assets/wudu'/membasuhtelapaktangan.svg",
         content:
             'Mulailah dengan membasuh kedua telapak tangan tiga kali, termasuk '
             'sela-sela jari. Ini termasuk sunnah wudhu — mencuci tangan sebelum '
@@ -101,6 +106,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Berkumur & Membersihkan Hidung',
+        imageAsset: "assets/wudu'/berkumurdanmembersihkanhidung.svg",
         content:
             'Berkumur (madhmadhah) dan menghirup air ke dalam hidung '
             '(istinsyaq) lalu mengeluarkannya (istintsar), masing-masing tiga '
@@ -111,6 +117,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Membasuh Wajah',
+        imageAsset: "assets/wudu'/membasuhwajah.svg",
         content:
             'Basuh seluruh wajah tiga kali. Batas wajah: dari tumbuhnya rambut '
             '(dahi) hingga dagu, dan dari telinga kanan ke telinga kiri.\n\n'
@@ -119,6 +126,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Membasuh Tangan sampai Siku',
+        imageAsset: "assets/wudu'/membasuhtangansampaisiku.svg",
         content:
             'Basuh tangan kanan terlebih dahulu sampai siku, lalu tangan kiri. '
             'Siku termasuk bagian yang wajib dibasuh.\n\n'
@@ -128,6 +136,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Mengusap Kepala & Telinga',
+        imageAsset: "assets/wudu'/mengusapkepaladantelinga.svg",
         content:
             'Usap kepala dengan air: dari depan ke belakang lalu kembali ke '
             'depan. Sebagian ulama membolehkan mengusap sebagian kepala saja.\n\n'
@@ -137,6 +146,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Membasuh Kaki sampai Mata Kaki',
+        imageAsset: "assets/wudu'/membasuhkakisampaimatakaki.svg",
         content:
             'Basuh kaki kanan terlebih dahulu sampai mata kaki, lalu kaki '
             'kiri. Mata kaki termasuk bagian yang wajib dibasuh.\n\n'

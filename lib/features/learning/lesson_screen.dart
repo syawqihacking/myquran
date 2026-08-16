@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
@@ -94,6 +95,22 @@ class LessonScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  ],
+                  if (lesson.imageAsset != null) ...[
+                    const SizedBox(height: AppLayout.sp4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+                      child: Container(
+                        width: double.infinity,
+                        height: 220,
+                        color: scheme.surfaceContainerLowest,
+                        child: SvgPicture.asset(
+                          lesson.imageAsset!,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppLayout.sp4),
                   ],
                   const SizedBox(height: AppLayout.sp5),
                   for (final p in paragraphs) ...[
