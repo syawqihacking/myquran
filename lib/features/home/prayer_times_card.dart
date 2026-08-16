@@ -71,15 +71,24 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
             _SectionHeader(locationName: schedule.locationName),
             const SizedBox(height: AppLayout.sp3),
             SizedBox(
-              height: 92,
+              // Tall enough for the active card's three lines (label, time,
+              // countdown) to fit without overflowing vertically.
+              height: 100,
               child: ScrollConfiguration(
                 // Match the design: no visible scrollbar on the strip.
                 behavior:
                     ScrollConfiguration.of(context).copyWith(scrollbars: false),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  // Top padding gives the gold pulse dot room to breathe.
-                  padding: const EdgeInsets.only(top: 10, bottom: 4),
+                  // Edge padding gives the gold pulse dot room to breathe on
+                  // all sides so it never overflows the viewport when the
+                  // active card sits at the strip's edge.
+                  padding: const EdgeInsets.only(
+                    top: 10,
+                    bottom: 4,
+                    left: 8,
+                    right: 8,
+                  ),
                   itemCount: schedule.entries.length,
                   separatorBuilder: (_, __) =>
                       const SizedBox(width: AppLayout.sp3),
@@ -110,7 +119,7 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
         const _SectionHeader(locationName: ''),
         const SizedBox(height: AppLayout.sp3),
         SizedBox(
-          height: 92,
+          height: 100,
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -259,7 +268,7 @@ class _PrayerCard extends StatelessWidget {
                   ),
                 ),
                 if (countdownText != null) ...[
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 3),
                   Text(
                     countdownText!,
                     style: TextStyle(

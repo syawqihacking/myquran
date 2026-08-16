@@ -23,6 +23,7 @@ import 'repositories/spiritual_repository.dart';
 import 'repositories/user_repositories.dart';
 import 'services/audio_service.dart';
 import 'services/just_audio_service.dart';
+import 'services/ratib_audio_service.dart';
 import 'services/murottal_download_service.dart';
 import 'services/notification_service.dart';
 import 'services/prayer_time_service.dart';
@@ -146,6 +147,14 @@ final audioServiceProvider = Provider<AudioService>((ref) {
       }
     },
   );
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+/// Dedicated Ratib Al-Haddad audio service, kept separate from the Quran
+/// `audioServiceProvider` so the two playback paths never interfere.
+final ratibAudioServiceProvider = Provider<RatibAudioService>((ref) {
+  final service = RatibAudioService();
   ref.onDispose(service.dispose);
   return service;
 });

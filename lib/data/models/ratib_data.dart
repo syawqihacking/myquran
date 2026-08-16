@@ -13,7 +13,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 2,
     title: 'Al-Fatihah',
-    arabic: '﴿ ٱِّٰa ٱلرَّ ٱلرَّحِيمِ ١ ٱَۡمۡدُ ِِّٰa رَبِّ ٱلَٰۡلَمَِ ٢ ٱلرَّ ٱلرَّحِيمِ ٣ َٰلِكِ يَوۡمِ ٱِّZينِ ٤ إِيَّاكَ َعۡبُدُ يَّاكَ ìسَۡتَعُِ ٥ ٱهۡدِنَا ٱلصَِّٰطَ ٱلۡمُسۡتَقِيمَ ٦ صَِٰطَ ٱَِّينَ َۡعَمۡتَ عَلَيۡهِمۡ غَِۡ ٱلۡمَغۡضُوبِ عَلَيۡهِمۡ وََ ٱلضَّآلَِّ ٧﴾',
+    arabic: '﴿بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ١ ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ ٢ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ٣ مَـٰلِكِ يَوْمِ ٱلدِّينِ ٤ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ٥ ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ ٦ صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ ٧﴾',
     transliteration: 'Bismi Llāhi r-Raḥmāni r-Raḥīm, Al-ḥamdu li Llāhi Rabbi l-ʿālamīn, ar-Raḥmāni r-Raḥīm, Māliki yawmi d-dīn, iyyāka naʿbudu wa iyyāka nastaʿīn, ihdinā ṣ-ṣirāṭa l-mustaqīm, ṣirāṭa lladhīna anʿamta ʿalayhim ghayri l-maghḍūbi ʿalayhim wa la ḍ-ḍāllīn.',
     translation: 'In the Name of Allah, the Benevolent, the Merciful All Praise is due to Allah, the Lord of the worlds. The Most Beneficent, the Most Merciful. The Owner of the Day of Recompense. You Alone we worship, and You Alone we ask for help. Guide us to the straight way. The way of those on whom You have bestowed Your Grace, not of those who earned Your anger nor of those who went astray. [1:1-7]',
     label: 'AL-FATIHAH',
@@ -21,7 +21,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 3,
     title: 'Ayat Kursi',
-    arabic: '﴿اُّٰa َٓ إَِٰهَ إَِّ هُوَ ٱلَُّۡ ٱلۡقَيُّومُۚ َ تَأۡخُذُهُۥ سِنَةٞ وََ نَوۡمٞۚ َُّۥ مَا ﻓِﻲ ٱلسَََّٰٰتِ وَمَا ﻓِﻲ ٱَۡ ِ ض مَن ذَا ٱَِّي شَۡفَعُ عِندَهُٓۥ إَِّ ِإِذۡنِهِۚۦ َعۡلَمُ مَا بََۡ َيۡدِيهِمۡ وَمَا خَلۡفَهُمۡۖ وََ ُِيطُونَ َِۡءٖ مِّنۡ عِلۡمِهِٓۦ إَِّ بِمَا شَآءَۚ وَسِعَ كُرۡسِيُّهُ ٱلسَََّٰٰتِ وَٱَۡضَۖ وََ َُٔودُهُۥ حِفۡظُهُمَاۚ وَهُوَ ٱلۡعَُِّ ٱلۡعَظِيمُ ٥٥٢﴾',
+    arabic: '﴿ٱللَّهُ لَآ إِلَـٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ ۚ لَا تَأْخُذُهُۥ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُۥ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ مَن ذَا ٱلَّذِى يَشْفَعُ عِندَهُۥٓ إِلَّا بِإِذْنِهِۦ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَىْءٍ مِّنْ عِلْمِهِۦٓ إِلَّا بِمَا شَآءَ ۚ وَسِعَ كُرْسِيُّهُ ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضَ ۖ وَلَا يَـُٔودُهُۥ حِفْظُهُمَا ۚ وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ ٢٥٥﴾',
     transliteration: 'Allāhu lā ilāha illā Huwa l-Ḥayyu l-Qayyūm, lā ta\'khudhuhu sinatun wa lā nawm, lahu mā fi s-samāwāti wa mā fi l-arḍ, man dha lladhī yashfaʿu ʿindahu illā bi idhnih, yaʿlamu mā bayna aydīhim wa mā khalfahum wa lā yuḥīṭūna bi shay\'in min ʿilmihī illā bimā shā\'a, wasiʿa kursiyyuhu s-samāwāti wa l-arḍ, wa lā ya\'ūduhu ḥifẓuhumā wa Huwa l-ʿAliyyu l-ʿAẓīm.',
     translation: 'Allah, there is no God but Him, the Living, the Self-Subsisting. He is not subject to drowsiness or sleep. Everything in the heavens and earth belongs to Him. Who can intercede with Him except by His permission? He knows what is before them and what is behind them, but they cannot grasp any of His knowledge except what He wills. His Footstool encompasses the heavens and the earth, and their preservation does not tire Him. He is the Most-High the Magnificent. [2:255]',
     label: 'AYAT KURSI',
@@ -29,7 +29,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 4,
     title: 'Akhir Surat Al-Baqarah (285-286)',
-    arabic: '﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إَِۡهِ مِن رَِّّهِۦ وَٱلۡمُؤۡمِنُونَۚ ٌُّ ءَامَنَ بِٱِّٰa وَمََِٰكَتِهِۦ وَُتُبِهِۦ وَرُسُلِهِۦ َ ُفَرِّقُ بََۡ أَحَدٖ مِّن رُّسُلِهِۚۦ وَقَالُواْ سَمِعۡنَا وَأَطَعۡنَاۖ ُفۡرَانَكَ رََّنَا َۡكَ ٱلۡمَصُِ ٥٨٢ َ يََُلِّفَُ ٱ ُّٰۡa َفۡسًا إَِّ وُسۡعَهَاۚ لَهَا مَا كَسَبَتۡ وَعَلَيۡهَا مَا ٱۡتَسَبَتۡۗ رََّنَا َ تُؤَاخِذۡنَآ إِن ìسَِّينَآ أوۡ أخۡطَنَاۚ رََّنَا وََ َۡsمِلۡ عَلَيۡنَآ إِۡٗI كَمَا ََلۡتَهَُۥ ََ ٱَِّينَ مِن َẽبۡلِنَاۚ رََّنَا وََ َُsمِّلۡنَا مَا َ طَاقَةَ ََا بِهِۖۦ وَٱۡcفُ َcنَّا وَٱغۡفِرۡ ََا وَٱرَۡۡنَآۚ أنتَ مَوۡلَٰٮنَا فَٱنُۡنَا ََ ٱلۡقَوۡمِ ٱلَٰۡفِرِنَ ٦٨٢﴾',
+    arabic: '﴿ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِۦ ۚ وَقَالُوا۟ سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ ٱلْمَصِيرُ ٢٨٥ لَا يُكَلِّفُ ٱللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا ٱكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَآ إِن نَّسِينَآ أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَآ إِصْرًا كَمَا حَمَلْتَهُۥ عَلَى ٱلَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِۦ ۖ وَٱعْفُ عَنَّا وَٱغْفِرْ لَنَا وَٱرْحَمْنَآ ۚ أَنتَ مَوْلَىٰنَا فَٱنصُرْنَا عَلَى ٱلْقَوْمِ ٱلْكَـٰفِرِينَ ٢٨٦﴾',
     transliteration: 'Āmana r-Rasūlu bi mā unzila ilayhi min r-Rabbihī wa l-mu\'minūn, kullun āmana bi Llāhi wa malā\'ikatihi wa kutubihi wa rusulih, lā nufarriqu bayna aḥadin min rusulih, wa qālū samiʿnā wa aṭaʿnā ghufrānaka Rabbanā wa ilayka l-maṣīr. Lā yukallifu Llāhu nafsan illā wusʿahā, lahā mā kasabat wa ʿalayhā ma-ktasabat, Rabbanā lā tu\'ākhidhnā in nasīnā aw akhṭa\'nā, Rabbanā wa lā taḥmil ʿalaynā iṣran kamā ḥamaltahū ʿala lladhīna min qablinā, Rabbanā wa lā tuḥammilnā mā lā ṭāqata lanā bih, waʿfu ʿannā wa-ghfir lanā wa-rḥamnā, Anta mawlānā fa-nṣurnā ʿala l-qawmi l-kāfirīn.',
     translation: 'The Messenger believes in what was sent down to him from his Lord, and so do the believers. Each one believes in Allah, His angels, and His books, and His Messengers, “We make no distinction between any of His Messengers.” And they say: “We hear and obey, we ask Your forgiveness, our Lord, for destiny leads to You.\' Allah does not compel a soul to do what is beyond its ability, one gets what one has earned and is responsible for what one deserves. Our Lord, do not punish us if we forget or make mistakes; our Lord, charge us not with a burden such as You did lay upon those who were before us, our Lord, load not upon us that which we are unable to bear, and pardon us and forgive us and have mercy on us, You are our Protector so help us against those who disbelieve. [2:285-286]',
     label: 'AL-BAQARAH',
@@ -45,7 +45,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 6,
     title: 'Tasbih',
-    arabic: 'ﺳُﺒْﺤَﺎنَ اِﷲ وَاﻟَْﺤﻤْﺪُ ِِّٰa وَ ﻻَ إِﻟَٰـﻪَ إِﻻَّ اُﷲ وَاُﷲ اَْﺒَُﺮ ﴿٣﴾',
+    arabic: 'ﺳُﺒْﺤَﺎنَ اِﷲ وَاﻟَْﺤﻤْﺪُ لِلّٰهِ وَ ﻻَ إِﻟَٰـﻪَ إِﻻَّ اُﷲ وَاُﷲ اَْﺒَُﺮ ﴿٣﴾',
     transliteration: 'Subḥāna Llāhi wa l-ḥamdu li-Llāhi wa lā ilāha illa Llāhu wa Llāhu Akbar.',
     translation: 'Transcendent is Allah, all Praise belongs to Allah, there is no God but Allah, Allah is the Greatest.',
     repeatCount: 3,
@@ -101,7 +101,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 13,
     title: 'Takdir Allah',
-    arabic: ' اِﷲ وَاﻟَْﺤﻤْﺪُ ِِّٰa وَاﻟَْﺨُْ وَالﺸَُّّﺮ ﺑِﻤَﺸِيﺌَﺔِ اِﷲ ﴿٣﴾',
+    arabic: ' اِﷲ وَاﻟَْﺤﻤْﺪُ لِلّٰهِ وَاﻟَْﺨُْ وَالﺸَُّّﺮ ﺑِﻤَﺸِيﺌَﺔِ اِﷲ ﴿٣﴾',
     transliteration: 'Bismi Llāhi wa l-ḥamdu li-Llāhi wa l-khayru wa sh-sharru bi mashī\'ati Llāh.',
     translation: 'In the Name of Allah and Praise be to Allah, both good and evil are by the Will of Allah.',
     repeatCount: 3,
@@ -181,7 +181,7 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 23,
     title: 'Al-Ikhlas',
-    arabic: '﴿قُلۡ هُوَ ٱُّٰa أَحَدٌ ١ ٱُّٰa ٱلصَّمَدُ ٢ لَمۡ يَ ِۡSوَلَمۡ يُوَۡZ ٣ وَلَمۡ يَُن َُّۥ كُفُوًا أَحَدُۢ ٤﴾ ﴿٤﴾',
+    arabic: '﴿قُلْ هُوَ ٱللَّهُ أَحَدٌ ١ ٱللَّهُ ٱلصَّمَدُ ٢ لَمْ يَلِدْ وَلَمْ يُولَدْ ٣ وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ ٤﴾ ﴿٤﴾',
     transliteration: 'Bismi Llāhi r-Raḥmāni r-Raḥīm\nQul Huwa Llāhu aḥad, Allāhu ṣ-Ṣamad, lam yalid wa lam yūlad, wa lam yakun lahu kufuwan aḥad.',
     translation: 'In the Name of Allah, the Benevolent, the Merciful. Say: He is Allah, Absolute Oneness, Allah the eternal. He has not given birth and He was not born, and He has no equal. [112:1-4]',
     repeatCount: 3,
@@ -190,14 +190,14 @@ const List<SpiritualItem> ratibAlHaddadItems = [
   SpiritualItem(
     id: 24,
     title: 'Al-Falaq',
-    arabic: '﴿قل أعُوذ بِرَبِّ ٱلفَلقِ ١ مِنۡ َِّ مَا خَلقَ ٢ وَمِن َِّ سِقٍ إِذا وَقبَ ٣ وَمِن َِّ ٱَّفَّٰـَٰتِ ﻓِﻲ ٱلعُقَدِ ٤ وَمِن َِّ حَاسِدٍ إِذَا حَسَدَ ٥﴾',
+    arabic: '﴿قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ ١ مِن شَرِّ مَا خَلَقَ ٢ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ٣ وَمِن شَرِّ ٱلنَّفَّـٰثَـٰتِ فِى ٱلْعُقَدِ ٤ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ٥﴾',
     transliteration: 'Bismi Llāhi r-Raḥmāni r-Raḥīm\nQul aʿūdhu bi Rabbi l-falaq, min sharri mā khalaq, wa min sharri ghāsiqin idhā waqab, wa min sharri n-naffāthāti fi l-ʿuqad, wa min sharri ḥāsidin idhā ḥasad.',
     translation: 'In the Name of Allah, the Benevolent, the Merciful Say: I seek refuge in the Lord of daybreak from the evil of that which He created and from the evil of darkness when it settles and from the evil of those who blow on knots and from the evil of an envier when he envies. [113:1-5]',
   ),
   SpiritualItem(
     id: 25,
     title: 'An-Nas',
-    arabic: '﴿قل أعُوذ بِرَبَِّّ ٱَّاسِ ١ مَلِكِ ٱَّاسِ ٢ إِٰهِ ٱَّاسِ ۡ٣ مِن َِّ ٱلوَسۡوَاسِ ٱَنَّاسِ ٤ ٱِي يُوَسۡوِسُ ﻓِﻲ صُدُورِ ٱَّاسِ ٥ مِنَ ٱِȘنَّةِ وَٱَّاسِ ٦﴾',
+    arabic: '﴿قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ ١ مَلِكِ ٱلنَّاسِ ٢ إِلَـٰهِ ٱلنَّاسِ ٣ مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ ٤ ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ ٥ مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ ٦﴾',
     transliteration: 'Bismi Llāhi r-Raḥmāni r-Raḥīm\nQul aʿūdhu bi Rabbi n-nās, Maliki n-nās, Ilāhi n-nās, min sharri l-waswāsi l-khannās, al-ladhī yuwaswisu fī ṣudūri n-nās, mina l-jinnati wa n-nās.',
     translation: 'In the Name of Allah, the Benevolent, the Merciful Say: I seek refuge in the Lord of mankind, the Sovereign of mankind, the God of mankind from the evil of the retreating whisperer, who whispers into the breasts of mankind among the jinn and humans. [114:1-6]',
   ),

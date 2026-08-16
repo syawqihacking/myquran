@@ -1,21 +1,22 @@
+import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/ratib_data.dart';
 import '../../data/models/spiritual_content.dart';
+import '../../data/providers.dart';
+import '../../data/services/audio_service.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Ratibul Haddad (Stitch design): a pinned app bar, a scroll progress bar, an
 /// intro card with a mosque watermark, numbered dhikr cards (type/repeat chip,
 /// Arabic, transliteration, translation, interactive repeat counter), and a
-/// fixed bottom audio bar. Audio is not available yet — every control honestly
-/// reports "Audio segera hadir".
+/// fixed bottom audio bar streaming the Ratib Al-Haddad recitation.
 class RatibulHaddadScreen extends StatefulWidget {
   const RatibulHaddadScreen({super.key});
 
@@ -64,18 +65,6 @@ class _RatibulHaddadScreenState extends State<RatibulHaddadScreen> {
     if (_countOf(id) > 0) {
       setState(() => _counts[id] = 0);
     }
-  }
-
-  void _showComingSoon() {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(S.audioComingSoon),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(milliseconds: 1800),
-        ),
-      );
   }
 
   @override
@@ -141,7 +130,7 @@ class _RatibulHaddadScreenState extends State<RatibulHaddadScreen> {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: _AudioBar(onAction: _showComingSoon),
+                child: const _AudioBar(),
               ),
             ],
           ),
@@ -642,130 +631,164 @@ class _RepeatCounter extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Bottom audio bar (Stitch §Audio Playback Control). Audio is not available
-// yet — every control reports "Audio segera hadir"; timing shows an honest
-// placeholder on desktop only.
+// Bottom audio bar (Stitch §Audio Playback Control). Streams a single
+// continuous Ratib Al-Haddad file via `ratibAudioServiceProvider`: the play
+// button toggles play/pause/resume and the timing shows real position/duration.
 // ---------------------------------------------------------------------------
 
-class _AudioBar extends StatelessWidget {
-  const _AudioBar({required this.onAction});
+class _AudioBar extends ConsumerStatefulWidget {
+  const _AudioBar();
 
-  final VoidCallback onAction;
+  @override
+  ConsumerState<_AudioBar> createState() => _AudioBarState();
+}
+
+class _AudioBarState extends ConsumerState<_AudioBar> {
+  StreamSubscription<AudioPlaybackState>? _sub;
+  AudioPlaybackState _state = const AudioPlaybackState.idle();
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = ref
+        .read(ratibAudioServiceProvider)
+        .stateStream
+        .listen((state) {
+      if (!mounted) return;
+      setState(() => _state = state);
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  bool get _isPlaying =>
+      _state.status == AudioStatus.playing ||
+      _state.status == AudioStatus.buffering;
+
+  void _toggle() {
+    final service = ref.read(ratibAudioServiceProvider);
+    switch (_state.status) {
+      case AudioStatus.playing:
+      case AudioStatus.buffering:
+        service.pause();
+      case AudioStatus.paused:
+        service.resume();
+      case AudioStatus.idle:
+        service.play();
+    }
+  }
+
+  /// Real position/duration as `mm:ss / mm:ss` (all platforms).
+  String get _timing {
+    String fmt(Duration d) {
+      final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+      return '$m:$s';
+    }
+
+    return '${fmt(_state.position)} / ${fmt(_state.duration)}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final isDesktop =
-        MediaQuery.sizeOf(context).width >= AppConstants.mobileBreakpoint;
+    final buffering = _state.status == AudioStatus.buffering;
 
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: scheme.surface.withValues(alpha: 0.9),
-          border: Border(
-            top: BorderSide(color: scheme.surfaceContainerHighest),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: 0.08),
-              blurRadius: 24,
-              offset: const Offset(0, -4),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        // Solid (near-opaque) surface — no BackdropFilter, which caused a
+        // whole-screen blur on some Android GPUs. The bar stays readable on
+        // its own, no frosted-glass needed.
+        color: scheme.surface.withValues(alpha: 0.95),
+        border: Border(
+          top: BorderSide(color: scheme.surfaceContainerHighest),
         ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppLayout.sp6,
-              vertical: AppLayout.sp3,
-            ),
-            child: Row(
-              children: [
-                // Left: avatar + track title.
-                Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: scheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(AppLayout.radiusSm),
-                        ),
-                        child: Icon(
-                          Icons.graphic_eq_rounded,
-                          size: 24,
-                          color: scheme.onPrimaryContainer,
-                        ),
-                      ),
-                      const SizedBox(width: AppLayout.sp3),
-                      Flexible(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              S.playingLabel.toUpperCase(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.6,
-                                color: scheme.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              S.ratibFullTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: scheme.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Controls.
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppLayout.sp6,
+            vertical: AppLayout.sp3,
+          ),
+          child: Row(
+            children: [
+              // Left: avatar + track title.
+              Expanded(
+                child: Row(
                   children: [
-                    _SkipButton(
-                      icon: Icons.skip_previous_rounded,
-                      tooltip: S.audioPrev,
-                      onTap: onAction,
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(AppLayout.radiusSm),
+                      ),
+                      child: Icon(
+                        Icons.graphic_eq_rounded,
+                        size: 24,
+                        color: scheme.onPrimaryContainer,
+                      ),
                     ),
-                    const SizedBox(width: AppLayout.sp4),
-                    _PlayButton(onTap: onAction),
-                    const SizedBox(width: AppLayout.sp4),
-                    _SkipButton(
-                      icon: Icons.skip_next_rounded,
-                      tooltip: S.audioNext,
-                      onTap: onAction,
+                    const SizedBox(width: AppLayout.sp3),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            S.playingLabel.toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.6,
+                              color: scheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            S.ratibFullTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: scheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                // Timing — desktop only, honest placeholder (no fake numbers).
-                if (isDesktop) ...[
-                  const SizedBox(width: AppLayout.sp6),
-                  SizedBox(
-                    width: 96,
-                    child: Text(
-                      S.audioTimingPlaceholder,
-                      textAlign: TextAlign.right,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.outline,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+              ),
+              // Timing — real position/duration, on all platforms.
+              Text(
+                _timing,
+                textAlign: TextAlign.right,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.outline,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const SizedBox(width: AppLayout.sp4),
+              // Play/pause toggle (spinner while buffering).
+              _PlayButton(
+                playing: _isPlaying,
+                buffering: buffering,
+                onTap: _toggle,
+              ),
+            ],
           ),
         ),
       ),
@@ -773,32 +796,17 @@ class _AudioBar extends StatelessWidget {
   }
 }
 
-class _SkipButton extends StatelessWidget {
-  const _SkipButton({
-    required this.icon,
-    required this.tooltip,
+/// 48px play/pause button inside a 56px decorative gold progress ring. Shows a
+/// small spinner while buffering.
+class _PlayButton extends StatelessWidget {
+  const _PlayButton({
+    required this.playing,
+    required this.buffering,
     required this.onTap,
   });
 
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return IconButton(
-      onPressed: onTap,
-      tooltip: tooltip,
-      icon: Icon(icon, size: 28, color: scheme.onSurfaceVariant),
-    );
-  }
-}
-
-/// 48px play button inside a 56px decorative gold progress ring.
-class _PlayButton extends StatelessWidget {
-  const _PlayButton({required this.onTap});
-
+  final bool playing;
+  final bool buffering;
   final VoidCallback onTap;
 
   @override
@@ -830,11 +838,21 @@ class _PlayButton extends StatelessWidget {
               child: SizedBox(
                 width: 48,
                 height: 48,
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  size: 28,
-                  color: scheme.onPrimary,
-                ),
+                child: buffering
+                    ? Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: scheme.onPrimary,
+                        ),
+                      )
+                    : Icon(
+                        playing
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        size: 28,
+                        color: scheme.onPrimary,
+                      ),
               ),
             ),
           ),

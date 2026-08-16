@@ -347,7 +347,6 @@ abstract final class S {
   static const playingLabel = 'Sedang Memutar';
   static const counterLabel = 'Hitung';
   static const counterReset = 'Reset hitungan';
-  static const audioTimingPlaceholder = '—:— / —:—';
 
   // Amalan Ibadah (daily deeds tracker).
   static const amalanIbadahTitle = 'Amalan Ibadah';

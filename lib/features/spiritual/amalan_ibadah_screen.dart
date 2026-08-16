@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -327,101 +325,101 @@ class _GoalProgressCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          padding: const EdgeInsets.all(AppLayout.sp6),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(color: scheme.surfaceContainerHighest),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          S.amalanGoalProgress,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 20,
-                            height: 28 / 20,
-                            fontWeight: FontWeight.w600,
-                            color: scheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          S.amalanGoalSubtitle,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 16,
-                            height: 24 / 16,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppLayout.sp3),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppLayout.sp3,
-                      vertical: AppLayout.sp1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-                    ),
-                    child: Text(
-                      S.amalanProgress(done, total),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppLayout.sp4),
-              // Animated progress bar (track highest, fill primary, 500ms).
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return Container(
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeOut,
-                        width: constraints.maxWidth * progress,
-                        height: 8,
-                        decoration: BoxDecoration(
+      child: Container(
+        padding: const EdgeInsets.all(AppLayout.sp6),
+        decoration: BoxDecoration(
+          // Solid (near-opaque) surface — no BackdropFilter, which caused a
+          // whole-screen blur on some Android GPUs (Impeller). The card stays
+          // readable on its own, no frosted-glass needed.
+          color: Colors.white.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          border: Border.all(color: scheme.surfaceContainerHighest),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: 0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        S.amalanGoalProgress,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontSize: 20,
+                          height: 28 / 20,
+                          fontWeight: FontWeight.w600,
                           color: scheme.primary,
-                          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        S.amalanGoalSubtitle,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 16,
+                          height: 24 / 16,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppLayout.sp3),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppLayout.sp3,
+                    vertical: AppLayout.sp1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                  ),
+                  child: Text(
+                    S.amalanProgress(done, total),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSecondaryContainer,
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppLayout.sp4),
+            // Animated progress bar (track highest, fill primary, 500ms).
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOut,
+                      width: constraints.maxWidth * progress,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: scheme.primary,
+                        borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
