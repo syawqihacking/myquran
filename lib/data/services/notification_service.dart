@@ -24,9 +24,12 @@ import 'prayer_time_service.dart';
 /// the permission, otherwise scheduling falls back to inexact (may fire a few
 /// minutes late) rather than throwing.
 ///
-/// Each adzan voice gets its own notification channel (`prayer_times_<id>`)
-/// whose sound is the downloaded mp3, so switching voices only requires
-/// rescheduling on the new channel.
+/// Scheduled prayer notifications are deliberately SILENT: the full adzan is
+/// played by the foreground service (see [startAdzanService]) on the media
+/// stream, which is not interrupted by the volume buttons. The notification
+/// itself only shows the reminder text. Each voice gets its own silent channel
+/// (`prayer_silent_<id>`); the sounding channel (`prayer_times_<id>`) is used
+/// only by [showTestNotification] so the user can preview a voice.
 class NotificationService {
   NotificationService();
 
@@ -49,6 +52,10 @@ class NotificationService {
   /// The voice id the last schedule was created with; a voice change forces a
   /// reschedule even when the times are unchanged.
   String? _scheduledVoiceId;
+
+  /// The fajr voice id the last schedule was created with; a fajr voice change
+  /// forces a reschedule even when the times are unchanged.
+  String? _scheduledFajrVoiceId;
 
   static bool get _isMobile =>
       !kIsWeb &&
@@ -127,10 +134,11 @@ class NotificationService {
     }
   }
 
-  /// Creates (or updates) the notification channel for a voice with its
-  /// downloaded sound. The channel sound is fixed at creation, so each voice
-  /// keeps its own channel id. Never throws: a sound failure must not prevent
-  /// the notification from being shown.
+  /// Creates (or updates) the sounding notification channel used by
+  /// [showTestNotification] so the user can preview a voice. The channel sound
+  /// is fixed at creation, so each voice keeps its own channel id. Never
+  /// throws: a sound failure must not prevent the notification from being
+  /// shown.
   Future<void> _createChannel(String voiceId, String soundPath) async {
     try {
       final android = _plugin.resolvePlatformSpecificImplementation<
@@ -152,19 +160,54 @@ class NotificationService {
     }
   }
 
-  /// Schedules the five daily prayer notifications on the given voice's
-  /// channel. Skips when both the times and the voice are unchanged since the
-  /// last call (the schedule refreshes every 30 s).
+  /// Creates (or updates) the SILENT channel used by scheduled prayer
+  /// notifications. The adzan itself is played by the foreground service on
+  /// the media stream, so the notification must not add a second sound (and
+  /// must not be killed by the volume buttons). Never throws.
+  Future<void> _createSilentChannel(String voiceId) async {
+    try {
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      await android?.createNotificationChannel(
+        AndroidNotificationChannel(
+          'prayer_silent_$voiceId',
+          _channelName,
+          description: _channelDesc,
+          importance: Importance.high,
+          playSound: false,
+        ),
+      );
+    } catch (_) {
+      // Ignore: the notification still shows.
+    }
+  }
+
+  /// Schedules the five daily prayer notifications on the given voice's SILENT
+  /// channel. The adzan audio is played by the foreground service (media
+  /// stream, unaffected by the volume buttons); the notification only shows
+  /// the reminder text so the two never double-play. Skips when both the times
+  /// and the voices are unchanged since the last call (the schedule refreshes
+  /// every 30 s).
+  ///
+  /// The Subuh (fajr) prayer uses its own voice ([fajrVoiceId]) and its own
+  /// silent channel (`prayer_silent_<fajrVoiceId>`); the other four prayers use
+  /// [voiceId] on `prayer_silent_<voiceId>`.
   Future<void> schedulePrayers(
     PrayerSchedule schedule, {
     required String voiceId,
+    required String fajrVoiceId,
   }) async {
     await _ensureInitialized();
     if (!_isMobile) return;
     final times = schedule.entries.map((e) => e.time).toList();
-    if (_sameTimes(times) && _scheduledVoiceId == voiceId) return;
+    if (_sameTimes(times) &&
+        _scheduledVoiceId == voiceId &&
+        _scheduledFajrVoiceId == fajrVoiceId) {
+      return;
+    }
     _scheduledTimes = times;
     _scheduledVoiceId = voiceId;
+    _scheduledFajrVoiceId = fajrVoiceId;
 
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -173,15 +216,17 @@ class NotificationService {
     // enabling — so re-check instead of trusting the toggle-time value.
     _exactAllowed = await android?.requestExactAlarmsPermission() ?? false;
 
-    final voice = adzanVoiceById(voiceId);
-    final soundPath = await ensureVoiceDownloaded(voice);
-    final soundUri = await _contentUriForFile(soundPath);
-    await _createChannel(voiceId, soundPath);
+    await _createSilentChannel(voiceId);
+    await _createSilentChannel(fajrVoiceId);
 
     await _plugin.cancelAllPendingNotifications();
     final now = tz.TZDateTime.now(tz.local);
     for (final entry in schedule.entries) {
       final id = entry.prayer.index + 1;
+      final isFajr = entry.prayer == Prayer.subuh;
+      final channelId = isFajr
+          ? 'prayer_silent_$fajrVoiceId'
+          : 'prayer_silent_$voiceId';
       var scheduled = tz.TZDateTime(
         tz.local,
         now.year,
@@ -202,18 +247,14 @@ class NotificationService {
         scheduledDate: scheduled,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
-            'prayer_times_$voiceId',
+            channelId,
             _channelName,
             channelDescription: _channelDesc,
             importance: Importance.high,
             priority: Priority.high,
-            // The notification-level sound must be set explicitly: the Android
-            // plugin's setSound() overrides the channel sound with the default
-            // notification sound when `sound` is null here. If the content URI
-            // is unavailable, omit it so the notification still shows.
-            sound: soundUri == null
-                ? null
-                : UriAndroidNotificationSound(soundUri),
+            // Silent on purpose: the adzan is played by the foreground
+            // service, so the notification must not add a second sound.
+            silent: true,
           ),
           iOS: const DarwinNotificationDetails(),
         ),
@@ -264,6 +305,7 @@ class NotificationService {
     await _plugin.cancelAllPendingNotifications();
     _scheduledTimes = null;
     _scheduledVoiceId = null;
+    _scheduledFajrVoiceId = null;
   }
 
   /// Schedules the two daily Dzikir Pagi & Petang reminder notifications
@@ -334,27 +376,42 @@ class NotificationService {
   /// Starts (or updates) the foreground service that plays the full adzan at
   /// prayer times. Mobile-only: a safe no-op on desktop.
   ///
-  /// The voice mp3 path and the daily schedule (as a JSON string) are stored
-  /// via [FlutterForegroundTask.saveData] so the background isolate's handler
-  /// can read them. If the service is already running it is updated (to refresh
-  /// the notification text) rather than restarted.
+  /// Both voice mp3 paths (regular + fajr) and the daily schedule (as a JSON
+  /// string) are stored via [FlutterForegroundTask.saveData] so the background
+  /// isolate's handler can read them. Each schedule entry carries a `fajr`
+  /// flag so the handler can pick the fajr voice for Subuh and the regular
+  /// voice for the other four prayers. If the service is already running it is
+  /// updated (to refresh the notification text) rather than restarted.
   Future<void> startAdzanService(
     PrayerSchedule schedule, {
     required String voiceId,
+    required String fajrVoiceId,
   }) async {
     if (!_isMobile) return;
 
     final voice = adzanVoiceById(voiceId);
     final path = await ensureVoiceDownloaded(voice);
 
+    final fajrVoice = adzanVoiceById(fajrVoiceId);
+    final fajrPath = await ensureVoiceDownloaded(fajrVoice);
+
     final scheduleJson = jsonEncode([
       for (final e in schedule.entries)
-        {'label': e.label, 'hh': e.time.hour, 'mm': e.time.minute},
+        {
+          'label': e.label,
+          'hh': e.time.hour,
+          'mm': e.time.minute,
+          'fajr': e.prayer == Prayer.subuh,
+        },
     ]);
 
     await FlutterForegroundTask.saveData(
       key: 'adzan_voice_path',
       value: path,
+    );
+    await FlutterForegroundTask.saveData(
+      key: 'adzan_fajr_voice_path',
+      value: fajrPath,
     );
     await FlutterForegroundTask.saveData(
       key: 'adzan_schedule',

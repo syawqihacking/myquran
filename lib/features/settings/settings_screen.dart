@@ -201,12 +201,25 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const _DividerRow(),
               InkWell(
-                onTap: () => _pickAdzanVoice(context, ref),
+                onTap: () =>
+                    _pickAdzanVoice(context, ref, AdzanCategory.regular),
                 child: _SettingRow(
                   icon: Icons.volume_up_rounded,
-                  title: S.adzanVoiceLabel,
+                  title: S.adzanVoiceSholatLabel,
                   subtitle:
                       adzanVoiceById(ref.watch(selectedAdzanVoiceProvider)).name,
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                ),
+              ),
+              const _DividerRow(),
+              InkWell(
+                onTap: () => _pickAdzanVoice(context, ref, AdzanCategory.fajr),
+                child: _SettingRow(
+                  icon: Icons.wb_twilight_rounded,
+                  title: S.adzanVoiceFajrLabel,
+                  subtitle: adzanVoiceById(
+                          ref.watch(selectedFajrAdzanVoiceProvider))
+                      .name,
                   trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                 ),
               ),
@@ -215,20 +228,28 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.notifications_rounded,
                 title: S.prayerNotificationsTest,
                 subtitle: S.prayerNotificationsTestSublabel,
-                trailing: TextButton(
-                  onPressed: () async {
-                    final voiceId =
-                        ref.read(selectedAdzanVoiceProvider);
-                    await ref
-                        .read(prayerNotificationsProvider)
-                        .showTestNotification(voiceId: voiceId);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(S.prayerNotificationsTestSent)),
-                      );
-                    }
-                  },
-                  child: const Text(S.prayerNotificationsTestSend),
+                bottom: Wrap(
+                  spacing: AppLayout.sp2,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => _sendTestNotification(
+                        context,
+                        ref,
+                        ref.read(selectedAdzanVoiceProvider),
+                      ),
+                      icon: const Icon(Icons.volume_up_rounded, size: 18),
+                      label: const Text(S.adzanTestSholat),
+                    ),
+                    TextButton.icon(
+                      onPressed: () => _sendTestNotification(
+                        context,
+                        ref,
+                        ref.read(selectedFajrAdzanVoiceProvider),
+                      ),
+                      icon: const Icon(Icons.wb_twilight_rounded, size: 18),
+                      label: const Text(S.adzanTestFajr),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -335,15 +356,26 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Lets the user pick an adzan voice: shows the list, downloads the chosen
-  /// mp3 (blocking progress dialog), then switches the selection — the sync
-  /// provider reschedules the prayers on the new voice's channel.
-  Future<void> _pickAdzanVoice(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(selectedAdzanVoiceProvider);
+  /// Lets the user pick an adzan voice for one category: shows the voices of
+  /// that category, downloads the chosen mp3 (blocking progress dialog), then
+  /// switches the selection — the sync provider reschedules the prayers on the
+  /// new voice's channel.
+  Future<void> _pickAdzanVoice(
+    BuildContext context,
+    WidgetRef ref,
+    AdzanCategory category,
+  ) async {
+    final isFajr = category == AdzanCategory.fajr;
+    final current = isFajr
+        ? ref.read(selectedFajrAdzanVoiceProvider)
+        : ref.read(selectedAdzanVoiceProvider);
+    final voices = adzanVoicesByCategory(category);
     final selected = await showDialog<String>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: Text(S.adzanVoiceLabel),
+        title: Text(
+          isFajr ? S.adzanVoiceFajrLabel : S.adzanVoiceSholatLabel,
+        ),
         children: [
           RadioGroup<String>(
             groupValue: current,
@@ -353,7 +385,7 @@ class SettingsScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final v in adzanVoices)
+                for (final v in voices)
                   RadioListTile<String>(
                     value: v.id,
                     title: Text(v.name),
@@ -387,7 +419,13 @@ class SettingsScreen extends ConsumerWidget {
           .ensureVoiceDownloaded(adzanVoiceById(selected));
       if (!context.mounted) return;
       Navigator.of(context).pop(); // close the progress dialog
-      await ref.read(selectedAdzanVoiceProvider.notifier).select(selected);
+      if (isFajr) {
+        await ref
+            .read(selectedFajrAdzanVoiceProvider.notifier)
+            .select(selected);
+      } else {
+        await ref.read(selectedAdzanVoiceProvider.notifier).select(selected);
+      }
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(S.adzanVoiceChanged)),
@@ -397,6 +435,22 @@ class SettingsScreen extends ConsumerWidget {
       Navigator.of(context).pop(); // close the progress dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(S.adzanVoiceDownloadFailed)),
+      );
+    }
+  }
+
+  /// Sends a test notification with the given voice id, then confirms.
+  Future<void> _sendTestNotification(
+    BuildContext context,
+    WidgetRef ref,
+    String voiceId,
+  ) async {
+    await ref
+        .read(prayerNotificationsProvider)
+        .showTestNotification(voiceId: voiceId);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.prayerNotificationsTestSent)),
       );
     }
   }

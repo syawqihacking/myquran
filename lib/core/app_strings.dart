@@ -73,6 +73,10 @@ abstract final class S {
   static const adzanVoiceChanged = 'Suara adzan diperbarui';
   static const adzanVoiceDownloadFailed =
       'Gagal mengunduh suara adzan. Periksa koneksi internet.';
+  static const adzanVoiceSholatLabel = 'Suara Adzan Sholat';
+  static const adzanVoiceFajrLabel = 'Suara Adzan Fajr/Subuh';
+  static const adzanTestSholat = 'Suara Sholat';
+  static const adzanTestFajr = 'Suara Fajr';
 
   // Browse (unified surah/juz/search page).
   static const browseEyebrow = 'BACA';

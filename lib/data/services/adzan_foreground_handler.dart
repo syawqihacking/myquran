@@ -14,12 +14,13 @@ void adzanTaskCallback() {
 /// Plays the full adzan at prayer times from the foreground service's
 /// background isolate.
 ///
-/// The handler reads the voice path and the daily schedule (stored as a JSON
-/// string) via [FlutterForegroundTask.getData], which is backed by
-/// shared_preferences and works in the background isolate. On every
+/// The handler reads the voice paths (regular + fajr) and the daily schedule
+/// (stored as a JSON string) via [FlutterForegroundTask.getData], which is
+/// backed by shared_preferences and works in the background isolate. On every
 /// [onRepeatEvent] it re-reads the data so daily schedule changes are picked
 /// up, and plays the adzan when the current time matches a prayer's
-/// hour:minute (guarded against double-play per day).
+/// hour:minute (guarded against double-play per day). Entries flagged `fajr`
+/// play the fajr voice; all others play the regular voice.
 class AdzanTaskHandler extends TaskHandler {
   AudioPlayer? _player;
 
@@ -55,12 +56,15 @@ class AdzanTaskHandler extends TaskHandler {
     }
   }
 
-  /// Re-reads the schedule + voice path and plays the adzan if a prayer time
+  /// Re-reads the schedule + voice paths and plays the adzan if a prayer time
   /// has just arrived. Never throws: a failure must not crash the isolate.
   Future<void> _checkAndPlay() async {
     try {
       final path = await FlutterForegroundTask.getData<String>(
         key: 'adzan_voice_path',
+      );
+      final fajrPath = await FlutterForegroundTask.getData<String>(
+        key: 'adzan_fajr_voice_path',
       );
       final scheduleJson = await FlutterForegroundTask.getData<String>(
         key: 'adzan_schedule',
@@ -85,7 +89,11 @@ class AdzanTaskHandler extends TaskHandler {
           final key = '$todayKey:$i';
           if (_lastPlayedKey == key) return; // already played today
           _lastPlayedKey = key;
-          _playAdzan(path);
+          // Fajr entries use the fajr voice; fall back to the regular voice
+          // when the fajr path is missing.
+          final isFajr = entry['fajr'] == true;
+          final playPath = isFajr && fajrPath != null ? fajrPath : path;
+          _playAdzan(playPath);
           return;
         }
       }

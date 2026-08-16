@@ -449,6 +449,28 @@ class AdzanVoiceController extends Notifier<String> {
   }
 }
 
+/// The selected fajr (subuh) adzan voice id (persisted; defaults to the first
+/// fajr voice). Used for the Subuh prayer while [selectedAdzanVoiceProvider]
+/// covers the other four prayers.
+final selectedFajrAdzanVoiceProvider =
+    NotifierProvider<FajrAdzanVoiceController, String>(
+        FajrAdzanVoiceController.new);
+
+class FajrAdzanVoiceController extends Notifier<String> {
+  static const _key = 'adzan_voice_fajr_id';
+
+  @override
+  String build() {
+    return ref.watch(sharedPreferencesProvider).getString(_key) ??
+        defaultVoiceForCategory(AdzanCategory.fajr).id;
+  }
+
+  Future<void> select(String id) async {
+    state = id;
+    await ref.read(sharedPreferencesProvider).setString(_key, id);
+  }
+}
+
 /// Whether daily prayer-time notifications are enabled (persisted).
 final prayerNotificationsEnabledProvider =
     NotifierProvider<PrayerNotificationsController, bool>(
@@ -482,6 +504,7 @@ class PrayerNotificationsController extends Notifier<bool> {
 final prayerNotificationSyncProvider = Provider<void>((ref) {
   final enabled = ref.watch(prayerNotificationsEnabledProvider);
   final voiceId = ref.watch(selectedAdzanVoiceProvider);
+  final fajrVoiceId = ref.watch(selectedFajrAdzanVoiceProvider);
   final schedule = ref.watch(prayerScheduleProvider).value;
   final service = ref.watch(prayerNotificationsProvider);
   if (!enabled) {
@@ -490,8 +513,16 @@ final prayerNotificationSyncProvider = Provider<void>((ref) {
     return;
   }
   if (schedule != null) {
-    service.schedulePrayers(schedule, voiceId: voiceId);
-    service.startAdzanService(schedule, voiceId: voiceId);
+    service.schedulePrayers(
+      schedule,
+      voiceId: voiceId,
+      fajrVoiceId: fajrVoiceId,
+    );
+    service.startAdzanService(
+      schedule,
+      voiceId: voiceId,
+      fajrVoiceId: fajrVoiceId,
+    );
   }
 });
 
