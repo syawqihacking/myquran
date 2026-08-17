@@ -10,6 +10,8 @@ import '../../core/app_strings.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import '../../data/models/tahlil_doa_data.dart';
+import '../../data/models/doa_setelah_sholat_data.dart';
+import '../spiritual/doa_setelah_sholat_screen.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../browse/browse_screen.dart';
 import '../hijri/hijri_calendar_screen.dart';
@@ -67,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                   onOpenPrayer: onOpenPrayer,
                 ),
                 const SizedBox(height: AppLayout.sp3),
-                const _LearningCard(),
+                const _FeatureCardsRow(),
                 const SizedBox(height: AppLayout.sp7),
                 const PrayerTimesCard(),
                 const SizedBox(height: AppLayout.sp7),
@@ -549,71 +551,7 @@ class _QuickActionsBento extends StatelessWidget {
   }
 }
 
-/// Pusat Belajar entry card — a full-width tappable card below the quick
-/// actions bento (same house card style: surfaceContainerLowest, radius-lg,
-/// outlineVariant border). Pushes the learning screen.
-class _LearningCard extends StatelessWidget {
-  const _LearningCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const LearningScreen()),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(AppLayout.sp5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(color: scheme.outlineVariant),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-                ),
-                child: Icon(Icons.school_rounded, color: scheme.primary),
-              ),
-              const SizedBox(width: AppLayout.sp4),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.learningHomeEntryTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      S.learningHomeEntrySubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: scheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ── Feature cards row (Pusat Belajar + Doa Setelah Sholat) ──────────────
 
 /// One bento tile: a sage 48px circle with a filled icon and a label below,
 /// on a `surfaceContainerLowest` card with a soft shadow. The circle gently
@@ -703,6 +641,153 @@ class _QuickActionTileState extends State<_QuickActionTile> {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Two side-by-side feature cards: Pusat Belajar (left) and Doa Setelah
+/// Sholat (right). Both use the app's primary/theme-consistent green palette.
+class _FeatureCardsRow extends StatelessWidget {
+  const _FeatureCardsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _LearningTile()),
+        SizedBox(width: AppLayout.sp3),
+        Expanded(child: _DoaSetelahSholatTile()),
+      ],
+    );
+  }
+}
+
+/// Compact vertical tile for Pusat Belajar.
+class _LearningTile extends StatelessWidget {
+  const _LearningTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLowest,
+      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const LearningScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(AppLayout.sp4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+            border: Border.all(color: scheme.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                ),
+                child: Icon(
+                  Icons.school_rounded,
+                  size: 24,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(height: AppLayout.sp3),
+              Text(
+                S.learningHomeEntryTitle,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                S.learningHomeEntrySubtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact vertical tile for Doa Setelah Sholat.
+class _DoaSetelahSholatTile extends StatelessWidget {
+  const _DoaSetelahSholatTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLowest,
+      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const DoaSetelahSholatScreen(),
+          ),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(AppLayout.sp4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+            border: Border.all(color: scheme.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                ),
+                child: Icon(
+                  Icons.front_hand_rounded,
+                  size: 24,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(height: AppLayout.sp3),
+              Text(
+                S.doaSetelahSholatHomeTitle,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                S.doaSetelahSholatHomeSubtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+            ],
           ),
         ),
       ),

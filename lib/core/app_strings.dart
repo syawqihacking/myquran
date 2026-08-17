@@ -27,6 +27,14 @@ abstract final class S {
   static const qaMasjidTerdekat = 'Masjid Terdekat';
   static const comingSoon = 'Segera hadir';
 
+  // Doa Setelah Sholat.
+  static const doaSetelahSholatTitle = 'Doa Setelah Sholat';
+  static const doaSetelahSholatCaption =
+      'Kumpulan doa & dzikir yang dibaca setelah sholat fardhu 5 waktu';
+  static const doaSetelahSholatHomeTitle = 'Doa Setelah Sholat';
+  static const doaSetelahSholatHomeSubtitle =
+      'Dzikir & doa setelah sholat fardhu';
+
   // Prayer times.
   static const prayerTimesEyebrow = 'WAKTU SHOLAT';
   static const nextPrayerLabel = 'Sholat berikutnya';

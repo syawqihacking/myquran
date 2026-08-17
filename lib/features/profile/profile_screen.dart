@@ -564,16 +564,16 @@ class _SettingRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: scheme.secondaryContainer,
-                shape: BoxShape.circle,
+                color: scheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppLayout.radiusMd),
               ),
               child: Icon(
                 icon,
                 size: 20,
-                color: scheme.onSecondaryContainer,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(width: AppLayout.sp3),
@@ -614,7 +614,7 @@ class _DividerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Divider(
       height: 1,
-      indent: AppLayout.sp4 + 40 + AppLayout.sp3,
+      indent: AppLayout.sp4 + 36 + AppLayout.sp3,
       color: Theme.of(context).colorScheme.outlineVariant,
     );
   }
