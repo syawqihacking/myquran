@@ -343,6 +343,15 @@ abstract final class S {
   static const tadabburCaption = 'Renungan ayat Al-Qur\'an untuk setiap hari';
   static const tadabburReflection = 'Renungan';
 
+  // Asmaul Husna.
+  static const asmaulHusnaTitle = 'Asmaul Husna';
+  static const asmaulHusnaCaption = '99 nama Allah beserta artinya';
+  static const asmaulHusnaSearchHint = 'Cari nama atau arti...';
+  static const asmaulHusnaEmpty = 'Tidak ditemukan';
+  static const asmaulHusnaEmptyHint = 'Coba kata kunci lain.';
+  static const asmaulHusnaArti = 'Arti';
+  static const asmaulHusnaCatatan = 'Catatan';
+  static const asmaulHusnaClose = 'Tutup';
 
   // Doa Harian (daily prayers).
   static const doaHarianTitle = 'Doa Harian';

@@ -19,6 +19,7 @@ import '../learning/learning_screen.dart';
 import '../mosque/mosque_screen.dart';
 import '../personality/personality_screen.dart';
 import '../spiritual/amalan_ibadah_screen.dart';
+import '../spiritual/asmaul_husna_screen.dart';
 import '../spiritual/doa_harian_screen.dart';
 import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
@@ -530,6 +531,17 @@ class _QuickActionsBento extends StatelessWidget {
               label: S.amalanIbadahTitle,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const AmalanIbadahScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          SizedBox(
+            width: itemWidth,
+            child: _QuickActionTile(
+              icon: Icons.stars_rounded,
+              label: S.asmaulHusnaTitle,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const AsmaulHusnaScreen()),
               ),
             ),
           ),
