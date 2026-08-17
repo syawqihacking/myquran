@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../../data/db/user_database.dart';
 import '../../data/models/adzan_voice.dart';
 import '../../data/providers.dart';
 
@@ -160,6 +161,18 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.restoreLastRead,
                 onChanged: controller.setRestoreLastRead,
               ),
+            ),
+            const _DividerRow(),
+            _SettingRow(
+              icon: Icons.record_voice_over_rounded,
+              title: S.reciterLabel,
+              subtitle: _reciterName(ref),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              onTap: () => _pickReciter(context, ref),
             ),
           ],
         ),
@@ -536,6 +549,101 @@ class SettingsScreen extends ConsumerWidget {
       onFajrTap: () => _pickAdzanVoice(context, ref, AdzanCategory.fajr),
     );
   }
+
+  /// The selected reciter's display name, falling back to the default while
+  /// the reciter list is still loading or unavailable.
+  String _reciterName(WidgetRef ref) {
+    final reciters = ref.watch(recitersProvider).value;
+    final selectedId = ref.watch(selectedReciterProvider);
+    if (reciters != null) {
+      for (final r in reciters) {
+        if (r.id == selectedId) return r.name;
+      }
+    }
+    return S.reciterDefault;
+  }
+
+  /// Lets the user pick a qari: shows the reciter list from the DB and
+  /// switches the selection immediately — no download, murottal files are
+  /// resolved at playback time via the reciter's URL template.
+  Future<void> _pickReciter(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(selectedReciterProvider);
+    final List<Reciter> reciters;
+    try {
+      reciters = await ref.read(recitersProvider.future);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.reciterLoadFailed)),
+      );
+      return;
+    }
+    if (!context.mounted || reciters.isEmpty) return;
+
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        final textTheme = Theme.of(ctx).textTheme;
+        return SimpleDialog(
+          titlePadding: const EdgeInsets.fromLTRB(
+            AppLayout.sp4,
+            AppLayout.sp4,
+            AppLayout.sp4,
+            AppLayout.sp2,
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.record_voice_over_rounded,
+                size: 22,
+                color: scheme.primary,
+              ),
+              const SizedBox(width: AppLayout.sp3),
+              Expanded(child: Text(S.reciterDialogTitle)),
+            ],
+          ),
+          children: [
+            RadioGroup<int>(
+              groupValue: current,
+              onChanged: (id) {
+                if (id != null) Navigator.of(ctx).pop(id);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final r in reciters)
+                    RadioListTile<int>(
+                      value: r.id,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppLayout.sp4,
+                      ),
+                      title: Text(
+                        r.name,
+                        style: textTheme.bodyLarge?.copyWith(
+                          fontWeight: r.id == current ? FontWeight.w600 : null,
+                          color: r.id == current ? scheme.primary : null,
+                        ),
+                      ),
+                      subtitle: Text(r.style),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppLayout.sp2),
+          ],
+        );
+      },
+    );
+    if (selected == null || selected == current) return;
+    if (!context.mounted) return;
+
+    await ref.read(selectedReciterProvider.notifier).select(selected);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(S.reciterChanged)),
+    );
+  }
 }
 
 /// App bar for the pushed Settings route: a quiet bar with just the back
@@ -617,6 +725,7 @@ class _SettingRow extends StatelessWidget {
     this.trailing,
     this.bottom,
     this.destructive = false,
+    this.onTap,
   });
 
   final IconData icon;
@@ -628,12 +737,15 @@ class _SettingRow extends StatelessWidget {
   /// When true, the row is rendered in the error color (destructive action).
   final bool destructive;
 
+  /// When set, the row becomes tappable with a ripple (picker rows).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accent =
         destructive ? theme.colorScheme.error : theme.colorScheme.primary;
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppLayout.sp4,
         vertical: AppLayout.sp3,
@@ -674,6 +786,15 @@ class _SettingRow extends StatelessWidget {
             trailing!,
           ],
         ],
+      ),
+    );
+    if (onTap == null) return content;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        child: content,
       ),
     );
   }

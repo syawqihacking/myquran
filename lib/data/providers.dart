@@ -124,28 +124,86 @@ final personalityRepositoryProvider = Provider((ref) => PersonalityRepository(
 final personalityProvider = StreamProvider<PersonalityAnalysis?>(
     (ref) => ref.watch(personalityRepositoryProvider).watchAnalysis());
 
+// ---- Reciter (qari) selection --------------------------------------------------
+
+/// All reciters from the user DB, sorted by id ascending. Feeds the reciter
+/// picker UI.
+final recitersProvider = FutureProvider<List<Reciter>>((ref) async {
+  final db = ref.watch(userDatabaseProvider);
+  final reciters = await db.select(db.reciters).get();
+  reciters.sort((a, b) => a.id.compareTo(b.id));
+  return reciters;
+});
+
+/// The selected reciter id, persisted in shared_preferences (defaults to
+/// Alafasy, id 1). Playback and murottal downloads resolve the URL template
+/// through this provider, so switching reciter takes effect immediately.
+final selectedReciterProvider =
+    NotifierProvider<SelectedReciterController, int>(
+        SelectedReciterController.new);
+
+class SelectedReciterController extends Notifier<int> {
+  static const _key = 'selected_reciter_id';
+
+  @override
+  int build() {
+    return ref.watch(sharedPreferencesProvider).getInt(_key) ?? 1;
+  }
+
+  Future<void> select(int id) async {
+    state = id;
+    await ref.read(sharedPreferencesProvider).setInt(_key, id);
+  }
+}
+
+/// Resolves the URL template for the currently selected reciter. Watches
+/// [selectedReciterProvider] so the audio/murottal services pick up a reciter
+/// change on the next playback. Prefers the selected reciter's template,
+/// falling back to the first reciter (by id) with a usable template. Returns
+/// an empty list when nothing is available — the audio service has its own
+/// qurancdn fallback.
+Future<List<String>> _resolveReciterTemplates(Ref ref) async {
+  final db = ref.read(userDatabaseProvider);
+  try {
+    final reciters = await db.select(db.reciters).get();
+    if (reciters.isEmpty) return const [];
+    reciters.sort((a, b) => a.id.compareTo(b.id));
+
+    final selectedId = ref.watch(selectedReciterProvider);
+    Reciter? selected;
+    for (final r in reciters) {
+      if (r.id == selectedId) {
+        selected = r;
+        break;
+      }
+    }
+    final selectedTemplate = selected?.urlTemplate;
+    if (selectedTemplate != null && selectedTemplate.trim().isNotEmpty) {
+      return [selectedTemplate.trim()];
+    }
+
+    // Fallback: first reciter (by id) that has a usable template.
+    for (final r in reciters) {
+      final template = r.urlTemplate;
+      if (template != null && template.trim().isNotEmpty) {
+        return [template.trim()];
+      }
+    }
+    return const [];
+  } catch (_) {
+    return const [];
+  }
+}
+
 final audioServiceProvider = Provider<AudioService>((ref) {
   final service = JustAudioService(
     ayahRepository: ref.watch(ayahRepositoryProvider),
     // Offline murottal: playback falls back to the local file when the ayah
     // has been downloaded, otherwise it streams (and caches) from the network.
     localFileFor: ref.watch(murottalDownloadServiceProvider).localFileFor,
-    // First (default) reciter's URL template from the user DB; the service
+    // The selected reciter's URL template from the user DB; the service
     // appends the qurancdn fallback itself. Empty on any DB hiccup.
-    resolveUrlTemplates: () async {
-      final db = ref.read(userDatabaseProvider);
-      try {
-        final reciters = await db.select(db.reciters).get();
-        if (reciters.isEmpty) return const [];
-        reciters.sort((a, b) => a.id.compareTo(b.id));
-        final template = reciters.first.urlTemplate;
-        return [
-          if (template != null && template.trim().isNotEmpty) template.trim(),
-        ];
-      } catch (_) {
-        return const [];
-      }
-    },
+    resolveUrlTemplates: () => _resolveReciterTemplates(ref),
   );
   ref.onDispose(service.dispose);
   return service;
@@ -162,23 +220,10 @@ final ratibAudioServiceProvider = Provider<RatibAudioService>((ref) {
 // ---- Offline murottal (download a surah's recitation for offline playback) --
 
 /// The download service singleton. Resolves the same URL templates as the
-/// audio service (first/default reciter from the user DB).
+/// audio service (the selected reciter from the user DB).
 final murottalDownloadServiceProvider = Provider<MurottalDownloadService>((ref) {
   return MurottalDownloadService(
-    resolveUrlTemplates: () async {
-      final db = ref.read(userDatabaseProvider);
-      try {
-        final reciters = await db.select(db.reciters).get();
-        if (reciters.isEmpty) return const [];
-        reciters.sort((a, b) => a.id.compareTo(b.id));
-        final template = reciters.first.urlTemplate;
-        return [
-          if (template != null && template.trim().isNotEmpty) template.trim(),
-        ];
-      } catch (_) {
-        return const [];
-      }
-    },
+    resolveUrlTemplates: () => _resolveReciterTemplates(ref),
   );
 });
 

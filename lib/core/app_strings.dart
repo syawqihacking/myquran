@@ -241,6 +241,13 @@ abstract final class S {
   static const resetDataConfirm = 'Reset data';
   static const resetDataDone = 'Data pengguna berhasil direset.';
 
+  // Settings — qari (reciter) selection.
+  static const reciterLabel = 'Qari';
+  static const reciterDefault = 'Mishary Rashid Alafasy';
+  static const reciterDialogTitle = 'Pilih Qari';
+  static const reciterChanged = 'Qari berhasil diganti';
+  static const reciterLoadFailed = 'Gagal memuat daftar qari';
+
   // Stats.
   static const statsEyebrow = 'STATISTIK';
   static const statsTitle = 'Statistik';

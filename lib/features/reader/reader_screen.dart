@@ -435,6 +435,18 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final murottalState = ref.watch(murottalDownloadProvider)[widget.surahId] ??
         const MurottalDownloadState();
 
+    // Reciter (qari) name for the sticky player; falls back to the hardcoded
+    // label while the reciter list is loading or unavailable.
+    final selectedReciterId = ref.watch(selectedReciterProvider);
+    final reciters = ref.watch(recitersProvider).value;
+    String reciterName = S.audioReciter;
+    for (final r in reciters ?? const <Reciter>[]) {
+      if (r.id == selectedReciterId) {
+        reciterName = r.name;
+        break;
+      }
+    }
+
     final ayahs = ayahsAsync.value;
     final surah = surahAsync.value;
     if (ayahs != null) _cacheAyahs(ayahs);
@@ -574,6 +586,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                         surahName: surah?.nameLatin ?? '',
                         ayahNumber: _audioTarget!.ayahNumber,
                         speed: _speed,
+                        reciterName: reciterName,
                         onTogglePlayPause: _togglePlayPause,
                         onPrev: _skipPrev,
                         onNext: _skipNext,
@@ -1656,6 +1669,7 @@ class _StickyAudioPlayer extends StatelessWidget {
     required this.surahName,
     required this.ayahNumber,
     required this.speed,
+    required this.reciterName,
     required this.onTogglePlayPause,
     required this.onPrev,
     required this.onNext,
@@ -1669,6 +1683,7 @@ class _StickyAudioPlayer extends StatelessWidget {
   final String surahName;
   final int ayahNumber;
   final double speed;
+  final String reciterName;
   final VoidCallback onTogglePlayPause;
   final VoidCallback onPrev;
   final VoidCallback onNext;
@@ -1756,7 +1771,7 @@ class _StickyAudioPlayer extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        S.audioReciter,
+                                        reciterName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: theme.textTheme.labelSmall
