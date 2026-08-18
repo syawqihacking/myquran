@@ -27,11 +27,11 @@ abstract final class S {
   static const qaMasjidTerdekat = 'Masjid Terdekat';
   static const comingSoon = 'Segera hadir';
 
-  // Doa Setelah Sholat.
-  static const doaSetelahSholatTitle = 'Doa Setelah Sholat';
+  // Doa Ba'da Sholat.
+  static const doaSetelahSholatTitle = 'Doa Ba\'da Sholat';
   static const doaSetelahSholatCaption =
       'Kumpulan doa & dzikir yang dibaca setelah sholat fardhu 5 waktu';
-  static const doaSetelahSholatHomeTitle = 'Doa Setelah Sholat';
+  static const doaSetelahSholatHomeTitle = 'Doa Ba\'da Sholat';
   static const doaSetelahSholatHomeSubtitle =
       'Dzikir & doa setelah sholat fardhu';
 

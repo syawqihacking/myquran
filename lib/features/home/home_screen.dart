@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hijri/hijri_calendar.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
+import '../../data/models/doa_harian_data.dart';
+import '../../data/models/asmaul_husna_data.dart';
 import '../../data/models/tahlil_doa_data.dart';
 import '../../data/models/doa_setelah_sholat_data.dart';
 import '../spiritual/doa_setelah_sholat_screen.dart';
@@ -23,10 +28,10 @@ import '../spiritual/asmaul_husna_screen.dart';
 import '../spiritual/doa_harian_screen.dart';
 import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
+import '../spiritual/tasbih_digital_screen.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/quran_text_view.dart';
 import 'prayer_times_card.dart';
-
 /// Beranda — the Stitch remodel: a pinned app bar (Al-Qur'an + search), a
 /// greeting, the last-read hero, a quick-actions bento, the Jadwal Sholat
 /// strip, and Ayat Hari Ini. The reading history and the full surah/juz links
@@ -64,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 const _Greeting(),
                 const SizedBox(height: AppLayout.sp6),
-                const _LastReadHero(),
+                const _HeroCarousel(),
                 const SizedBox(height: AppLayout.sp6),
                 _QuickActionsBento(
                   onOpenPrayer: onOpenPrayer,
@@ -181,6 +186,90 @@ class _Greeting extends ConsumerWidget {
 
 // ── Last-read hero card ──────────────────────────────────────────────────
 
+/// A sliding carousel that displays the last-read hero and other features.
+class _HeroCarousel extends ConsumerStatefulWidget {
+  const _HeroCarousel();
+
+  @override
+  ConsumerState<_HeroCarousel> createState() => _HeroCarouselState();
+}
+
+class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
+  final PageController _pageController = PageController();
+  Timer? _timer;
+  int _currentPage = 0;
+  final int _pageCount = 4;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start at a large number to allow swiping backwards initially if we wanted to, 
+    // but 0 is fine if we only auto-scroll forward.
+    // Let's start at an index that is a multiple of 3, e.g., 3000.
+    _currentPage = 3000;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pageController.jumpToPage(_currentPage);
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 6), (Timer timer) {
+      if (_pageController.hasClients) {
+        _currentPage++;
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 1400),
+          curve: Curves.fastLinearToSlowEaseIn,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width - (AppLayout.sp6 * 2);
+    const gap = 12.0;
+    
+    return SizedBox(
+      height: 180,
+      child: OverflowBox(
+        maxWidth: width + gap,
+        alignment: Alignment.centerLeft,
+        child: PageView.builder(
+          controller: _pageController,
+          onPageChanged: (int page) {
+            _currentPage = page;
+          },
+          itemBuilder: (context, index) {
+            final realIndex = index % _pageCount;
+            
+            Widget child;
+            if (realIndex == 0) {
+              child = const _LastReadHero();
+            } else if (realIndex == 1) {
+              child = const _RandomDoaHeroSlide();
+            } else if (realIndex == 2) {
+              child = const _RandomAsmaulHusnaHeroSlide();
+            } else {
+              child = const _TasbihHeroSlide();
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(right: gap),
+              child: child,
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
 /// Deep-emerald gradient hero for the most recent reading: history label,
 /// surah name, ayah/juz position, a "Lanjutkan" pill, and a watermark open
 /// book at 10% opacity (Stitch Beranda §3).
@@ -194,7 +283,6 @@ class _LastReadHero extends ConsumerWidget {
     final detail = ref.watch(lastReadDetailProvider);
 
     return Container(
-      height: 176,
       padding: const EdgeInsets.all(AppLayout.sp5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -245,24 +333,7 @@ class _LastReadHero extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.history_rounded,
-                        size: 20,
-                        color: scheme.onPrimary,
-                      ),
-                      const SizedBox(width: AppLayout.sp2),
-                      Text(
-                        S.lastReadLabel.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: scheme.onPrimary,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
+                  const _HeroTopInfo(),
                   const Spacer(),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -322,6 +393,337 @@ class _LastReadHero extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RandomDoaHeroSlide extends ConsumerStatefulWidget {
+  const _RandomDoaHeroSlide();
+
+  @override
+  ConsumerState<_RandomDoaHeroSlide> createState() => _RandomDoaHeroSlideState();
+}
+
+class _RandomDoaHeroSlideState extends ConsumerState<_RandomDoaHeroSlide> {
+  late final DoaHarian _doa;
+
+  @override
+  void initState() {
+    super.initState();
+    final random = math.Random();
+    _doa = doaHarianItems[random.nextInt(doaHarianItems.length)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(AppLayout.sp5),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [scheme.secondary, scheme.primary],
+        ),
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.secondary.withValues(alpha: 0.1),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -24,
+            bottom: -32,
+            child: Icon(
+              Icons.volunteer_activism_rounded,
+              size: 150,
+              color: scheme.onPrimary.withValues(alpha: 0.06),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.stars_rounded,
+                    size: 20,
+                    color: scheme.onPrimary,
+                  ),
+                  const SizedBox(width: AppLayout.sp2),
+                  Text(
+                    'DOA HARI INI',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onPrimary,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _doa.arabic,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontQuran,
+                        fontSize: 22,
+                        height: 1.5,
+                        color: scheme.onPrimary.withValues(alpha: 0.95),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _doa.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _doa.translation,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onPrimary.withValues(alpha: 0.8),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RandomAsmaulHusnaHeroSlide extends ConsumerStatefulWidget {
+  const _RandomAsmaulHusnaHeroSlide();
+
+  @override
+  ConsumerState<_RandomAsmaulHusnaHeroSlide> createState() => _RandomAsmaulHusnaHeroSlideState();
+}
+
+class _RandomAsmaulHusnaHeroSlideState extends ConsumerState<_RandomAsmaulHusnaHeroSlide> {
+  late final AsmaulHusna _asma;
+
+  @override
+  void initState() {
+    super.initState();
+    final random = math.Random();
+    _asma = asmaulHusnaItems[random.nextInt(asmaulHusnaItems.length)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(AppLayout.sp5),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF00695C), Color(0xFF004D40)],
+        ),
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.tertiary.withValues(alpha: 0.1),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -24,
+            bottom: -32,
+            child: Icon(
+              Icons.stars_rounded,
+              size: 150,
+              color: scheme.onPrimary.withValues(alpha: 0.08),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 20,
+                    color: scheme.onPrimary,
+                  ),
+                  const SizedBox(width: AppLayout.sp2),
+                  Text(
+                    'ASMAUL HUSNA',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onPrimary,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      _asma.arabic,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontFamily: AppConstants.fontQuran,
+                        fontSize: 28,
+                        height: 1.5,
+                        color: scheme.onPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _asma.transliteration,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _asma.translation,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onPrimary.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TasbihHeroSlide extends StatelessWidget {
+  const _TasbihHeroSlide();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const TasbihDigitalScreen()),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppLayout.sp5),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              scheme.primary.withValues(alpha: 0.9),
+              scheme.secondary.withValues(alpha: 0.8),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: 0.1),
+              blurRadius: 32,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Positioned(
+              right: -24,
+              bottom: -32,
+              child: Icon(
+                Icons.fingerprint_rounded,
+                size: 150,
+                color: scheme.onPrimary.withValues(alpha: 0.08),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.fingerprint_rounded,
+                      size: 20,
+                      color: scheme.onPrimary,
+                    ),
+                    const SizedBox(width: AppLayout.sp2),
+                    Text(
+                      'TASBIH DIGITAL',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onPrimary,
+                        letterSpacing: 1.2,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Text(
+                  'Hitung Dzikir',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: scheme.onPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Berdzikir mengingat Allah dengan mudah',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onPrimary.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -399,6 +801,129 @@ class _ContinuePill extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HeroTopInfo extends ConsumerStatefulWidget {
+  const _HeroTopInfo();
+
+  @override
+  ConsumerState<_HeroTopInfo> createState() => _HeroTopInfoState();
+}
+
+class _HeroTopInfoState extends ConsumerState<_HeroTopInfo> {
+  late Timer _ticker;
+  Duration _countdown = Duration.zero;
+  bool _seeded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      final schedule = ref.read(prayerScheduleProvider).value;
+      if (schedule != null && mounted) {
+        final now = DateTime.now();
+        final next = schedule.nextPrayer;
+        final diff = next.time.isAfter(now)
+            ? next.time.difference(now)
+            : next.time.add(const Duration(days: 1)).difference(now);
+        setState(() => _countdown = diff);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker.cancel();
+    super.dispose();
+  }
+
+  String _formatCountdown(Duration d) {
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) {
+      return '-$h j ${m.toString().padLeft(2, '0')} m';
+    }
+    return '-${m.toString().padLeft(2, '0')} m ${s.toString().padLeft(2, '0')} d';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final scheduleAsync = ref.watch(prayerScheduleProvider);
+
+    final today = HijriCalendar.now();
+    final hijriText = '${today.getDayName()}, ${today.hDay} ${today.getLongMonthName()} ${today.hYear} H';
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.history_rounded,
+              size: 20,
+              color: scheme.onPrimary,
+            ),
+            const SizedBox(width: AppLayout.sp2),
+            Text(
+              S.lastReadLabel.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onPrimary,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                hijriText,
+                textAlign: TextAlign.right,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              scheduleAsync.when(
+                data: (schedule) {
+                  if (!_seeded) {
+                    _seeded = true;
+                    _countdown = schedule.countdown;
+                  }
+                  final next = schedule.nextPrayer;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.access_time_rounded, size: 12, color: scheme.onPrimary.withValues(alpha: 0.8)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${next.label} ${_formatCountdown(_countdown)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onPrimary.withValues(alpha: 0.9),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -777,7 +1302,7 @@ class _DoaSetelahSholatTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppLayout.radiusMd),
                 ),
                 child: Icon(
-                  Icons.front_hand_rounded,
+                  Icons.back_hand_rounded,
                   size: 24,
                   color: scheme.primary,
                 ),

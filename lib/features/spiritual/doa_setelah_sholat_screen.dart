@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/doa_setelah_sholat_data.dart';
+import '../../data/models/spiritual_content.dart';
 import 'spiritual_reader_screen.dart';
 
 /// Picker screen for Doa Setelah Sholat: 5 interactive cards — one per prayer
@@ -142,7 +143,7 @@ class _HeaderCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [scheme.primary, scheme.tertiary],
+          colors: [scheme.secondary, scheme.primary],
         ),
         borderRadius: BorderRadius.circular(AppLayout.radiusLg),
         boxShadow: [
@@ -163,7 +164,7 @@ class _HeaderCard extends StatelessWidget {
             child: Transform.rotate(
               angle: -12 * math.pi / 180,
               child: Icon(
-                Icons.front_hand_rounded,
+                Icons.volunteer_activism_rounded,
                 size: 120,
                 color: scheme.onPrimary.withValues(alpha: 0.08),
               ),
@@ -182,7 +183,7 @@ class _HeaderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppLayout.radiusMd),
                     ),
                     child: Icon(
-                      Icons.front_hand_rounded,
+                      Icons.volunteer_activism_rounded,
                       size: 22,
                       color: scheme.onPrimary,
                     ),
@@ -219,13 +220,7 @@ class _HeaderCard extends StatelessWidget {
                     icon: Icons.access_time_rounded,
                     label: '5 Waktu',
                     color: scheme.onPrimary,
-                  ),
-                  const SizedBox(width: AppLayout.sp2),
-                  _HeaderChip(
-                    icon: Icons.auto_stories_rounded,
-                    label: '${doaSholatList.first.items.length}+ Doa',
-                    color: scheme.onPrimary,
-                  ),
+                  )   
                 ],
               ),
             ],
@@ -356,13 +351,29 @@ class _PrayerCardState extends State<_PrayerCard>
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        onTap: () {
+        onTap: () async {
+          String fileName = info.name.toLowerCase();
+          if (fileName == 'asar') fileName = 'ashar';
+          
+          final String text = await DefaultAssetBundle.of(context)
+              .loadString('assets/doa_bada_sholat/$fileName.txt');
+              
+          if (!context.mounted) return;
+
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => SpiritualReaderScreen(
-                title: 'Doa Setelah ${info.name}',
+                title: 'Doa Ba\'da ${info.name}',
                 subtitle: info.timeHint,
-                items: info.items,
+                items: [
+                  SpiritualItem(
+                    id: widget.index + 1,
+                    title: '',
+                    arabic: text.trim(),
+                    transliteration: '',
+                    translation: '',
+                  ),
+                ],
                 icon: icon,
               ),
             ),

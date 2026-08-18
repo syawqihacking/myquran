@@ -4,13 +4,16 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/models/tahlil_doa_data.dart';
-import 'doa_harian_screen.dart';
-import 'dzikir_pagi_petang_screen.dart';
 import 'amalan_ibadah_screen.dart';
+import 'asmaul_husna_screen.dart';
+import 'doa_harian_screen.dart';
+import 'doa_setelah_sholat_screen.dart';
+import 'dzikir_pagi_petang_screen.dart';
 import 'niat_shalat_screen.dart';
 import 'ratibul_haddad_screen.dart';
 import 'spiritual_reader_screen.dart';
 import 'tadabbur_harian_screen.dart';
+import 'tasbih_digital_screen.dart';
 
 /// Spiritual home — the browse page for Tahlil, Doa, and Ratib Al-Haddad.
 class SpiritualScreen extends StatelessWidget {
@@ -97,6 +100,23 @@ class SpiritualScreen extends StatelessWidget {
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => const RatibulHaddadScreen(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppLayout.sp4),
+
+        // --- Tasbih Digital card ---
+        _SpiritualCard(
+          icon: Icons.fingerprint_rounded,
+          title: 'Tasbih Digital',
+          caption: 'Hitung dzikir dengan mudah',
+          gradient: [
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
+            theme.colorScheme.secondaryContainer.withValues(alpha: 0.4),
+          ],
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const TasbihDigitalScreen(),
             ),
           ),
         ),
