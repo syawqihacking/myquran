@@ -13,6 +13,7 @@ import '../../data/repositories/quran_repositories.dart';
 import '../../data/repositories/user_repositories.dart';
 import '../reader/reader_screen.dart';
 import '../widgets/ayah_number_badge.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
@@ -44,11 +45,7 @@ class BrowseState {
 /// favorit lewat segmen, plus pencarian yang dibuka lewat bilah pencarian atau
 /// ikon search.
 class BrowseScreen extends ConsumerStatefulWidget {
-  const BrowseScreen({
-    super.key,
-    required this.state,
-    required this.focusTick,
-  });
+  const BrowseScreen({super.key, required this.state, required this.focusTick});
 
   /// Lives in the shell: the page listens to it for rebuilds and external
   /// state changes (Ctrl+K, Beranda quick access).
@@ -82,8 +79,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   }
 
   void _toggleSearch() {
-    widget.state.value =
-        widget.state.value.copyWith(searchOpen: !widget.state.value.searchOpen);
+    widget.state.value = widget.state.value.copyWith(
+      searchOpen: !widget.state.value.searchOpen,
+    );
   }
 
   void _openSearchPanel() {
@@ -102,18 +100,15 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
     return SafeArea(
       bottom: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          _BrowseAppBar(
-            searchOpen: state.searchOpen,
-            onToggleSearch: _toggleSearch,
-          ),
-          Expanded(
+          // Content fills the screen and scrolls behind the floating glass
+          // header pills — exactly like the home header.
+          Positioned.fill(
             child: ListView(
               padding: EdgeInsets.fromLTRB(
                 AppLayout.sp6,
-                AppLayout.sp5,
+                AppLayout.sp10 + AppLayout.sp5,
                 AppLayout.sp6,
                 isMobile
                     ? glassNavClearance + MediaQuery.paddingOf(context).bottom
@@ -159,6 +154,16 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ],
             ),
           ),
+          // Floating glass header pills, over the scrolling content.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _BrowseAppBar(
+              searchOpen: state.searchOpen,
+              onToggleSearch: _toggleSearch,
+            ),
+          ),
         ],
       ),
     );
@@ -175,10 +180,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 /// omitted: the shell already owns navigation (sidebar on desktop, bottom bar
 /// on mobile), so a drawer affordance here would be a dead button.
 class _BrowseAppBar extends StatelessWidget {
-  const _BrowseAppBar({
-    required this.searchOpen,
-    required this.onToggleSearch,
-  });
+  const _BrowseAppBar({required this.searchOpen, required this.onToggleSearch});
 
   final bool searchOpen;
   final VoidCallback onToggleSearch;
@@ -187,41 +189,24 @@ class _BrowseAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.92),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
+    return GlassHeader(
+      title: S.browseTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: scheme.primary,
+      ),
+      trailing: GlassPill(
+        padding: EdgeInsets.zero,
+        child: GlassTouchButton(
+          radius: AppLayout.radiusFull,
+          child: IconButton(
+            tooltip: searchOpen ? S.closeSearch : S.openSearch,
+            isSelected: searchOpen,
+            onPressed: onToggleSearch,
+            icon: Icon(Icons.search_rounded, color: scheme.primary),
+            selectedIcon: Icon(Icons.close_rounded, color: scheme.primary),
           ),
         ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            S.browseTitle,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: scheme.primary,
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: GlassTouchButton(
-              radius: AppLayout.radiusFull,
-              child: IconButton(
-                tooltip: searchOpen ? S.closeSearch : S.openSearch,
-                isSelected: searchOpen,
-                onPressed: onToggleSearch,
-                icon: Icon(Icons.search_rounded, color: scheme.primary),
-                selectedIcon: Icon(Icons.close_rounded, color: scheme.primary),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -476,10 +461,12 @@ class _SurahList extends ConsumerWidget {
     final surahs = ref.watch(surahListProvider);
 
     return surahs.when(
-      loading: () => const Center(child: Padding(
-        padding: EdgeInsets.all(48),
-        child: CircularProgressIndicator(),
-      )),
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(48),
+          child: CircularProgressIndicator(),
+        ),
+      ),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
@@ -738,10 +725,12 @@ class _JuzList extends ConsumerWidget {
         : {for (final s in surahs.value!) s.id: s};
 
     return juzs.when(
-      loading: () => const Center(child: Padding(
-        padding: EdgeInsets.all(48),
-        child: CircularProgressIndicator(),
-      )),
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(48),
+          child: CircularProgressIndicator(),
+        ),
+      ),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
@@ -755,10 +744,7 @@ class _JuzList extends ConsumerWidget {
           children: [
             for (var i = 0; i < list.length; i++) ...[
               if (i > 0) const SizedBox(height: AppLayout.sp3),
-              _JuzRow(
-                juz: list[i],
-                range: _juzRange(surahMap, list[i]),
-              ),
+              _JuzRow(juz: list[i], range: _juzRange(surahMap, list[i])),
             ],
           ],
         );
@@ -785,8 +771,8 @@ class _JuzRow extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return _HoverCard(
-      onTap: () => openSurah(context, juz.firstSurahId,
-          initialAyahId: juz.firstAyahId),
+      onTap: () =>
+          openSurah(context, juz.firstSurahId, initialAyahId: juz.firstAyahId),
       child: Row(
         children: [
           Container(
@@ -857,10 +843,12 @@ class _FavoritList extends ConsumerWidget {
     final bookmarks = ref.watch(bookmarksProvider);
 
     return bookmarks.when(
-      loading: () => const Center(child: Padding(
-        padding: EdgeInsets.all(48),
-        child: CircularProgressIndicator(),
-      )),
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(48),
+          child: CircularProgressIndicator(),
+        ),
+      ),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
@@ -1004,9 +992,9 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
 
   /// Flattened visible rows (surah rows then ayah rows).
   List<_SearchRow> get _rows => [
-        for (var i = 0; i < _surahs.length; i++) _SearchRow(_RowKind.surah, i),
-        for (var i = 0; i < _ayahs.length; i++) _SearchRow(_RowKind.ayah, i),
-      ];
+    for (var i = 0; i < _surahs.length; i++) _SearchRow(_RowKind.surah, i),
+    for (var i = 0; i < _ayahs.length; i++) _SearchRow(_RowKind.ayah, i),
+  ];
 
   @override
   void initState() {
@@ -1128,8 +1116,7 @@ class _SearchTabState extends ConsumerState<_SearchTab> {
           controller: _controller,
           focusNode: _searchNode,
           onChanged: _onChanged,
-          onSubmitted: (_) =>
-              _activateIndex(_selected >= 0 ? _selected : 0),
+          onSubmitted: (_) => _activateIndex(_selected >= 0 ? _selected : 0),
           decoration: InputDecoration(
             hintText: S.browseSearchHint,
             prefixIcon: const Icon(Icons.search_rounded),
@@ -1256,7 +1243,12 @@ class _GroupHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppLayout.sp4, AppLayout.sp4, AppLayout.sp4, AppLayout.sp1),
+      padding: const EdgeInsets.fromLTRB(
+        AppLayout.sp4,
+        AppLayout.sp4,
+        AppLayout.sp4,
+        AppLayout.sp1,
+      ),
       child: Text(
         label,
         style: theme.textTheme.labelSmall?.copyWith(
@@ -1302,8 +1294,10 @@ class _SurahResultRow extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded,
-              color: theme.colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -1370,7 +1364,9 @@ class _ResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: selected ? theme.colorScheme.surfaceContainerLow : Colors.transparent,
+      color: selected
+          ? theme.colorScheme.surfaceContainerLow
+          : Colors.transparent,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -1405,7 +1401,11 @@ class _PopularSurahs extends ConsumerWidget {
           )
         else ...[
           for (final s in surahs.value!.take(6))
-            _SurahResultRow(surah: s, selected: false, onTap: () => onTap(s.id)),
+            _SurahResultRow(
+              surah: s,
+              selected: false,
+              onTap: () => onTap(s.id),
+            ),
         ],
       ],
     );
@@ -1464,7 +1464,8 @@ class _HoverTileState extends State<HoverTile> {
 void openSurah(BuildContext context, int surahId, {int? initialAyahId}) {
   Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (_) => ReaderScreen(surahId: surahId, initialAyahId: initialAyahId),
+      builder: (_) =>
+          ReaderScreen(surahId: surahId, initialAyahId: initialAyahId),
     ),
   );
 }

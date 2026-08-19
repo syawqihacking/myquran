@@ -5,6 +5,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
+import '../widgets/glass_pill.dart';
 import 'course_detail_screen.dart';
 
 /// Shared app bar for the Pusat Belajar screens: back button + centered title
@@ -22,41 +23,21 @@ class LearningAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: title,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }

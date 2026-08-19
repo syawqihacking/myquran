@@ -28,15 +28,18 @@ class CourseDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            LearningAppBar(
-              title: course.title,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
               child: ListView(
-                padding: const EdgeInsets.all(AppLayout.sp6),
+                padding: const EdgeInsets.fromLTRB(
+                  AppLayout.sp6,
+                  AppLayout.sp10 + AppLayout.sp5,
+                  AppLayout.sp6,
+                  AppLayout.sp6,
+                ),
                 children: [
                   // Header card: description + progress.
                   Container(
@@ -58,8 +61,9 @@ class CourseDetailScreen extends ConsumerWidget {
                                 color: course.category
                                     .color(scheme)
                                     .withValues(alpha: 0.5),
-                                borderRadius:
-                                    BorderRadius.circular(AppLayout.radiusMd),
+                                borderRadius: BorderRadius.circular(
+                                  AppLayout.radiusMd,
+                                ),
                               ),
                               child: Icon(
                                 course.category.icon,
@@ -93,7 +97,8 @@ class CourseDetailScreen extends ConsumerWidget {
                             Expanded(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(
-                                    AppLayout.radiusFull),
+                                  AppLayout.radiusFull,
+                                ),
                                 child: LinearProgressIndicator(
                                   value: pct,
                                   minHeight: 8,
@@ -130,6 +135,16 @@ class CourseDetailScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LearningAppBar(
+                title: course.title,
+                onBack: () => Navigator.of(context).maybePop(),
+              ),
+            ),
           ],
         ),
       ),
@@ -148,9 +163,11 @@ class _LessonTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final completed =
-        ref.watch(learningProgressProvider)[course.id]?.completed
-                .contains(index) ??
-            false;
+        ref
+            .watch(learningProgressProvider)[course.id]
+            ?.completed
+            .contains(index) ??
+        false;
     final lesson = course.lessons[index];
 
     return Material(
@@ -188,7 +205,11 @@ class _LessonTile extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 child: completed
-                    ? Icon(Icons.check_rounded, size: 18, color: scheme.onPrimary)
+                    ? Icon(
+                        Icons.check_rounded,
+                        size: 18,
+                        color: scheme.onPrimary,
+                      )
                     : Center(
                         child: Text(
                           '${index + 1}',
@@ -204,9 +225,7 @@ class _LessonTile extends ConsumerWidget {
                 child: Text(
                   lesson.title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: completed
-                        ? scheme.onSurface
-                        : scheme.onSurface,
+                    color: completed ? scheme.onSurface : scheme.onSurface,
                   ),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:hijri/hijri_calendar.dart';
 
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../widgets/glass_pill.dart';
 
 /// A scratch instance used only to call the instance method
 /// `hijriToGregorian` (pure, stateless) for Gregorian conversions.
@@ -69,13 +70,13 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
 
     // Instance for the 1st of the displayed month — carries the correct month
     // name and day count without depending on today.
-    final month =
-        HijriCalendar.fromDate(_converter.hijriToGregorian(_year, _month, 1));
+    final month = HijriCalendar.fromDate(
+      _converter.hijriToGregorian(_year, _month, 1),
+    );
     final daysInMonth = month.lengthOfMonth;
 
     // Leading blank cells: Dart weekday of the 1st (1=Senin..7=Ahad).
-    final leading =
-        _converter.hijriToGregorian(_year, _month, 1).weekday - 1;
+    final leading = _converter.hijriToGregorian(_year, _month, 1).weekday - 1;
 
     final today = HijriCalendar.now();
     bool isToday(int day) =>
@@ -85,21 +86,22 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
       backgroundColor: scheme.surface,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            _HijriAppBar(),
-            Expanded(
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
                   AppLayout.sp6,
-                  AppLayout.sp5,
+                  AppLayout.sp10 + AppLayout.sp5,
                   AppLayout.sp6,
                   AppLayout.sp8,
                 ),
                 children: [
                   _MonthNavigator(
-                    label: '${month.getLongMonthName()} $_year ${S.hijriYearSuffix}',
+                    label:
+                        '${month.getLongMonthName()} $_year ${S.hijriYearSuffix}',
                     atMin: _atMin,
                     atMax: _atMax,
                     onPrevious: _previousMonth,
@@ -116,6 +118,8 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
                 ],
               ),
             ),
+            // Floating glass header pills, over the scrolling content.
+            Positioned(top: 0, left: 0, right: 0, child: _HijriAppBar()),
           ],
         ),
       ),
@@ -133,39 +137,19 @@ class _HijriAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.92),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.hijriTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.hijriTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balance for centered text
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }
@@ -311,10 +295,7 @@ class _CalendarCard extends StatelessWidget {
             itemBuilder: (context, index) {
               if (index < leading) return const SizedBox.shrink();
               final day = index - leading + 1;
-              return _DayCell(
-                day: day,
-                isToday: isToday(day),
-              );
+              return _DayCell(day: day, isToday: isToday(day));
             },
           ),
         ],
@@ -366,7 +347,10 @@ class _TodayCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final gregorian = _converter.hijriToGregorian(
-        today.hYear, today.hMonth, today.hDay);
+      today.hYear,
+      today.hMonth,
+      today.hDay,
+    );
     final gregorianDayName = _gregorianDayName(gregorian.weekday);
 
     return Container(
@@ -415,11 +399,27 @@ class _TodayCard extends StatelessWidget {
   }
 
   static const _gregorianMonths = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
   ];
   static const _gregorianDays = [
-    'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad',
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Ahad',
   ];
 
   String _gregorianMonthName(int month) => _gregorianMonths[month - 1];

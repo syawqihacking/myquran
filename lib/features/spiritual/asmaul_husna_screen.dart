@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/asmaul_husna_data.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
@@ -67,10 +68,11 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
       backgroundColor: scheme.surface,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
           children: [
-            _AsmaulHusnaAppBar(onBack: () => Navigator.of(context).maybePop()),
-            Expanded(
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final width = constraints.maxWidth;
@@ -82,7 +84,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(
                       AppLayout.sp6,
-                      AppLayout.sp4,
+                      AppLayout.sp10 + AppLayout.sp5,
                       AppLayout.sp6,
                       AppLayout.sp8,
                     ),
@@ -124,6 +126,15 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
                     ],
                   );
                 },
+              ),
+            ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _AsmaulHusnaAppBar(
+                onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
           ],
@@ -200,41 +211,21 @@ class _AsmaulHusnaAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.asmaulHusnaTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.asmaulHusnaTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }

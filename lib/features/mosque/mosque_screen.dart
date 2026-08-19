@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import 'mosque_models.dart';
 import 'mosque_providers.dart';
@@ -119,57 +120,77 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            _MasjidAppBar(onBack: () => Navigator.of(context).maybePop()),
-            _buildSearch(theme, scheme),
-            if (_showChips) _buildChips(theme, scheme),
-            Expanded(
-              child: mosquesAsync.when(
-                loading: () => const _LoadingState(),
-                error: (e, _) => _ErrorState(
-                  isLocationError: e is MosqueLocationException,
-                  errorDetail: e is MosqueFetchException ? e.message : null,
-                  onRetry: () {
-                    ref.invalidate(mosqueLocationProvider);
-                    ref.invalidate(mosqueListProvider);
-                  },
-                ),
-                data: (result) {
-                  final mosques = result.mosques;
-                  final filtered = _filtered(mosques);
-                  final filteredIds = filtered.map((m) => m.id).toSet();
-                  return Column(
-                    children: [
-                      if (result.fromCache) const _CachedNote(),
-                      if (location != null) ...[
-                        _MapSection(
-                          mapController: _mapController,
-                          mosques: mosques,
-                          filteredIds: filteredIds,
-                          userLocation: location,
-                          selectedId: _selectedId,
-                          onSelect: _selectMosque,
-                          onDeselect: () =>
-                              setState(() => _selectedId = null),
-                          onRecenter: () => _mapController.move(location, 14.0),
-                        ),
-                        const SizedBox(height: AppLayout.sp4),
-                      ],
-                      Expanded(
-                        child: filtered.isEmpty
-                            ? const _EmptyState()
-                            : _MosqueList(
-                                mosques: filtered,
+            // Content fills the screen and sits behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSearch(theme, scheme),
+                  if (_showChips) _buildChips(theme, scheme),
+                  Expanded(
+                    child: mosquesAsync.when(
+                      loading: () => const _LoadingState(),
+                      error: (e, _) => _ErrorState(
+                        isLocationError: e is MosqueLocationException,
+                        errorDetail: e is MosqueFetchException
+                            ? e.message
+                            : null,
+                        onRetry: () {
+                          ref.invalidate(mosqueLocationProvider);
+                          ref.invalidate(mosqueListProvider);
+                        },
+                      ),
+                      data: (result) {
+                        final mosques = result.mosques;
+                        final filtered = _filtered(mosques);
+                        final filteredIds = filtered.map((m) => m.id).toSet();
+                        return Column(
+                          children: [
+                            if (result.fromCache) const _CachedNote(),
+                            if (location != null) ...[
+                              _MapSection(
+                                mapController: _mapController,
+                                mosques: mosques,
+                                filteredIds: filteredIds,
+                                userLocation: location,
                                 selectedId: _selectedId,
                                 onSelect: _selectMosque,
-                                onRoute: _openRoute,
-                                onDetail: _showDetail,
+                                onDeselect: () =>
+                                    setState(() => _selectedId = null),
+                                onRecenter: () =>
+                                    _mapController.move(location, 14.0),
                               ),
-                      ),
-                    ],
-                  );
-                },
+                              const SizedBox(height: AppLayout.sp4),
+                            ],
+                            Expanded(
+                              child: filtered.isEmpty
+                                  ? const _EmptyState()
+                                  : _MosqueList(
+                                      mosques: filtered,
+                                      selectedId: _selectedId,
+                                      onSelect: _selectMosque,
+                                      onRoute: _openRoute,
+                                      onDetail: _showDetail,
+                                    ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _MasjidAppBar(
+                onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
           ],
@@ -182,7 +203,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppLayout.sp6,
-        AppLayout.sp4,
+        AppLayout.sp10 + AppLayout.sp4,
         AppLayout.sp6,
         AppLayout.sp3,
       ),
@@ -283,8 +304,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
                 _MasjidFilterChip(
                   label: _masjidFilters[i].$2,
                   selected: _filter == _masjidFilters[i].$1,
-                  onTap: () =>
-                      setState(() => _filter = _masjidFilters[i].$1),
+                  onTap: () => setState(() => _filter = _masjidFilters[i].$1),
                 ),
               ],
             ],
@@ -307,41 +327,21 @@ class _MasjidAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.masjidTerdekatTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.masjidTerdekatTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }
@@ -354,16 +354,15 @@ class _ChipScrollBehavior extends MaterialScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      child;
+  ) => child;
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-        PointerDeviceKind.stylus,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 }
 
 class _MasjidFilterChip extends StatefulWidget {
@@ -482,7 +481,8 @@ class _MapSection extends StatelessWidget {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'myquran',
                   ),
                   MarkerLayer(
@@ -863,13 +863,9 @@ class _MosqueCardState extends State<_MosqueCard> {
               const SizedBox(height: AppLayout.sp4),
               Row(
                 children: [
-                  Expanded(
-                    child: _RouteButton(onTap: widget.onRoute),
-                  ),
+                  Expanded(child: _RouteButton(onTap: widget.onRoute)),
                   const SizedBox(width: AppLayout.sp3),
-                  Expanded(
-                    child: _DetailButton(onTap: widget.onDetail),
-                  ),
+                  Expanded(child: _DetailButton(onTap: widget.onDetail)),
                 ],
               ),
             ],
@@ -1149,9 +1145,7 @@ class _CachedNote extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.4),
-        ),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
@@ -1219,12 +1213,11 @@ class _ErrorState extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isLinux = defaultTargetPlatform == TargetPlatform.linux;
-    final title =
-        isLocationError ? S.masjidLocationUnavailable : S.masjidError;
+    final title = isLocationError ? S.masjidLocationUnavailable : S.masjidError;
     final message = isLocationError
         ? (isLinux
-            ? S.masjidLocationLinuxHint
-            : S.masjidLocationUnavailableHint)
+              ? S.masjidLocationLinuxHint
+              : S.masjidLocationUnavailableHint)
         : S.masjidErrorHint;
     return Center(
       child: Padding(

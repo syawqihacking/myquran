@@ -30,132 +30,156 @@ class LessonScreen extends ConsumerWidget {
     final lesson = course.lessons[lessonIndex];
     final controller = ref.read(learningProgressProvider.notifier);
     final completed =
-        ref.watch(learningProgressProvider)[course.id]?.completed
-                .contains(lessonIndex) ??
-            false;
+        ref
+            .watch(learningProgressProvider)[course.id]
+            ?.completed
+            .contains(lessonIndex) ??
+        false;
     final isLast = lessonIndex == course.lessons.length - 1;
     final paragraphs = lesson.content.split('\n\n');
 
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            LearningAppBar(
-              title: course.title,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(AppLayout.sp6),
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
+              child: Column(
                 children: [
-                  Text(
-                    '${S.learningLangkah} ${lessonIndex + 1} '
-                    '${S.learningLangkahDari} ${course.lessons.length}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                      color: scheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: AppLayout.sp2),
-                  Text(
-                    lesson.title,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (completed) ...[
-                    const SizedBox(height: AppLayout.sp3),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppLayout.sp3,
-                        vertical: AppLayout.sp1,
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppLayout.sp6,
+                        AppLayout.sp10 + AppLayout.sp5,
+                        AppLayout.sp6,
+                        AppLayout.sp6,
                       ),
-                      decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
-                        borderRadius:
-                            BorderRadius.circular(AppLayout.radiusFull),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            size: 16,
-                            color: scheme.onPrimaryContainer,
+                      children: [
+                        Text(
+                          '${S.learningLangkah} ${lessonIndex + 1} '
+                          '${S.learningLangkahDari} ${course.lessons.length}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: scheme.primary,
                           ),
-                          const SizedBox(width: AppLayout.sp1),
-                          Text(
-                            S.learningSelesai,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: scheme.onPrimaryContainer,
+                        ),
+                        const SizedBox(height: AppLayout.sp2),
+                        Text(
+                          lesson.title,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (completed) ...[
+                          const SizedBox(height: AppLayout.sp3),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppLayout.sp3,
+                              vertical: AppLayout.sp1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppLayout.radiusFull,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 16,
+                                  color: scheme.onPrimaryContainer,
+                                ),
+                                const SizedBox(width: AppLayout.sp1),
+                                Text(
+                                  S.learningSelesai,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: scheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
+                        if (lesson.imageAsset != null) ...[
+                          const SizedBox(height: AppLayout.sp4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              AppLayout.radiusLg,
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              height: 220,
+                              color: scheme.surfaceContainerLowest,
+                              child: SvgPicture.asset(
+                                lesson.imageAsset!,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppLayout.sp4),
+                        ],
+                        const SizedBox(height: AppLayout.sp5),
+                        for (final p in paragraphs) ...[
+                          Text(
+                            p,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                              color: scheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: AppLayout.sp4),
+                        ],
+                      ],
                     ),
-                  ],
-                  if (lesson.imageAsset != null) ...[
-                    const SizedBox(height: AppLayout.sp4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-                      child: Container(
-                        width: double.infinity,
-                        height: 220,
-                        color: scheme.surfaceContainerLowest,
-                        child: SvgPicture.asset(
-                          lesson.imageAsset!,
-                          fit: BoxFit.contain,
+                  ),
+                  _BottomBar(
+                    completed: completed,
+                    isLast: isLast,
+                    onMarkDone: () {
+                      controller.markLesson(course, lessonIndex, done: true);
+                      if (isLast) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute<void>(
+                            builder: (_) => LessonScreen(
+                              course: course,
+                              lessonIndex: lessonIndex + 1,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    onMarkUndone: () =>
+                        controller.markLesson(course, lessonIndex, done: false),
+                    onNext: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute<void>(
+                        builder: (_) => LessonScreen(
+                          course: course,
+                          lessonIndex: lessonIndex + 1,
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppLayout.sp4),
-                  ],
-                  const SizedBox(height: AppLayout.sp5),
-                  for (final p in paragraphs) ...[
-                    Text(
-                      p,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        height: 1.6,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: AppLayout.sp4),
-                  ],
+                    onBackToCourse: () => Navigator.of(context).pop(),
+                  ),
                 ],
               ),
             ),
-            _BottomBar(
-              completed: completed,
-              isLast: isLast,
-              onMarkDone: () {
-                controller.markLesson(course, lessonIndex, done: true);
-                if (isLast) {
-                  Navigator.of(context).pop();
-                } else {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => LessonScreen(
-                        course: course,
-                        lessonIndex: lessonIndex + 1,
-                      ),
-                    ),
-                  );
-                }
-              },
-              onMarkUndone: () =>
-                  controller.markLesson(course, lessonIndex, done: false),
-              onNext: () => Navigator.of(context).pushReplacement(
-                MaterialPageRoute<void>(
-                  builder: (_) => LessonScreen(
-                    course: course,
-                    lessonIndex: lessonIndex + 1,
-                  ),
-                ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LearningAppBar(
+                title: course.title,
+                onBack: () => Navigator.of(context).maybePop(),
               ),
-              onBackToCourse: () => Navigator.of(context).pop(),
             ),
           ],
         ),
@@ -197,9 +221,7 @@ class _BottomBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(
-          top: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
+          top: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.4)),
         ),
       ),
       child: SafeArea(

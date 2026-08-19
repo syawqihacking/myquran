@@ -52,66 +52,87 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
     // Watch the state so the hero/progress rebuild on change, then read the
     // derived "continue course" from the controller.
     ref.watch(learningProgressProvider);
-    final continueCourse = ref.read(learningProgressProvider.notifier).continueCourse;
+    final continueCourse = ref
+        .read(learningProgressProvider.notifier)
+        .continueCourse;
 
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            LearningAppBar(
-              title: S.learningTitle,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppLayout.sp6,
-                AppLayout.sp4,
-                AppLayout.sp6,
-                AppLayout.sp2,
-              ),
-              child: _SearchField(
-                controller: _searchController,
-                focusNode: _searchFocus,
-                query: _query,
-                onChanged: (v) => setState(() => _query = v),
-              ),
-            ),
-            Expanded(
-              child: searching
-                  ? _SearchResults(results: results)
-                  : ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppLayout.sp6,
-                        AppLayout.sp4,
-                        AppLayout.sp6,
-                        AppLayout.sp8,
-                      ),
-                      children: [
-                        if (continueCourse != null) ...[
-                          _ContinueHero(course: continueCourse),
-                          const SizedBox(height: AppLayout.sp6),
-                        ],
-                        Text(
-                          S.learningKategoriTitle,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: AppLayout.sp3),
-                        for (var i = 0;
-                            i < LearningCategory.values.length;
-                            i++) ...[
-                          _CategoryCard(
-                            category: LearningCategory.values[i],
-                            courseCount: [
-                              for (final c in learningCourses)
-                                if (c.category == LearningCategory.values[i]) c,
-                            ].length,
-                          ),
-                          if (i != LearningCategory.values.length - 1)
-                            const SizedBox(height: AppLayout.sp3),
-                        ],
-                      ],
+            // Content fills the screen and sits behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppLayout.sp6,
+                      AppLayout.sp10 + AppLayout.sp4,
+                      AppLayout.sp6,
+                      AppLayout.sp2,
                     ),
+                    child: _SearchField(
+                      controller: _searchController,
+                      focusNode: _searchFocus,
+                      query: _query,
+                      onChanged: (v) => setState(() => _query = v),
+                    ),
+                  ),
+                  Expanded(
+                    child: searching
+                        ? _SearchResults(results: results)
+                        : ListView(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppLayout.sp6,
+                              AppLayout.sp4,
+                              AppLayout.sp6,
+                              AppLayout.sp8,
+                            ),
+                            children: [
+                              if (continueCourse != null) ...[
+                                _ContinueHero(course: continueCourse),
+                                const SizedBox(height: AppLayout.sp6),
+                              ],
+                              Text(
+                                S.learningKategoriTitle,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: AppLayout.sp3),
+                              for (
+                                var i = 0;
+                                i < LearningCategory.values.length;
+                                i++
+                              ) ...[
+                                _CategoryCard(
+                                  category: LearningCategory.values[i],
+                                  courseCount: [
+                                    for (final c in learningCourses)
+                                      if (c.category ==
+                                          LearningCategory.values[i])
+                                        c,
+                                  ].length,
+                                ),
+                                if (i != LearningCategory.values.length - 1)
+                                  const SizedBox(height: AppLayout.sp3),
+                              ],
+                            ],
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LearningAppBar(
+                title: S.learningTitle,
+                onBack: () => Navigator.of(context).maybePop(),
+              ),
             ),
           ],
         ),
@@ -195,8 +216,9 @@ class _ContinueHero extends ConsumerWidget {
     final progress = ref.watch(learningProgressProvider);
     final done = progress[course.id]?.completed.length ?? 0;
     final total = course.lessons.length;
-    final nextIndex =
-        ref.read(learningProgressProvider.notifier).nextLessonIndex(course);
+    final nextIndex = ref
+        .read(learningProgressProvider.notifier)
+        .nextLessonIndex(course);
     final nextLesson = course.lessons[nextIndex];
     final pct = total == 0 ? 0 : (done * 100 / total).round();
 
@@ -318,10 +340,12 @@ class _ContinueHero extends ConsumerWidget {
                     child: LinearProgressIndicator(
                       value: total == 0 ? 0.0 : done / total,
                       minHeight: 6,
-                      backgroundColor:
-                          scheme.primaryFixedDim.withValues(alpha: 0.20),
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(scheme.tertiaryFixed),
+                      backgroundColor: scheme.primaryFixedDim.withValues(
+                        alpha: 0.20,
+                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        scheme.tertiaryFixed,
+                      ),
                     ),
                   ),
                 ],
@@ -370,10 +394,7 @@ class _CategoryCard extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                 child: Icon(
                   category.icon,
                   size: 24,
@@ -385,10 +406,7 @@ class _CategoryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      category.label,
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    Text(category.label, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
                       category.subtitle,
@@ -451,10 +469,7 @@ class _SearchResults extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
               const SizedBox(height: AppLayout.sp3),
-              Text(
-                S.learningSearchEmpty,
-                style: theme.textTheme.titleMedium,
-              ),
+              Text(S.learningSearchEmpty, style: theme.textTheme.titleMedium),
               const SizedBox(height: AppLayout.sp1),
               Text(
                 S.learningSearchEmptyHint,

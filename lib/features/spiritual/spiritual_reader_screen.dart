@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/spiritual_content.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
@@ -92,54 +93,68 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
           backgroundColor: scheme.surface,
           body: Stack(
             children: [
-              Column(
-                children: [
-                  _TopBar(
-                    title: widget.title,
-                    onBack: () => Navigator.of(context).maybePop(),
-                  ),
-                  _ProgressBar(progress: _progress),
-                  Expanded(
-                    child: Scrollbar(
-                      controller: _scroll,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 760),
-                          child: ListView.builder(
-                            controller: _scroll,
-                            padding: const EdgeInsets.fromLTRB(
-                              AppLayout.sp6,
-                              AppLayout.sp4,
-                              AppLayout.sp6,
-                              AppLayout.sp8,
+              // Content fills the screen and scrolls behind the floating
+              // glass header pills — exactly like the home header.
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    _ProgressBar(progress: _progress),
+                    Expanded(
+                      child: Scrollbar(
+                        controller: _scroll,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 760),
+                            child: ListView.builder(
+                              controller: _scroll,
+                              padding: const EdgeInsets.fromLTRB(
+                                AppLayout.sp6,
+                                AppLayout.sp10 + AppLayout.sp4,
+                                AppLayout.sp6,
+                                AppLayout.sp8,
+                              ),
+                              itemCount:
+                                  widget.items.length +
+                                  2, // header + items + footer
+                              itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  return _SpiritualHeader(
+                                    title: _isTahlil
+                                        ? S.tahlilHeaderTitle
+                                        : widget.title,
+                                    description: _isTahlil
+                                        ? S.tahlilHeaderDesc
+                                        : widget.subtitle,
+                                    itemCount: widget.items.length,
+                                  );
+                                }
+                                if (index <= widget.items.length) {
+                                  final item = widget.items[index - 1];
+                                  return _SpiritualItemTile(
+                                    item: item,
+                                    number: index,
+                                  );
+                                }
+                                // Footer
+                                return _EndFooter(title: widget.title);
+                              },
                             ),
-                            itemCount: widget.items.length + 2, // header + items + footer
-                            itemBuilder: (context, index) {
-                              if (index == 0) {
-                                return _SpiritualHeader(
-                                  title:
-                                      _isTahlil ? S.tahlilHeaderTitle : widget.title,
-                                  description:
-                                      _isTahlil ? S.tahlilHeaderDesc : widget.subtitle,
-                                  itemCount: widget.items.length,
-                                );
-                              }
-                              if (index <= widget.items.length) {
-                                final item = widget.items[index - 1];
-                                return _SpiritualItemTile(
-                                  item: item,
-                                  number: index,
-                                );
-                              }
-                              // Footer
-                              return _EndFooter(title: widget.title);
-                            },
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              // Floating glass header pills, over the content.
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _TopBar(
+                  title: widget.title,
+                  onBack: () => Navigator.of(context).maybePop(),
+                ),
               ),
               // Gradient fade from the surface behind the FAB (design §FAB).
               Positioned(
@@ -186,41 +201,22 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: title,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w600,
+        color: scheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-            color: scheme.primary,
-          ),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w600,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+          color: scheme.primary,
+        ),
       ),
     );
   }
@@ -559,10 +555,7 @@ class _EndFooter extends StatelessWidget {
             color: theme.colorScheme.primary,
           ),
           const SizedBox(height: AppLayout.sp4),
-          Text(
-            'Selesai membaca $title',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('Selesai membaca $title', style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp2),
           Text(
             'Semoga Allah menerima amalan kita. Aamiin.',

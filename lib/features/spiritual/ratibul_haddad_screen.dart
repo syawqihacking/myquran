@@ -11,6 +11,7 @@ import '../../data/models/ratib_data.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/providers.dart';
 import '../../data/services/audio_service.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
@@ -82,49 +83,63 @@ class _RatibulHaddadScreenState extends State<RatibulHaddadScreen> {
           backgroundColor: scheme.surface,
           body: Stack(
             children: [
-              Column(
-                children: [
-                  _RatibAppBar(onBack: () => Navigator.of(context).maybePop()),
-                  _ProgressBar(progress: _progress),
-                  Expanded(
-                    child: Scrollbar(
-                      controller: _scroll,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 760),
-                          child: ListView.builder(
-                            controller: _scroll,
-                            // Bottom padding clears the fixed audio bar.
-                            padding: const EdgeInsets.fromLTRB(
-                              AppLayout.sp6,
-                              AppLayout.sp4,
-                              AppLayout.sp6,
-                              AppLayout.sp11,
+              // Content fills the screen and scrolls behind the floating
+              // glass header pills — exactly like the home header.
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    _ProgressBar(progress: _progress),
+                    Expanded(
+                      child: Scrollbar(
+                        controller: _scroll,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 760),
+                            child: ListView.builder(
+                              controller: _scroll,
+                              // Bottom padding clears the fixed audio bar.
+                              padding: const EdgeInsets.fromLTRB(
+                                AppLayout.sp6,
+                                AppLayout.sp10 + AppLayout.sp4,
+                                AppLayout.sp6,
+                                AppLayout.sp11,
+                              ),
+                              itemCount:
+                                  ratibAlHaddadItems.length +
+                                  2, // intro + items + footer
+                              itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  return const _IntroCard();
+                                }
+                                if (index <= ratibAlHaddadItems.length) {
+                                  final item = ratibAlHaddadItems[index - 1];
+                                  return _RatibItemCard(
+                                    item: item,
+                                    number: index,
+                                    count: _countOf(item.id),
+                                    onIncrement: () =>
+                                        _increment(item.id, item.repeatCount),
+                                    onReset: () => _reset(item.id),
+                                  );
+                                }
+                                return const _EndFooter();
+                              },
                             ),
-                            itemCount: ratibAlHaddadItems.length + 2, // intro + items + footer
-                            itemBuilder: (context, index) {
-                              if (index == 0) {
-                                return const _IntroCard();
-                              }
-                              if (index <= ratibAlHaddadItems.length) {
-                                final item = ratibAlHaddadItems[index - 1];
-                                return _RatibItemCard(
-                                  item: item,
-                                  number: index,
-                                  count: _countOf(item.id),
-                                  onIncrement: () =>
-                                      _increment(item.id, item.repeatCount),
-                                  onReset: () => _reset(item.id),
-                                );
-                              }
-                              return const _EndFooter();
-                            },
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              // Floating glass header pills, over the content.
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _RatibAppBar(
+                  onBack: () => Navigator.of(context).maybePop(),
+                ),
               ),
               // Fixed bottom audio bar (overlays content, per design).
               Positioned(
@@ -154,48 +169,31 @@ class _RatibAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(color: scheme.surfaceContainerHighest),
-        ),
+    return GlassHeader(
+      title: S.ratibulHaddadTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.5, // tracking-tight
+        color: scheme.primary,
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerLow,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              onPressed: onBack,
-              tooltip: S.back,
-              padding: EdgeInsets.zero,
-              icon: Icon(Icons.arrow_back_rounded, color: scheme.primary),
-            ),
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            shape: BoxShape.circle,
           ),
-          Expanded(
-            child: Text(
-              S.ratibulHaddadTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5, // tracking-tight
-                color: scheme.primary,
-              ),
-            ),
+          child: IconButton(
+            onPressed: onBack,
+            tooltip: S.back,
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.arrow_back_rounded, color: scheme.primary),
           ),
-          const SizedBox(width: 40), // balances the back circle
-        ],
+        ),
       ),
     );
   }
@@ -651,10 +649,7 @@ class _AudioBarState extends ConsumerState<_AudioBar> {
   @override
   void initState() {
     super.initState();
-    _sub = ref
-        .read(ratibAudioServiceProvider)
-        .stateStream
-        .listen((state) {
+    _sub = ref.read(ratibAudioServiceProvider).stateStream.listen((state) {
       if (!mounted) return;
       setState(() => _state = state);
     });
@@ -706,9 +701,7 @@ class _AudioBarState extends ConsumerState<_AudioBar> {
         // whole-screen blur on some Android GPUs. The bar stays readable on
         // its own, no frosted-glass needed.
         color: scheme.surface.withValues(alpha: 0.95),
-        border: Border(
-          top: BorderSide(color: scheme.surfaceContainerHighest),
-        ),
+        border: Border(top: BorderSide(color: scheme.surfaceContainerHighest)),
         boxShadow: [
           BoxShadow(
             color: scheme.primary.withValues(alpha: 0.08),

@@ -11,6 +11,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/providers.dart';
 import '../../data/services/prayer_time_service.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 
 /// Jadwal Shalat & Kiblat (Stitch design): a pinned app bar, a centered
@@ -75,43 +76,45 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            const _PrayerAppBar(),
-            Expanded(
-            child: scheduleAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => _ErrorState(onRetry: _changeLocation),
-              data: (schedule) {
-                if (!_seeded) {
-                  _seeded = true;
-                  _countdown = schedule.countdown;
-                }
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppLayout.sp6,
-                    AppLayout.sp5,
-                    AppLayout.sp6,
-                    AppLayout.sp8,
-                  ),
-                  children: [
-                    _HeaderCountdown(
-                      schedule: schedule,
-                      countdown: _countdown,
-                      onChangeLocation: _changeLocation,
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
+              child: scheduleAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => _ErrorState(onRetry: _changeLocation),
+                data: (schedule) {
+                  if (!_seeded) {
+                    _seeded = true;
+                    _countdown = schedule.countdown;
+                  }
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppLayout.sp6,
+                      AppLayout.sp10 + AppLayout.sp5,
+                      AppLayout.sp6,
+                      AppLayout.sp8,
                     ),
-                    const SizedBox(height: AppLayout.sp6),
-                    _CardsGrid(schedule: schedule),
-                  ],
-                );
-              },
+                    children: [
+                      _HeaderCountdown(
+                        schedule: schedule,
+                        countdown: _countdown,
+                        onChangeLocation: _changeLocation,
+                      ),
+                      const SizedBox(height: AppLayout.sp6),
+                      _CardsGrid(schedule: schedule),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+            // Floating glass header pills, over the scrolling content.
+            Positioned(top: 0, left: 0, right: 0, child: const _PrayerAppBar()),
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -125,39 +128,19 @@ class _PrayerAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.92),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.prayerScreenTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.prayerScreenTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balance for centered text
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }
@@ -239,7 +222,11 @@ class _ChangeLocationButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.edit_location_alt_rounded, size: 14, color: scheme.primary),
+          Icon(
+            Icons.edit_location_alt_rounded,
+            size: 14,
+            color: scheme.primary,
+          ),
           const SizedBox(width: 4),
           Text(
             S.changeLocation,
@@ -565,21 +552,14 @@ class _NeedlePainter extends CustomPainter {
       ..close();
     canvas.drawPath(top, Paint()..color = primary);
 
-    canvas.drawCircle(
-      Offset(w / 2, topH + 5),
-      4,
-      Paint()..color = gold,
-    );
+    canvas.drawCircle(Offset(w / 2, topH + 5), 4, Paint()..color = gold);
 
     final bottom = Path()
       ..moveTo(w / 2, size.height)
       ..lineTo(w, size.height - bottomH)
       ..lineTo(0, size.height - bottomH)
       ..close();
-    canvas.drawPath(
-      bottom,
-      Paint()..color = secondary.withValues(alpha: 0.6),
-    );
+    canvas.drawPath(bottom, Paint()..color = secondary.withValues(alpha: 0.6));
   }
 
   @override
@@ -606,9 +586,9 @@ class _DashedCirclePainter extends CustomPainter {
     const gap = 4.0;
     final step = (dash + gap) / radius;
     for (var a = -math.pi / 2; a < 3 * math.pi / 2; a += step) {
-      final start =
-          center + Offset(math.cos(a), math.sin(a)) * radius;
-      final end = center +
+      final start = center + Offset(math.cos(a), math.sin(a)) * radius;
+      final end =
+          center +
           Offset(math.cos(a + dash / radius), math.sin(a + dash / radius)) *
               radius;
       canvas.drawLine(start, end, paint);
@@ -715,8 +695,8 @@ class _PrayerListCard extends StatelessWidget {
               time: rows[i].time == null
                   ? '—'
                   : _formatPrayerTime(rows[i].time!),
-              active: rows[i].entryIndex != null &&
-                  rows[i].entryIndex == activeIdx,
+              active:
+                  rows[i].entryIndex != null && rows[i].entryIndex == activeIdx,
             ),
           ],
         ],
@@ -762,8 +742,8 @@ class _PrayerRowState extends State<_PrayerRow> {
           color: active
               ? scheme.primaryContainer.withValues(alpha: 0.10)
               : _hovered
-                  ? scheme.surfaceContainerLow
-                  : Colors.transparent,
+              ? scheme.surfaceContainerLow
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppLayout.radiusSm),
           border: Border(
             left: BorderSide(

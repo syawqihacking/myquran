@@ -7,6 +7,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/amalan_ibadah_data.dart';
 import '../../data/providers.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 
 /// Filter chips in the Stitch design's order. `null` = "Semua".
@@ -32,8 +33,7 @@ class AmalanIbadahScreen extends ConsumerStatefulWidget {
   const AmalanIbadahScreen({super.key});
 
   @override
-  ConsumerState<AmalanIbadahScreen> createState() =>
-      _AmalanIbadahScreenState();
+  ConsumerState<AmalanIbadahScreen> createState() => _AmalanIbadahScreenState();
 }
 
 class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
@@ -81,10 +81,7 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
         _completed.remove(id);
       }
     });
-    await prefs.setStringList(
-      _storageKey(DateTime.now()),
-      _completed.toList(),
-    );
+    await prefs.setStringList(_storageKey(DateTime.now()), _completed.toList());
   }
 
   List<Deed> get _filtered {
@@ -132,10 +129,11 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
             child: _AmbientGlow(color: scheme.primary.withValues(alpha: 0.03)),
           ),
           SafeArea(
-            child: Column(
+            child: Stack(
               children: [
-                _AmalanAppBar(onBack: () => Navigator.of(context).maybePop()),
-                Expanded(
+                // Content fills the screen and scrolls behind the floating
+                // glass header pills — exactly like the home header.
+                Positioned.fill(
                   child: CustomScrollView(
                     slivers: [
                       // Header + glass goal-progress card.
@@ -143,7 +141,7 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
                             AppLayout.sp6,
-                            AppLayout.sp5,
+                            AppLayout.sp10 + AppLayout.sp5,
                             AppLayout.sp6,
                             0,
                           ),
@@ -186,8 +184,9 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final width = constraints.maxWidth;
-                              final cols =
-                                  width < 700 ? 1 : (width < 1100 ? 2 : 3);
+                              final cols = width < 700
+                                  ? 1
+                                  : (width < 1100 ? 2 : 3);
                               const gap = AppLayout.sp6;
                               final itemWidth =
                                   (width - gap * (cols - 1)) / cols;
@@ -204,8 +203,7 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
                                       width: itemWidth,
                                       child: _DeedCard(
                                         deed: deed,
-                                        completed:
-                                            _completed.contains(deed.id),
+                                        completed: _completed.contains(deed.id),
                                         onToggle: () => _toggle(deed.id),
                                         onLearnMore: () => _showDetail(deed),
                                       ),
@@ -217,6 +215,15 @@ class _AmalanIbadahScreenState extends ConsumerState<AmalanIbadahScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                // Floating glass header pills, over the content.
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: _AmalanAppBar(
+                    onBack: () => Navigator.of(context).maybePop(),
                   ),
                 ),
               ],
@@ -240,41 +247,21 @@ class _AmalanAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.amalanIbadahTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.amalanIbadahTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }
@@ -413,7 +400,9 @@ class _GoalProgressCard extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         color: scheme.primary,
-                        borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                        borderRadius: BorderRadius.circular(
+                          AppLayout.radiusFull,
+                        ),
                       ),
                     ),
                   ),
@@ -455,7 +444,11 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
   double get maxExtent => _stickyHeaderHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -572,16 +565,15 @@ class _ChipScrollBehavior extends MaterialScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      child;
+  ) => child;
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-        PointerDeviceKind.stylus,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 }
 
 class _FilterChip extends StatefulWidget {
@@ -609,7 +601,9 @@ class _FilterChipState extends State<_FilterChip> {
     final selected = widget.selected;
     final bg = selected
         ? scheme.primary
-        : (_hovered ? scheme.secondaryContainer : scheme.surfaceContainerHighest);
+        : (_hovered
+              ? scheme.secondaryContainer
+              : scheme.surfaceContainerHighest);
     final fg = selected
         ? scheme.onPrimary
         : (_hovered ? scheme.onSecondaryContainer : scheme.onSurfaceVariant);
@@ -1004,11 +998,7 @@ class _DeedDetailSheet extends StatelessWidget {
                     color: scheme.secondaryContainer,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    deed.icon,
-                    size: 24,
-                    color: scheme.primary,
-                  ),
+                  child: Icon(deed.icon, size: 24, color: scheme.primary),
                 ),
                 const SizedBox(width: AppLayout.sp3),
                 Expanded(

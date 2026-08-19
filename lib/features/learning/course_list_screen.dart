@@ -23,15 +23,18 @@ class CourseListScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            LearningAppBar(
-              title: category.label,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
               child: ListView(
-                padding: const EdgeInsets.all(AppLayout.sp6),
+                padding: const EdgeInsets.fromLTRB(
+                  AppLayout.sp6,
+                  AppLayout.sp10 + AppLayout.sp5,
+                  AppLayout.sp6,
+                  AppLayout.sp6,
+                ),
                 children: [
                   Row(
                     children: [
@@ -66,6 +69,16 @@ class CourseListScreen extends ConsumerWidget {
                       const SizedBox(height: AppLayout.sp3),
                   ],
                 ],
+              ),
+            ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LearningAppBar(
+                title: category.label,
+                onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
           ],

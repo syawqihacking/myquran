@@ -28,6 +28,7 @@ import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
 import '../spiritual/tasbih_digital_screen.dart';
 import '../widgets/ayah_number_badge.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 import 'prayer_times_card.dart';
@@ -91,12 +92,14 @@ class HomeScreen extends ConsumerWidget {
               // _QuickAccess(onOpenSurahs: onOpenSurahs, onOpenJuzs: onOpenJuzs),
             ],
           ),
-          // Positioned(
-          //   top: 0,
-          //   left: 0,
-          //   right: 0,
-          //   child: _HomeAppBar(onOpenSearch: onOpenSearch),
-          // ),
+          // Floating glass header pill (title + search), inset from the
+          // screen edges and pinned over the scrolling content.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _HomeAppBar(onOpenSearch: onOpenSearch),
+          ),
         ],
       ),
     );
@@ -105,9 +108,12 @@ class HomeScreen extends ConsumerWidget {
 
 // ── Pinned app bar ───────────────────────────────────────────────────────
 
-/// Pinned app bar: centered "Al-Qur'an" title with the search action on the
-/// right. The hamburger menu is omitted — the shell has no drawer — and the
-/// shell's settings gear is positioned below this bar on the home view.
+/// Floating glass header: the centered "Al-Qur'an" title and the search
+/// action live in TWO separate compact liquid-glass pills — a title pill
+/// and a search pill — NOT one full-width bar and not one shared lens.
+/// Both are inset from the screen edges (sp4) and pinned at the top, so
+/// scrolling content refracts through the glass behind them while the
+/// title stays centered and the search button keeps working as before.
 class _HomeAppBar extends StatelessWidget {
   const _HomeAppBar({required this.onOpenSearch});
 
@@ -117,42 +123,49 @@ class _HomeAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.92),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return Padding(
+      // Inset from the screen edges so the pills float, not span edge-to-edge.
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp4,
+        vertical: AppLayout.sp2,
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Text(
-            S.browseTitle,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: scheme.primary,
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: GlassTouchButton(
-              radius: AppLayout.radiusFull,
-              child: IconButton(
-                onPressed: onOpenSearch,
-                tooltip: S.openSearch,
-                icon: Icon(
-                  Icons.search_rounded,
-                  color: scheme.onSurfaceVariant,
+      child: SizedBox(
+        // Pins the header row to the search button's height (48px) so the
+        // centered title pill and the right-edge search pill share one line.
+        height: AppLayout.sp10 + AppLayout.sp2,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Title pill — compact, wraps only the text + its own padding.
+            GlassPill(
+              child: Text(
+                S.browseTitle,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.primary,
                 ),
               ),
             ),
-          ),
-        ],
+            // Search pill — compact, sized to the button.
+            Positioned(
+              right: 0,
+              child: GlassPill(
+                padding: EdgeInsets.zero,
+                child: GlassTouchButton(
+                  radius: AppLayout.radiusFull,
+                  child: IconButton(
+                    onPressed: onOpenSearch,
+                    tooltip: S.openSearch,
+                    icon: Icon(
+                      Icons.search_rounded,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

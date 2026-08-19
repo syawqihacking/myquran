@@ -6,6 +6,7 @@ import '../../core/app_strings.dart';
 import '../../data/models/dzikir_content.dart';
 import '../../data/models/dzikir_pagi_petang_data.dart';
 import '../../data/models/spiritual_content.dart';
+import '../widgets/glass_pill.dart';
 import '../widgets/quran_text_view.dart';
 import 'spiritual_reader_screen.dart';
 
@@ -24,9 +25,9 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
   DzikirTime _time = DzikirTime.pagi;
 
   List<DzikirItem> get _filtered => [
-        for (final d in dzikirPagiPetangItems)
-          if (d.time == _time) d,
-      ];
+    for (final d in dzikirPagiPetangItems)
+      if (d.time == _time) d,
+  ];
 
   void _openReader(DzikirItem dzikir) {
     Navigator.of(context).push(
@@ -63,10 +64,11 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
       backgroundColor: scheme.surface,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Stack(
           children: [
-            _DzikirAppBar(onBack: () => Navigator.of(context).maybePop()),
-            Expanded(
+            // Content fills the screen and scrolls behind the floating glass
+            // header pills — exactly like the home header.
+            Positioned.fill(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final width = constraints.maxWidth;
@@ -78,7 +80,7 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(
                       AppLayout.sp6,
-                      AppLayout.sp4,
+                      AppLayout.sp10 + AppLayout.sp5,
                       AppLayout.sp6,
                       AppLayout.sp8,
                     ),
@@ -120,6 +122,15 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
                     ],
                   );
                 },
+              ),
+            ),
+            // Floating glass header pills, over the content.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _DzikirAppBar(
+                onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
           ],
@@ -167,41 +178,21 @@ class _DzikirAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      height: AppLayout.sp10,
-      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.9),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.4),
-          ),
-        ),
+    return GlassHeader(
+      title: S.dzikirTitle,
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontSize: 20,
+        height: 28 / 20,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.primary,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack,
-            tooltip: S.back,
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          Expanded(
-            child: Text(
-              S.dzikirTitle,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 20,
-                height: 28 / 20,
-                fontWeight: FontWeight.w700,
-                color: scheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 48), // balances the back button
-        ],
+      leading: GlassPill(
+        padding: EdgeInsets.zero,
+        child: IconButton(
+          onPressed: onBack,
+          tooltip: S.back,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
     );
   }
@@ -218,16 +209,15 @@ class _ChipScrollBehavior extends MaterialScrollBehavior {
     BuildContext context,
     Widget child,
     ScrollableDetails details,
-  ) =>
-      child;
+  ) => child;
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-        PointerDeviceKind.stylus,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 }
 
 class _TimeChip extends StatefulWidget {
@@ -257,7 +247,9 @@ class _TimeChipState extends State<_TimeChip> {
     final selected = widget.selected;
     final bg = selected
         ? scheme.primary
-        : (_hovered ? scheme.secondaryContainer : scheme.surfaceContainerHighest);
+        : (_hovered
+              ? scheme.secondaryContainer
+              : scheme.surfaceContainerHighest);
     final fg = selected
         ? scheme.onPrimary
         : (_hovered ? scheme.onSecondaryContainer : scheme.onSurfaceVariant);
@@ -409,10 +401,12 @@ class _DzikirCardState extends State<_DzikirCard> {
                               vertical: AppLayout.sp1,
                             ),
                             decoration: BoxDecoration(
-                              color: scheme.secondaryContainer
-                                  .withValues(alpha: 0.5),
-                              borderRadius:
-                                  BorderRadius.circular(AppLayout.radiusSm),
+                              color: scheme.secondaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppLayout.radiusSm,
+                              ),
                             ),
                             child: Text(
                               S.readNTimes(dzikir.repeatCount),
