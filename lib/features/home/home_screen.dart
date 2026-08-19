@@ -23,6 +23,7 @@ import '../personality/personality_screen.dart';
 import '../spiritual/amalan_ibadah_screen.dart';
 import '../spiritual/asmaul_husna_screen.dart';
 import '../spiritual/doa_harian_screen.dart';
+import '../spiritual/zakat_calculator_screen.dart';
 import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
 import '../spiritual/tasbih_digital_screen.dart';
@@ -987,7 +988,11 @@ class _QuickActionsBento extends StatelessWidget {
             child: _QuickActionTile(
               icon: Icons.monetization_on_rounded,
               label: S.qaZakat,
-              onTap: () => _comingSoon(context),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ZakatCalculatorScreen(),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: AppLayout.sp2),
@@ -1087,18 +1092,6 @@ class _QuickActionsBento extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _comingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(S.comingSoon),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(milliseconds: 1800),
-        ),
-      );
   }
 }
 

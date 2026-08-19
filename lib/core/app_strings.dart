@@ -522,4 +522,36 @@ abstract final class S {
   static const profileTimeHoursAgo = 'jam lalu';
   static const profileTimeYesterday = 'Kemarin';
   static const profileTimeDaysAgo = 'hari lalu';
+
+  // Kalkulator Zakat (zakat calculator).
+  static const zakatTitle = 'Kalkulator Zakat';
+  static const zakatSubtitle =
+      'Hitung zakat fitrah, mal, emas & perak, penghasilan, dan pertanian';
+  static const zakatTabFitrah = 'Fitrah';
+  static const zakatTabMal = 'Mal';
+  static const zakatTabEmasPerak = 'Emas & Perak';
+  static const zakatTabPenghasilan = 'Penghasilan';
+  static const zakatTabPertanian = 'Pertanian';
+  static const zakatJumlahJiwa = 'Jumlah jiwa';
+  static const zakatHargaBeras = 'Harga beras per kg (Rp)';
+  static const zakatTotalHarta = 'Total harta (Rp)';
+  static const zakatHargaEmas = 'Harga emas per gram (Rp)';
+  static const zakatGramEmas = 'Gram emas';
+  static const zakatGramPerak = 'Gram perak';
+  static const zakatHargaPerak = 'Harga perak per gram (Rp)';
+  static const zakatPenghasilanBulanan = 'Penghasilan per bulan (Rp)';
+  static const zakatHasilPanen = 'Hasil panen (kg)';
+  static const zakatHargaHasil = 'Harga hasil panen per kg (Rp)';
+  static const zakatIrigasiAlami = 'Irigasi alami (hujan)';
+  static const zakatIrigasiBerbayar = 'Irigasi berbayar';
+  static const zakatHitung = 'Hitung Zakat';
+  static const zakatHasil = 'Hasil Perhitungan';
+  static const zakatWajib = 'Wajib zakat';
+  static const zakatBelumWajib = 'Belum wajib zakat';
+  static const zakatNisab = 'Nisab';
+  static const zakatJumlahZakat = 'Jumlah zakat';
+  static const zakatCatatanBelumNisab = 'Belum mencapai nisab';
+  static const zakatRupiah = 'Rp';
+  static const zakatFieldRequired = 'Lengkapi semua kolom terlebih dahulu';
+  static const zakatHargaHasilHint = 'Kosongkan untuk menghitung dalam kg';
 }
