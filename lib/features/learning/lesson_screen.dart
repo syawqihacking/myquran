@@ -6,6 +6,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
+import '../widgets/liquid_glass.dart';
 import 'learning_widgets.dart';
 
 /// One lesson: scrollable content + a "Tandai Selesai" action. Marking a
@@ -207,31 +208,30 @@ class _BottomBar extends StatelessWidget {
             ? Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: LiquidGlassButton.tonal(
                       onPressed: onMarkUndone,
-                      child: const Text(S.learningMarkUndone),
+                      label: S.learningMarkUndone,
+                      height: 48,
                     ),
                   ),
                   const SizedBox(width: AppLayout.sp3),
                   Expanded(
                     flex: 2,
-                    child: FilledButton(
+                    child: LiquidGlassButton.filled(
                       onPressed: isLast ? onBackToCourse : onNext,
-                      child: Text(
-                        isLast
-                            ? S.learningBackToCourse
-                            : S.learningNextLesson,
-                      ),
+                      label: isLast
+                          ? S.learningBackToCourse
+                          : S.learningNextLesson,
+                      height: 48,
                     ),
                   ),
                 ],
               )
-            : FilledButton(
+            : LiquidGlassButton.filled(
                 onPressed: onMarkDone,
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: const Text(S.learningMarkDone),
+                label: S.learningMarkDone,
+                height: 48,
+                width: double.infinity,
               ),
       ),
     );

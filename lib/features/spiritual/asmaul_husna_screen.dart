@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/asmaul_husna_data.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Asmaul Husna — 99 nama Allah beserta artinya.
@@ -468,9 +469,9 @@ class _AsmaulHusnaDetail extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: AppLayout.sp6),
-              FilledButton.tonal(
+              LiquidGlassButton.filled(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text(S.asmaulHusnaClose),
+                label: S.asmaulHusnaClose,
               ),
             ],
           ),

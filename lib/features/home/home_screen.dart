@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +13,6 @@ import '../../data/providers.dart';
 import '../../data/models/doa_harian_data.dart';
 import '../../data/models/asmaul_husna_data.dart';
 import '../../data/models/tahlil_doa_data.dart';
-import '../../data/models/doa_setelah_sholat_data.dart';
 import '../spiritual/doa_setelah_sholat_screen.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../browse/browse_screen.dart';
@@ -30,8 +27,10 @@ import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
 import '../spiritual/tasbih_digital_screen.dart';
 import '../widgets/ayah_number_badge.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 import 'prayer_times_card.dart';
+
 /// Beranda — the Stitch remodel: a pinned app bar (Al-Qur'an + search), a
 /// greeting, the last-read hero, a quick-actions bento, the Jadwal Sholat
 /// strip, and Ayat Hari Ini. The reading history and the full surah/juz links
@@ -52,44 +51,51 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+
     return SafeArea(
       bottom: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
         children: [
-          _HomeAppBar(onOpenSearch: onOpenSearch),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                AppLayout.sp6,
-                AppLayout.sp5,
-                AppLayout.sp6,
-                AppLayout.sp8,
-              ),
-              children: [
-                const _Greeting(),
-                const SizedBox(height: AppLayout.sp6),
-                const _HeroCarousel(),
-                const SizedBox(height: AppLayout.sp6),
-                _QuickActionsBento(
-                  onOpenPrayer: onOpenPrayer,
-                ),
-                const SizedBox(height: AppLayout.sp3),
-                const _FeatureCardsRow(),
-                const SizedBox(height: AppLayout.sp7),
-                const PrayerTimesCard(),
-                const SizedBox(height: AppLayout.sp7),
-                const _DailyVerseCard(),
-                const SizedBox(height: AppLayout.sp7),
-                const _ReadingHistory(),
-                const SizedBox(height: AppLayout.sp7),
-                _QuickAccess(
-                  onOpenSurahs: onOpenSurahs,
-                  onOpenJuzs: onOpenJuzs,
-                ),
-              ],
+          ListView(
+            // The list fills the viewport so content scrolls behind the
+            // pinned glass app bar and the floating glass nav. The top inset
+            // clears the first item from the app bar (its height is sp10)
+            // plus a small margin; the bottom inset clears the last item
+            // from the nav (80px + margin + system inset) on mobile.
+            padding: EdgeInsets.fromLTRB(
+              AppLayout.sp6,
+              AppLayout.sp10 + AppLayout.sp5,
+              AppLayout.sp6,
+              isMobile
+                  ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+                  : AppLayout.sp8,
             ),
+            children: [
+              const _Greeting(),
+              const SizedBox(height: AppLayout.sp6),
+              const _HeroCarousel(),
+              const SizedBox(height: AppLayout.sp6),
+              _QuickActionsBento(onOpenPrayer: onOpenPrayer),
+              const SizedBox(height: AppLayout.sp3),
+              const _FeatureCardsRow(),
+              const SizedBox(height: AppLayout.sp7),
+              const PrayerTimesCard(),
+              const SizedBox(height: AppLayout.sp7),
+              const _DailyVerseCard(),
+              const SizedBox(height: AppLayout.sp7),
+              const _ReadingHistory(),
+              const SizedBox(height: AppLayout.sp7),
+              // _QuickAccess(onOpenSurahs: onOpenSurahs, onOpenJuzs: onOpenJuzs),
+            ],
           ),
+          // Positioned(
+          //   top: 0,
+          //   left: 0,
+          //   right: 0,
+          //   child: _HomeAppBar(onOpenSearch: onOpenSearch),
+          // ),
         ],
       ),
     );
@@ -133,10 +139,16 @@ class _HomeAppBar extends StatelessWidget {
           ),
           Positioned(
             right: 0,
-            child: IconButton(
-              onPressed: onOpenSearch,
-              tooltip: S.openSearch,
-              icon: Icon(Icons.search_rounded, color: scheme.onSurfaceVariant),
+            child: GlassTouchButton(
+              radius: AppLayout.radiusFull,
+              child: IconButton(
+                onPressed: onOpenSearch,
+                tooltip: S.openSearch,
+                icon: Icon(
+                  Icons.search_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         ],
@@ -203,7 +215,7 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
   @override
   void initState() {
     super.initState();
-    // Start at a large number to allow swiping backwards initially if we wanted to, 
+    // Start at a large number to allow swiping backwards initially if we wanted to,
     // but 0 is fine if we only auto-scroll forward.
     // Let's start at an index that is a multiple of 3, e.g., 3000.
     _currentPage = 3000;
@@ -234,7 +246,7 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width - (AppLayout.sp6 * 2);
     const gap = 12.0;
-    
+
     return SizedBox(
       height: 180,
       child: OverflowBox(
@@ -247,7 +259,7 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
           },
           itemBuilder: (context, index) {
             final realIndex = index % _pageCount;
-            
+
             Widget child;
             if (realIndex == 0) {
               child = const _LastReadHero();
@@ -402,7 +414,8 @@ class _RandomDoaHeroSlide extends ConsumerStatefulWidget {
   const _RandomDoaHeroSlide();
 
   @override
-  ConsumerState<_RandomDoaHeroSlide> createState() => _RandomDoaHeroSlideState();
+  ConsumerState<_RandomDoaHeroSlide> createState() =>
+      _RandomDoaHeroSlideState();
 }
 
 class _RandomDoaHeroSlideState extends ConsumerState<_RandomDoaHeroSlide> {
@@ -419,7 +432,7 @@ class _RandomDoaHeroSlideState extends ConsumerState<_RandomDoaHeroSlide> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(AppLayout.sp5),
       decoration: BoxDecoration(
@@ -454,11 +467,7 @@ class _RandomDoaHeroSlideState extends ConsumerState<_RandomDoaHeroSlide> {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.stars_rounded,
-                    size: 20,
-                    color: scheme.onPrimary,
-                  ),
+                  Icon(Icons.stars_rounded, size: 20, color: scheme.onPrimary),
                   const SizedBox(width: AppLayout.sp2),
                   Text(
                     'DOA HARI INI',
@@ -521,10 +530,12 @@ class _RandomAsmaulHusnaHeroSlide extends ConsumerStatefulWidget {
   const _RandomAsmaulHusnaHeroSlide();
 
   @override
-  ConsumerState<_RandomAsmaulHusnaHeroSlide> createState() => _RandomAsmaulHusnaHeroSlideState();
+  ConsumerState<_RandomAsmaulHusnaHeroSlide> createState() =>
+      _RandomAsmaulHusnaHeroSlideState();
 }
 
-class _RandomAsmaulHusnaHeroSlideState extends ConsumerState<_RandomAsmaulHusnaHeroSlide> {
+class _RandomAsmaulHusnaHeroSlideState
+    extends ConsumerState<_RandomAsmaulHusnaHeroSlide> {
   late final AsmaulHusna _asma;
 
   @override
@@ -538,7 +549,7 @@ class _RandomAsmaulHusnaHeroSlideState extends ConsumerState<_RandomAsmaulHusnaH
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(AppLayout.sp5),
       decoration: BoxDecoration(
@@ -745,22 +756,20 @@ class _HeroHint extends StatelessWidget {
         const Spacer(),
         Text(
           S.noHistoryTitle,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: scheme.onPrimary,
-          ),
+          style: theme.textTheme.titleMedium?.copyWith(color: scheme.onPrimary),
         ),
         const SizedBox(height: AppLayout.sp3),
-        FilledButton.tonalIcon(
+        LiquidGlassButton.filled(
           onPressed: onStart,
           icon: const Icon(Icons.menu_book_rounded, size: 18),
-          label: const Text(S.startFromFatihah),
+          label: S.startFromFatihah,
         ),
       ],
     );
   }
 }
 
-/// The "Lanjutkan" pill on the hero — emerald container, mint label + arrow.
+/// The "Lanjutkan" pill on the hero — 3D liquid glass capsule.
 class _ContinuePill extends StatelessWidget {
   const _ContinuePill({required this.onTap});
 
@@ -770,36 +779,32 @@ class _ContinuePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.primaryContainer,
-      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppLayout.sp4,
-            vertical: AppLayout.sp2,
+    return LiquidGlassCapsule(
+      onTap: onTap,
+      backgroundColor: scheme.primaryContainer.withValues(alpha: 0.88),
+      borderColor: Colors.white.withValues(alpha: 0.55),
+      glowColor: const Color(0xFF67E8B5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp4,
+        vertical: AppLayout.sp2,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            S.continueButton,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onPrimaryContainer,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                S.continueButton,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: scheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: AppLayout.sp1),
-              Icon(
-                Icons.arrow_forward_rounded,
-                size: 16,
-                color: scheme.onPrimaryContainer,
-              ),
-            ],
+          const SizedBox(width: AppLayout.sp1),
+          Icon(
+            Icons.arrow_forward_rounded,
+            size: 16,
+            color: scheme.onPrimaryContainer,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -856,7 +861,8 @@ class _HeroTopInfoState extends ConsumerState<_HeroTopInfo> {
     final scheduleAsync = ref.watch(prayerScheduleProvider);
 
     final today = HijriCalendar.now();
-    final hijriText = '${today.getDayName()}, ${today.hDay} ${today.getLongMonthName()} ${today.hYear} H';
+    final hijriText =
+        '${today.getDayName()}, ${today.hDay} ${today.getLongMonthName()} ${today.hYear} H';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -865,11 +871,7 @@ class _HeroTopInfoState extends ConsumerState<_HeroTopInfo> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.history_rounded,
-              size: 20,
-              color: scheme.onPrimary,
-            ),
+            Icon(Icons.history_rounded, size: 20, color: scheme.onPrimary),
             const SizedBox(width: AppLayout.sp2),
             Text(
               S.lastReadLabel.toUpperCase(),
@@ -903,7 +905,11 @@ class _HeroTopInfoState extends ConsumerState<_HeroTopInfo> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.access_time_rounded, size: 12, color: scheme.onPrimary.withValues(alpha: 0.8)),
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 12,
+                        color: scheme.onPrimary.withValues(alpha: 0.8),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${next.label} ${_formatCountdown(_countdown)}',
@@ -935,16 +941,16 @@ class _HeroTopInfoState extends ConsumerState<_HeroTopInfo> {
 /// the rest are not built yet and show a "Segera hadir" SnackBar rather than
 /// a placeholder screen.
 class _QuickActionsBento extends StatelessWidget {
-  const _QuickActionsBento({
-    required this.onOpenPrayer,
-  });
+  const _QuickActionsBento({required this.onOpenPrayer});
 
   final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final contentWidth = math.min(screenWidth, AppConstants.contentColumnMaxWidth) - AppLayout.sp6 * 2;
+    final contentWidth =
+        math.min(screenWidth, AppConstants.contentColumnMaxWidth) -
+        AppLayout.sp6 * 2;
     // Base width on 4 visible items, so the first 4 look identical to before
     final itemWidth = (contentWidth - (AppLayout.sp2 * 3)) / 4;
 
@@ -969,7 +975,9 @@ class _QuickActionsBento extends StatelessWidget {
               icon: Icons.volunteer_activism_rounded,
               label: S.qaDoaHarian,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const DoaHarianScreen()),
+                MaterialPageRoute<void>(
+                  builder: (_) => const DoaHarianScreen(),
+                ),
               ),
             ),
           ),
@@ -1044,7 +1052,9 @@ class _QuickActionsBento extends StatelessWidget {
               icon: Icons.brightness_5_rounded,
               label: S.ratibTitle,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const RatibulHaddadScreen()),
+                MaterialPageRoute<void>(
+                  builder: (_) => const RatibulHaddadScreen(),
+                ),
               ),
             ),
           ),
@@ -1055,7 +1065,9 @@ class _QuickActionsBento extends StatelessWidget {
               icon: Icons.checklist_rounded,
               label: S.amalanIbadahTitle,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const AmalanIbadahScreen()),
+                MaterialPageRoute<void>(
+                  builder: (_) => const AmalanIbadahScreen(),
+                ),
               ),
             ),
           ),
@@ -1066,7 +1078,9 @@ class _QuickActionsBento extends StatelessWidget {
               icon: Icons.stars_rounded,
               label: S.asmaulHusnaTitle,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const AsmaulHusnaScreen()),
+                MaterialPageRoute<void>(
+                  builder: (_) => const AsmaulHusnaScreen(),
+                ),
               ),
             ),
           ),
@@ -1185,7 +1199,6 @@ class _QuickActionTileState extends State<_QuickActionTile> {
   }
 }
 
-
 /// Two side-by-side feature cards: Pusat Belajar (left) and Doa Setelah
 /// Sholat (right). Both use the app's primary/theme-consistent green palette.
 class _FeatureCardsRow extends StatelessWidget {
@@ -1217,9 +1230,9 @@ class _LearningTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppLayout.radiusLg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const LearningScreen()),
-        ),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const LearningScreen())),
         child: Container(
           padding: const EdgeInsets.all(AppLayout.sp4),
           decoration: BoxDecoration(
@@ -1383,9 +1396,7 @@ class _DailyVerseCard extends ConsumerWidget {
             child: verseAsync.when(
               loading: () => const SizedBox(
                 height: 120,
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               ),
               error: (_, __) => SizedBox(
                 height: 120,
@@ -1468,7 +1479,8 @@ class _VerseContent extends StatelessWidget {
   Future<void> _share(BuildContext context) async {
     await Clipboard.setData(
       ClipboardData(
-        text: '${ayah.textUthmani}\n\n"${ayah.translation}"\n'
+        text:
+            '${ayah.textUthmani}\n\n"${ayah.translation}"\n'
             '${surah.nameLatin} : ${ayah.ayahNumber}',
       ),
     );
@@ -1487,45 +1499,42 @@ class _VerseContent extends StatelessWidget {
 
 // ── Surah / juz quick links ──────────────────────────────────────────────
 
-class _QuickAccess extends StatelessWidget {
-  const _QuickAccess({
-    required this.onOpenSurahs,
-    required this.onOpenJuzs,
-  });
+// class _QuickAccess extends StatelessWidget {
+//   const _QuickAccess({required this.onOpenSurahs, required this.onOpenJuzs});
 
-  final VoidCallback onOpenSurahs;
-  final VoidCallback onOpenJuzs;
+//   final VoidCallback onOpenSurahs;
+//   final VoidCallback onOpenJuzs;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          S.quickAccessEyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        _QuickLink(
-          icon: Icons.menu_book_rounded,
-          title: S.surahListTitle,
-          caption: S.quickSurahCaption,
-          onTap: onOpenSurahs,
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        _QuickLink(
-          icon: Icons.auto_stories_rounded,
-          title: S.juzListTitle,
-          caption: S.quickJuzCaption,
-          onTap: onOpenJuzs,
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Text(
+//           S.quickAccessEyebrow,
+//           style: theme.textTheme.labelSmall?.copyWith(
+//             color: theme.colorScheme.onSurfaceVariant,
+//           ),
+//         ),
+//         const SizedBox(height: AppLayout.sp2),
+//         _QuickLink(
+//           icon: Icons.menu_book_rounded,
+//           title: S.surahListTitle,
+//           caption: S.quickSurahCaption,
+//           onTap: onOpenSurahs,
+//         ),
+//         const SizedBox(height: AppLayout.sp2),
+//         _QuickLink(
+//           icon: Icons.auto_stories_rounded,
+//           title: S.juzListTitle,
+//           caption: S.quickJuzCaption,
+//           onTap: onOpenJuzs,
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class _QuickLink extends StatelessWidget {
   const _QuickLink({

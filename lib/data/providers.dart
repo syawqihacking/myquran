@@ -169,7 +169,7 @@ Future<List<String>> _resolveReciterTemplates(Ref ref) async {
     if (reciters.isEmpty) return const [];
     reciters.sort((a, b) => a.id.compareTo(b.id));
 
-    final selectedId = ref.watch(selectedReciterProvider);
+    final selectedId = ref.read(selectedReciterProvider);
     Reciter? selected;
     for (final r in reciters) {
       if (r.id == selectedId) {

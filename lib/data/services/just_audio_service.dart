@@ -136,13 +136,14 @@ class JustAudioService implements AudioService {
     for (final template in templates) {
       final url = audioUrlFor(ayah.surahId, ayah.ayahNumber, template);
       try {
+        final cacheFile = _cacheFile(dir, ayah.surahId, ayah.ayahNumber);
+        final source = cacheFile.existsSync()
+            ? AudioSource.file(cacheFile.path, tag: ayahId)
+            : AudioSource.uri(Uri.parse(url), tag: ayahId);
+
         await _player
             .setAudioSource(
-              LockCachingAudioSource(
-                Uri.parse(url),
-                cacheFile: _cacheFile(dir, ayah.surahId, ayah.ayahNumber),
-                tag: ayahId,
-              ),
+              source,
               preload: true,
             )
             .timeout(_sourceLoadTimeout);
@@ -154,6 +155,7 @@ class JustAudioService implements AudioService {
       }
     }
     _emit(status: AudioStatus.idle, ayahId: null);
+    throw Exception('Failed to load audio');
   }
 
   @override
@@ -170,46 +172,60 @@ class JustAudioService implements AudioService {
     final templates = await _resolveTemplates();
     if (templates.isEmpty) {
       _emit(status: AudioStatus.idle, ayahId: null);
-      return;
+      throw Exception('No audio reciter templates found');
     }
-    final primaryTemplate = templates.first;
 
     final dir = await _ensureCacheDir();
-    final sources = <AudioSource>[];
-    for (final ayah in ayahs) {
-      // Offline murottal: use the local file when this ayah has been
-      // downloaded, otherwise stream (and cache) from the network.
-      final local = _localFileFor != null
-          ? await _localFileFor(ayah.surahId, ayah.ayahNumber)
-          : null;
-      if (local != null) {
-        sources.add(AudioSource.file(local, tag: ayah.id));
-      } else {
-        sources.add(
-          LockCachingAudioSource(
-            Uri.parse(
-              audioUrlFor(ayah.surahId, ayah.ayahNumber, primaryTemplate),
-            ),
-            cacheFile: _cacheFile(dir, ayah.surahId, ayah.ayahNumber),
-            tag: ayah.id,
-          ),
-        );
-      }
-    }
-
     final startIndex = ayahs.indexWhere((a) => a.id == ayahId);
     _queue = [for (final ayah in ayahs) ayah.id];
 
-    // `preload: false` is required by the media_kit backend; the initial
-    // source loads when `play()` is called. Dead URLs in the queue auto-skip
-    // thanks to `maxSkipsOnError` on the player.
-    await _player.setAudioSources(
-      sources,
-      initialIndex: startIndex < 0 ? 0 : startIndex,
-      preload: false,
-    );
-    await _player.play();
-    _emit();
+    for (final template in templates) {
+      try {
+        final sources = <AudioSource>[];
+        for (final ayah in ayahs) {
+          // Offline murottal: use the local file when this ayah has been
+          // downloaded, otherwise stream (and cache) from the network.
+          final local = _localFileFor != null
+              ? await _localFileFor(ayah.surahId, ayah.ayahNumber)
+              : null;
+          if (local != null) {
+            sources.add(AudioSource.file(local, tag: ayah.id));
+          } else {
+            final cacheFile = _cacheFile(dir, ayah.surahId, ayah.ayahNumber);
+            if (cacheFile.existsSync()) {
+              sources.add(AudioSource.file(cacheFile.path, tag: ayah.id));
+            } else {
+              sources.add(
+                AudioSource.uri(
+                  Uri.parse(
+                    audioUrlFor(ayah.surahId, ayah.ayahNumber, template),
+                  ),
+                  tag: ayah.id,
+                ),
+              );
+            }
+          }
+        }
+
+        // Preload is supported on ExoPlayer/AVPlayer; dead URLs auto-skip
+        // thanks to `maxSkipsOnError` on the player.
+        await _player
+            .setAudioSources(
+              sources,
+              initialIndex: startIndex < 0 ? 0 : startIndex,
+              preload: true,
+            )
+            .timeout(_sourceLoadTimeout);
+        await _player.play();
+        _emit();
+        return;
+      } catch (_) {
+        // Try the next fallback template if available.
+      }
+    }
+
+    _emit(status: AudioStatus.idle, ayahId: null);
+    throw Exception('Failed to load audio playlist');
   }
 
   @override

@@ -61,6 +61,8 @@ dependencies:
   hijri: ^3.0.1
   flutter_foreground_task: ^10.0.0
   flutter_svg: ^2.0.10
+  liquid_glass_easy: ^4.0.0
+  liquid_glass_widgets: ^0.29.8
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +87,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Fragment programs compiled at runtime for the liquid-glass nav bubble.
+  shaders:
+    - assets/shaders/nav_bubble.frag
 
   assets:
     - assets/db/quran.db

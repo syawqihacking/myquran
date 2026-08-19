@@ -9,6 +9,7 @@ import '../../data/providers.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../../data/repositories/user_repositories.dart';
 import '../reader/reader_screen.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Favorit & Penanda (Stitch remodel): a pinned app bar, two tabs, and the
@@ -202,7 +203,9 @@ class _FavoritContent extends ConsumerWidget {
             isMobile ? AppLayout.sp3 : AppLayout.sp6,
             AppLayout.sp5,
             isMobile ? AppLayout.sp3 : AppLayout.sp6,
-            AppLayout.sp8,
+            isMobile
+                ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+                : AppLayout.sp8,
           ),
           itemCount: list.length,
           itemBuilder: (context, index) {
@@ -381,7 +384,9 @@ class _PenandaContent extends ConsumerWidget {
             isMobile ? AppLayout.sp3 : AppLayout.sp6,
             AppLayout.sp5,
             isMobile ? AppLayout.sp3 : AppLayout.sp6,
-            AppLayout.sp8,
+            isMobile
+                ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+                : AppLayout.sp8,
           ),
           itemCount: list.length,
           itemBuilder: (context, index) {
@@ -605,9 +610,10 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppLayout.sp6),
-            FilledButton.tonal(
+            LiquidGlassButton.filled(
               onPressed: onStart,
-              child: const Text(S.startReading),
+              icon: const Icon(Icons.menu_book_rounded, size: 18),
+              label: S.startReading,
             ),
           ],
         ),

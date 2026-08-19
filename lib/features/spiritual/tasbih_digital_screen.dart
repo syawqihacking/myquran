@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/app_layout.dart';
+
+import '../widgets/liquid_glass.dart';
 
 class TasbihCountNotifier extends Notifier<int> {
   @override
@@ -126,17 +127,11 @@ class _TasbihDigitalScreenState extends ConsumerState<TasbihDigitalScreen> with 
                 ),
               ),
               const SizedBox(height: 60),
-              TextButton.icon(
+              LiquidGlassButton.tonal(
                 onPressed: count > 0 ? _onReset : null,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Reset'),
-                style: TextButton.styleFrom(
-                  foregroundColor: scheme.onSurfaceVariant,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  textStyle: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                label: 'Reset',
+                height: 44,
               ),
             ],
           ),

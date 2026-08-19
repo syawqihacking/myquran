@@ -11,6 +11,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/providers.dart';
 import '../../data/services/prayer_time_service.dart';
+import '../widgets/liquid_glass.dart';
 
 /// Jadwal Shalat & Kiblat (Stitch design): a pinned app bar, a centered
 /// next-prayer header with a live countdown and location row, a qibla compass
@@ -222,48 +223,32 @@ class _HeaderCountdown extends StatelessWidget {
   }
 }
 
-/// Subtle "Ubah" text button that underlines on hover.
-class _ChangeLocationButton extends StatefulWidget {
+/// 3D Liquid Glass "Ubah Lokasi" capsule button.
+class _ChangeLocationButton extends StatelessWidget {
   const _ChangeLocationButton({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
-  State<_ChangeLocationButton> createState() => _ChangeLocationButtonState();
-}
-
-class _ChangeLocationButtonState extends State<_ChangeLocationButton> {
-  bool _hovered = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final labelStyle =
-        theme.textTheme.labelSmall ?? const TextStyle(fontSize: 12);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppLayout.sp1,
-            vertical: AppLayout.sp1,
-          ),
-          child: AnimatedDefaultTextStyle(
-            duration: AppLayout.durQuick,
-            style: labelStyle.copyWith(
+    return LiquidGlassCapsule(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.edit_location_alt_rounded, size: 14, color: scheme.primary),
+          const SizedBox(width: 4),
+          Text(
+            S.changeLocation,
+            style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.primary,
-              fontWeight: FontWeight.w600,
-              decoration:
-                  _hovered ? TextDecoration.underline : TextDecoration.none,
-              decorationColor: scheme.primary,
+              fontWeight: FontWeight.w700,
             ),
-            child: const Text(S.changeLocation),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -839,10 +824,10 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: AppLayout.sp3),
             Text(S.prayerError, style: theme.textTheme.bodyMedium),
             const SizedBox(height: AppLayout.sp4),
-            OutlinedButton.icon(
+            LiquidGlassButton.tonal(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(S.retry),
+              label: S.retry,
             ),
           ],
         ),

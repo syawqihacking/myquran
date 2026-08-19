@@ -13,6 +13,7 @@ import '../../data/repositories/quran_repositories.dart';
 import '../../data/repositories/user_repositories.dart';
 import '../reader/reader_screen.dart';
 import '../widgets/ayah_number_badge.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Segments of the unified Al-Qur'an page (the list tabs). Pencarian bukan
@@ -96,6 +97,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     final showJuz = !state.searchOpen && state.segment == BrowseSegment.juz;
     final showFavorit =
         !state.searchOpen && state.segment == BrowseSegment.favorit;
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
     return SafeArea(
       bottom: false,
@@ -108,11 +111,13 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 AppLayout.sp6,
                 AppLayout.sp5,
                 AppLayout.sp6,
-                AppLayout.sp8,
+                isMobile
+                    ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+                    : AppLayout.sp8,
               ),
               children: [
                 // The design's inline search bar. Tapping it opens the search
@@ -205,12 +210,15 @@ class _BrowseAppBar extends StatelessWidget {
           ),
           Positioned(
             right: 0,
-            child: IconButton(
-              tooltip: searchOpen ? S.closeSearch : S.openSearch,
-              isSelected: searchOpen,
-              onPressed: onToggleSearch,
-              icon: Icon(Icons.search_rounded, color: scheme.primary),
-              selectedIcon: Icon(Icons.close_rounded, color: scheme.primary),
+            child: GlassTouchButton(
+              radius: AppLayout.radiusFull,
+              child: IconButton(
+                tooltip: searchOpen ? S.closeSearch : S.openSearch,
+                isSelected: searchOpen,
+                onPressed: onToggleSearch,
+                icon: Icon(Icons.search_rounded, color: scheme.primary),
+                selectedIcon: Icon(Icons.close_rounded, color: scheme.primary),
+              ),
             ),
           ),
         ],
@@ -245,45 +253,48 @@ class _SearchBarTriggerState extends State<_SearchBarTrigger> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-          border: Border.all(
-            color: _hovered ? scheme.primary : scheme.outlineVariant,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-          child: InkWell(
-            onTap: widget.onTap,
+      child: GlassTouchButton(
+        radius: AppLayout.radiusFull,
+        child: AnimatedContainer(
+          duration: AppLayout.durBase,
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp4,
-                vertical: AppLayout.sp3,
+            border: Border.all(
+              color: _hovered ? scheme.primary : scheme.outlineVariant,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.search_rounded, color: scheme.outline),
-                  const SizedBox(width: AppLayout.sp3),
-                  Text(
-                    S.browseSearchHint,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppLayout.sp4,
+                  vertical: AppLayout.sp3,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search_rounded, color: scheme.outline),
+                    const SizedBox(width: AppLayout.sp3),
+                    Text(
+                      S.browseSearchHint,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

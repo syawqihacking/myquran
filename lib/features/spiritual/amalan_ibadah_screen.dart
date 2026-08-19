@@ -7,6 +7,7 @@ import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/amalan_ibadah_data.dart';
 import '../../data/providers.dart';
+import '../widgets/liquid_glass.dart';
 
 /// Filter chips in the Stitch design's order. `null` = "Semua".
 const List<(DeedCategory?, String)> _amalanChips = [
@@ -945,16 +946,11 @@ class _LearnMoreButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-        foregroundColor: scheme.primary,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppLayout.sp2,
-          vertical: AppLayout.sp1,
-        ),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return LiquidGlassCapsule(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp3,
+        vertical: AppLayout.sp1 + 2,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -962,12 +958,13 @@ class _LearnMoreButton extends StatelessWidget {
           Text(
             S.amalanLearnMore,
             style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.6,
+              color: scheme.primary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
             ),
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.arrow_forward_rounded, size: 16),
+          Icon(Icons.arrow_forward_rounded, size: 14, color: scheme.primary),
         ],
       ),
     );

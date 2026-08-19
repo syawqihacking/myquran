@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'core/app_constants.dart';
 import 'core/app_layout.dart';
@@ -13,6 +14,7 @@ import 'features/home/home_screen.dart';
 import 'features/prayer/prayer_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/stats/stats_screen.dart';
+import 'features/widgets/liquid_glass.dart';
 
 /// App root: watches the theme setting and applies the MyQuran theme.
 class MyQuranApp extends ConsumerWidget {
@@ -110,30 +112,42 @@ class _AppShellState extends ConsumerState<AppShell> {
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): _openSearch,
       },
       child: Scaffold(
-        bottomNavigationBar: isMobile
-            ? _BottomNav(
-                view: _view,
-                onSelect: (v) => setState(() => _view = v),
-              )
-            : null,
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: Stack(
           children: [
-            if (!isMobile)
-              _Sidebar(
-                view: _view,
-                onSelect: (v) => setState(() => _view = v),
-              ),
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: AppConstants.contentColumnMaxWidth,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!isMobile)
+                  _Sidebar(
+                    view: _view,
+                    onSelect: (v) => setState(() => _view = v),
                   ),
-                  child: body,
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: AppConstants.contentColumnMaxWidth,
+                      ),
+                      child: body,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Floating liquid-glass bottom nav on mobile: the content row
+            // stays full-height behind it so scrolling content refracts
+            // through the glass. Each screen's scrollable carries bottom
+            // padding so its last item clears the nav at the scroll extreme.
+            if (isMobile)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _BottomNav(
+                  view: _view,
+                  onSelect: (v) => setState(() => _view = v),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -160,9 +174,20 @@ class _BottomNav extends StatelessWidget {
       _View.profile => 4,
     };
 
-    return NavigationBar(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activeGreen = isDark ? const Color(0xFF67E8B5) : const Color(0xFF064E3B);
+    final inactiveColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
+    return GlassTabBar.bottom(
+      horizontalPadding: 16,
+      verticalPadding: 6,
+      barHeight: 64,
       selectedIndex: selectedIndex,
-      onDestinationSelected: (idx) {
+      selectedIconColor: activeGreen,
+      selectedLabelColor: activeGreen,
+      unselectedIconColor: inactiveColor,
+      unselectedLabelColor: inactiveColor,
+      onTabSelected: (idx) {
         final v = switch (idx) {
           0 => _View.home,
           1 => _View.browse,
@@ -173,31 +198,31 @@ class _BottomNav extends StatelessWidget {
         };
         onSelect(v);
       },
-      destinations: [
-        const NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home_rounded),
+      tabs: [
+        const GlassTab(
           label: 'Beranda',
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home_rounded),
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.menu_book_outlined),
-          selectedIcon: const Icon(Icons.menu_book_rounded),
+        GlassTab(
           label: S.browseTitle,
+          icon: const Icon(Icons.menu_book_outlined),
+          activeIcon: const Icon(Icons.menu_book_rounded),
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.bookmark_border_rounded),
-          selectedIcon: Icon(Icons.bookmark_rounded),
+        const GlassTab(
           label: 'Penanda',
+          icon: Icon(Icons.bookmark_border_rounded),
+          activeIcon: Icon(Icons.bookmark_rounded),
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.insights_outlined),
-          selectedIcon: Icon(Icons.insights_rounded),
+        const GlassTab(
           label: 'Statistik',
+          icon: Icon(Icons.insights_outlined),
+          activeIcon: Icon(Icons.insights_rounded),
         ),
-        const NavigationDestination(
-          icon: Icon(Icons.person_outline_rounded),
-          selectedIcon: Icon(Icons.person_rounded),
+        GlassTab(
           label: S.profileTitle,
+          icon: const Icon(Icons.person_outline_rounded),
+          activeIcon: const Icon(Icons.person_rounded),
         ),
       ],
     );

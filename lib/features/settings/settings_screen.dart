@@ -8,6 +8,7 @@ import '../../core/app_strings.dart';
 import '../../data/db/user_database.dart';
 import '../../data/models/adzan_voice.dart';
 import '../../data/providers.dart';
+import '../widgets/liquid_glass.dart';
 
 /// Settings (design §21).
 class SettingsScreen extends ConsumerWidget {
@@ -53,8 +54,10 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.brightness_6_rounded,
               title: S.themeModeLabel,
               subtitle: S.themeModeSublabel,
-              bottom: SizedBox(
+              bottom: LiquidGlassCapsule(
                 width: double.infinity,
+                padding: const EdgeInsets.all(2),
+                interactive: false,
                 child: SegmentedButton<ThemeMode>(
                   segments: const [
                     ButtonSegment(
@@ -76,8 +79,15 @@ class SettingsScreen extends ConsumerWidget {
                   selected: {settings.themeMode},
                   onSelectionChanged: (s) => controller.setThemeMode(s.first),
                   showSelectedIcon: false,
-                  style: const ButtonStyle(
+                  style: ButtonStyle(
                     visualDensity: VisualDensity.compact,
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return theme.colorScheme.primary.withValues(alpha: 0.28);
+                      }
+                      return Colors.transparent;
+                    }),
+                    side: const WidgetStatePropertyAll(BorderSide.none),
                   ),
                 ),
               ),
@@ -87,9 +97,16 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.format_size_rounded,
               title: S.quranFontSizeLabel,
               subtitle: S.quranFontSizeSublabel,
-              trailing: TextButton(
-                onPressed: controller.resetFontStep,
-                child: const Text(S.reset),
+              trailing: LiquidGlassCapsule(
+                onTap: controller.resetFontStep,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                child: Text(
+                  S.reset,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
               ),
               bottom: Slider(
                 value: settings.quranFontStep.toDouble(),
@@ -105,9 +122,10 @@ class SettingsScreen extends ConsumerWidget {
             _SettingRow(
               icon: Icons.translate_rounded,
               title: S.showTranslationLabel,
-              trailing: Switch(
+              trailing: GlassSwitch(
                 value: settings.showTranslation,
                 onChanged: controller.setShowTranslation,
+                useOwnLayer: true,
               ),
             ),
             const _DividerRow(),
@@ -138,9 +156,10 @@ class SettingsScreen extends ConsumerWidget {
             _SettingRow(
               icon: Icons.menu_book_rounded,
               title: S.tafsirDefaultLabel,
-              trailing: Switch(
+              trailing: GlassSwitch(
                 value: settings.tafsirOpenByDefault,
                 onChanged: controller.setTafsirOpenByDefault,
+                useOwnLayer: true,
               ),
             ),
             const _DividerRow(),
@@ -148,18 +167,20 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.palette_rounded,
               title: S.tajwidColorLabel,
               subtitle: S.tajwidColorSublabel,
-              trailing: Switch(
+              trailing: GlassSwitch(
                 value: settings.tajwidColor,
                 onChanged: controller.setTajwidColor,
+                useOwnLayer: true,
               ),
             ),
             const _DividerRow(),
             _SettingRow(
               icon: Icons.history_rounded,
               title: S.restoreLastReadLabel,
-              trailing: Switch(
+              trailing: GlassSwitch(
                 value: settings.restoreLastRead,
                 onChanged: controller.setRestoreLastRead,
+                useOwnLayer: true,
               ),
             ),
             const _DividerRow(),
@@ -187,8 +208,9 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.notifications_active_rounded,
                 title: S.prayerNotificationsLabel,
                 subtitle: S.prayerNotificationsSublabel,
-                trailing: Switch(
+                trailing: GlassSwitch(
                   value: ref.watch(prayerNotificationsEnabledProvider),
+                  useOwnLayer: true,
                   onChanged: (v) async {
                     final ok = await ref
                         .read(prayerNotificationsEnabledProvider.notifier)
@@ -206,8 +228,9 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.self_improvement_rounded,
                 title: S.dzikirReminderLabel,
                 subtitle: S.dzikirReminderSublabel,
-                trailing: Switch(
+                trailing: GlassSwitch(
                   value: ref.watch(dzikirReminderEnabledProvider),
+                  useOwnLayer: true,
                   onChanged: (v) async {
                     final ok = await ref
                         .read(dzikirReminderEnabledProvider.notifier)
@@ -228,23 +251,29 @@ class SettingsScreen extends ConsumerWidget {
                 bottom: Wrap(
                   spacing: AppLayout.sp2,
                   children: [
-                    TextButton.icon(
-                      onPressed: () => _sendTestNotification(
-                        context,
-                        ref,
-                        ref.read(selectedAdzanVoiceProvider),
+                    GlassTouchButton(
+                      radius: AppLayout.radiusFull,
+                      child: TextButton.icon(
+                        onPressed: () => _sendTestNotification(
+                          context,
+                          ref,
+                          ref.read(selectedAdzanVoiceProvider),
+                        ),
+                        icon: const Icon(Icons.volume_up_rounded, size: 18),
+                        label: const Text(S.adzanTestSholat),
                       ),
-                      icon: const Icon(Icons.volume_up_rounded, size: 18),
-                      label: const Text(S.adzanTestSholat),
                     ),
-                    TextButton.icon(
-                      onPressed: () => _sendTestNotification(
-                        context,
-                        ref,
-                        ref.read(selectedFajrAdzanVoiceProvider),
+                    GlassTouchButton(
+                      radius: AppLayout.radiusFull,
+                      child: TextButton.icon(
+                        onPressed: () => _sendTestNotification(
+                          context,
+                          ref,
+                          ref.read(selectedFajrAdzanVoiceProvider),
+                        ),
+                        icon: const Icon(Icons.wb_twilight_rounded, size: 18),
+                        label: const Text(S.adzanTestFajr),
                       ),
-                      icon: const Icon(Icons.wb_twilight_rounded, size: 18),
-                      label: const Text(S.adzanTestFajr),
                     ),
                   ],
                 ),
@@ -336,12 +365,18 @@ class SettingsScreen extends ConsumerWidget {
               title: S.resetDataLabel,
               subtitle: S.resetDataSublabel,
               destructive: true,
-              trailing: TextButton(
-                onPressed: () => _confirmReset(context, ref),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
+              trailing: LiquidGlassCapsule(
+                onTap: () => _confirmReset(context, ref),
+                backgroundColor: theme.colorScheme.error.withValues(alpha: 0.15),
+                glowColor: theme.colorScheme.error,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                child: Text(
+                  S.resetDataConfirm,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.error,
+                  ),
                 ),
-                child: const Text(S.resetDataConfirm),
               ),
             ),
           ],
@@ -673,10 +708,13 @@ class _SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         child: Row(
           children: [
-            IconButton(
-              onPressed: () => Navigator.of(context).maybePop(),
-              tooltip: S.back,
-              icon: const Icon(Icons.arrow_back_rounded),
+            GlassTouchButton(
+              radius: AppLayout.radiusFull,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                tooltip: S.back,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
             ),
           ],
         ),
@@ -760,7 +798,6 @@ class _SettingRowState extends State<_SettingRow> {
     final scheme = theme.colorScheme;
     
     final isDestructive = widget.destructive;
-    final accent = isDestructive ? scheme.error : scheme.primary;
     final iconBg = isDestructive 
         ? scheme.errorContainer.withValues(alpha: 0.5) 
         : scheme.primaryContainer.withValues(alpha: 0.3);

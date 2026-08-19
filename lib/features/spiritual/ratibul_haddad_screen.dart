@@ -11,6 +11,7 @@ import '../../data/models/ratib_data.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/providers.dart';
 import '../../data/services/audio_service.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Ratibul Haddad (Stitch design): a pinned app bar, a scroll progress bar, an
@@ -938,9 +939,9 @@ class _EndFooter extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppLayout.sp6),
-          FilledButton.tonal(
+          LiquidGlassButton.filled(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text(S.back),
+            label: S.back,
           ),
         ],
       ),

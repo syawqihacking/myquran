@@ -5,6 +5,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -13,6 +14,7 @@ import 'dart:io';
 import 'app.dart';
 import 'core/app_constants.dart';
 import 'data/providers.dart';
+import 'features/widgets/nav_glass_bubble.dart';
 
 /// Registers the Indonesian locale for the `hijri` package (it only ships
 /// `en`/`ar`/`tr`). Day keys follow Dart's `DateTime.weekday` (1=Senin..7=Ahad).
@@ -71,6 +73,10 @@ void _registerHijriLocale() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize liquid glass widgets & warm up shaders
+  await LiquidGlassWidgets.initialize();
+  ensureNavBubbleShader();
+
   _registerHijriLocale();
 
   // Audio backend for Linux/Windows: registers media_kit's libmpv before any
@@ -80,7 +86,7 @@ Future<void> main() async {
 
   // Mobile audio focus; a safe no-op on desktop (no platform channel).
   final audioSession = await AudioSession.instance;
-  await audioSession.configure(const AudioSessionConfiguration.speech());
+  await audioSession.configure(const AudioSessionConfiguration.music());
 
   // Foreground service that plays the full adzan at prayer times. Mobile-only:
   // the plugin has no platform channel on desktop, so this must be a no-op
@@ -133,9 +139,12 @@ Future<void> main() async {
   }
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const MyQuranApp(),
+    LiquidGlassWidgets.wrap(
+      brightnessResolver: Theme.maybeBrightnessOf,
+      child: UncontrolledProviderScope(
+        container: container,
+        child: const MyQuranApp(),
+      ),
     ),
   );
 }

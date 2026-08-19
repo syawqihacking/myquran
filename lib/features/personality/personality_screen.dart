@@ -7,6 +7,7 @@ import '../../data/models/personality_data.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/personality_repository.dart';
 import '../browse/browse_screen.dart' show openSurah;
+import '../widgets/liquid_glass.dart';
 
 /// Analisis Kepribadian (Stitch "Personality Analysis", Sacred Path).
 ///
@@ -512,16 +513,9 @@ class _NextStepCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppLayout.sp4),
-          FilledButton(
+          LiquidGlassButton.filled(
             onPressed: () => openSurah(context, surahId),
-            style: FilledButton.styleFrom(
-              shape: const StadiumBorder(),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp5,
-                vertical: AppLayout.sp3,
-              ),
-            ),
-            child: const Text(S.personalityNextButton),
+            label: S.personalityNextButton,
           ),
         ],
       ),
@@ -562,9 +556,9 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppLayout.sp4),
-            FilledButton.tonal(
+            LiquidGlassButton.tonal(
               onPressed: () => openSurah(context, 1),
-              child: const Text(S.personalityEmptyCta),
+              label: S.personalityEmptyCta,
             ),
           ],
         ),

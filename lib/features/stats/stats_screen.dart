@@ -10,6 +10,7 @@ import '../../data/db/user_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_stats_repository.dart';
 import '../personality/personality_screen.dart';
+import '../widgets/liquid_glass.dart';
 
 /// Statistik: reading stats (streak, today), khatam planner (target + ring),
 /// 30-day reading calendar, and totals. Follows the house header (eyebrow +
@@ -22,11 +23,17 @@ class StatsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final stats = ref.watch(readingStatsProvider);
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp6,
-        vertical: AppLayout.sp8,
+      padding: EdgeInsets.fromLTRB(
+        AppLayout.sp6,
+        AppLayout.sp8,
+        AppLayout.sp6,
+        isMobile
+            ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+            : AppLayout.sp8,
       ),
       children: [
         Text(
@@ -313,18 +320,18 @@ class _KhatamPlanner extends ConsumerWidget {
         spacing: AppLayout.sp3,
         runSpacing: AppLayout.sp2,
         children: [
-          FilledButton.tonalIcon(
+          LiquidGlassButton.tonal(
             onPressed: () => ref.read(khatamRepositoryProvider).setTarget(
                   targetDate: null,
                   startDate: DateTime.now(),
                 ),
             icon: const Icon(Icons.event_available_rounded, size: 18),
-            label: const Text(S.khatamPlan30),
+            label: S.khatamPlan30,
           ),
-          OutlinedButton.icon(
+          LiquidGlassButton.tonal(
             onPressed: () => _pickTargetDate(context, ref),
             icon: const Icon(Icons.calendar_month_rounded, size: 18),
-            label: const Text(S.khatamPickDate),
+            label: S.khatamPickDate,
           ),
         ],
       );
@@ -381,10 +388,25 @@ class _KhatamPlanner extends ConsumerWidget {
             ],
           ),
         ),
-        TextButton.icon(
-          onPressed: () => _confirmClearTarget(context, ref),
-          icon: const Icon(Icons.delete_outline_rounded, size: 18),
-          label: const Text(S.khatamClear),
+        LiquidGlassCapsule(
+          onTap: () => _confirmClearTarget(context, ref),
+          backgroundColor: theme.colorScheme.error.withValues(alpha: 0.12),
+          glowColor: theme.colorScheme.error,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outline_rounded, size: 16, color: theme.colorScheme.error),
+              const SizedBox(width: 4),
+              Text(
+                S.khatamClear,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

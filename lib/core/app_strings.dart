@@ -149,6 +149,7 @@ abstract final class S {
   static const audioVolume = 'Volume';
   static const audioQueue = 'Daftar putar';
   static const audioClose = 'Tutup pemutar';
+  static const audioError = 'Gagal memutar audio. Periksa koneksi internet.';
 
   // Reader — offline murottal (download a surah's recitation).
   static const murottalDownload = 'Unduh murottal surah ini';

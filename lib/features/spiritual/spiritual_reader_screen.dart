@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/models/spiritual_content.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Reader screen for spiritual content (Tahlil, Doa, Ratib Al-Haddad),
@@ -571,9 +572,9 @@ class _EndFooter extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppLayout.sp6),
-          FilledButton.tonal(
+          LiquidGlassButton.filled(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text(S.back),
+            label: S.back,
           ),
         ],
       ),

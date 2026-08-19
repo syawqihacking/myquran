@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
+import '../widgets/liquid_glass.dart';
 import 'mosque_models.dart';
 import 'mosque_providers.dart';
 
@@ -952,19 +953,11 @@ class _RouteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return OutlinedButton.icon(
+    return LiquidGlassButton.tonal(
       onPressed: onTap,
       icon: const Icon(Icons.directions_rounded, size: 18),
-      label: const Text(S.masjidRute),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: scheme.primary,
-        side: BorderSide(color: scheme.primary),
-        padding: const EdgeInsets.symmetric(vertical: AppLayout.sp2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-        ),
-      ),
+      label: S.masjidRute,
+      height: 38,
     );
   }
 }
@@ -976,18 +969,10 @@ class _DetailButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return FilledButton(
+    return LiquidGlassButton.filled(
       onPressed: onTap,
-      style: FilledButton.styleFrom(
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        padding: const EdgeInsets.symmetric(vertical: AppLayout.sp2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-        ),
-      ),
-      child: const Text(S.masjidDetail),
+      label: S.masjidDetail,
+      height: 38,
     );
   }
 }
@@ -1077,17 +1062,11 @@ class _MosqueDetailSheet extends StatelessWidget {
             const SizedBox(height: AppLayout.sp6),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: LiquidGlassButton.filled(
                 onPressed: onRoute,
-                icon: const Icon(Icons.directions_rounded),
-                label: const Text(S.masjidRute),
-                style: FilledButton.styleFrom(
-                  backgroundColor: scheme.primary,
-                  foregroundColor: scheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppLayout.sp3,
-                  ),
-                ),
+                icon: const Icon(Icons.directions_rounded, size: 20),
+                label: S.masjidRute,
+                height: 48,
               ),
             ),
           ],

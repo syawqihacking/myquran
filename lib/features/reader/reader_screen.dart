@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +15,7 @@ import '../../data/providers.dart';
 import '../../data/repositories/user_repositories.dart';
 import '../../data/services/audio_service.dart';
 import '../widgets/ayah_number_badge.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/ornament.dart';
 import '../widgets/quran_text_view.dart';
 import 'zen_mode_provider.dart';
@@ -738,21 +738,32 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       );
   }
 
+  /// Displays an error SnackBar when audio playback fails.
+  void _showAudioError() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(S.audioError),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 2500),
+        ),
+      );
+  }
+
   /// Requests playback of [ayah]. Plays the whole surah continuously from this
   /// ayah onward (the audio service builds a playlist of the remaining ayahs
-  /// and auto-advances), so the user does not have to tap each ayah to hear the
-  /// next one. NoopAudioService stays idle forever, so if the state has not
-  /// flipped within a frame we tell the truth: audio is not implemented yet. A
-  /// real service flips to buffering/playing, so the player shows the target
-  /// and no SnackBar appears.
+  /// and auto-advances).
   Future<void> _requestPlay(Ayah ayah) async {
-    await ref.read(audioServiceProvider).playSurahFrom(widget.surahId, ayah.id);
-    if (!mounted) return;
     setState(() => _audioTarget = ayah);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    try {
+      await ref
+          .read(audioServiceProvider)
+          .playSurahFrom(widget.surahId, ayah.id);
+    } catch (_) {
       if (!mounted) return;
-      if (_audioState.isIdle) _showComingSoon();
-    });
+      _showAudioError();
+    }
   }
 
   /// Card play button: pause if this ayah is the one playing, resume if it is
@@ -1706,26 +1717,22 @@ class _StickyAudioPlayer extends StatelessWidget {
         ? (state.position.inMilliseconds / durationMs).clamp(0.0, 1.0)
         : 0.0;
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: scheme.surface.withValues(alpha: 0.9),
-            border: Border(
-              top: BorderSide(color: scheme.surfaceContainerHighest),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.08),
-                blurRadius: 32,
-                offset: const Offset(0, -12),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: scheme.primary.withValues(alpha: 0.08),
+            blurRadius: 32,
+            offset: const Offset(0, -12),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        ],
+      ),
+      child: LiquidGlassLens(
+        style: glassChromeStyle(context),
+        useImpellerBackdrop: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
               _PlayerProgressBar(
                 progress: progress,
                 fill: scheme.primary,
@@ -1804,25 +1811,34 @@ class _StickyAudioPlayer extends StatelessWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            _PlayerIconButton(
-                              icon: Icons.skip_previous_rounded,
-                              size: 28,
-                              boxSize: isMobile ? 36 : 40,
-                              tooltip: S.audioPrev,
-                              onPressed: onPrev,
+                            GlassTouchButton(
+                              radius: AppLayout.radiusFull,
+                              child: _PlayerIconButton(
+                                icon: Icons.skip_previous_rounded,
+                                size: 28,
+                                boxSize: isMobile ? 36 : 40,
+                                tooltip: S.audioPrev,
+                                onPressed: onPrev,
+                              ),
                             ),
                             const SizedBox(width: AppLayout.sp1),
-                            _PlayPauseButton(
-                              status: state.status,
-                              onPressed: onTogglePlayPause,
+                            GlassTouchButton(
+                              radius: AppLayout.radiusFull,
+                              child: _PlayPauseButton(
+                                status: state.status,
+                                onPressed: onTogglePlayPause,
+                              ),
                             ),
                             const SizedBox(width: AppLayout.sp1),
-                            _PlayerIconButton(
-                              icon: Icons.skip_next_rounded,
-                              size: 28,
-                              boxSize: isMobile ? 36 : 40,
-                              tooltip: S.audioNext,
-                              onPressed: onNext,
+                            GlassTouchButton(
+                              radius: AppLayout.radiusFull,
+                              child: _PlayerIconButton(
+                                icon: Icons.skip_next_rounded,
+                                size: 28,
+                                boxSize: isMobile ? 36 : 40,
+                                tooltip: S.audioNext,
+                                onPressed: onNext,
+                              ),
                             ),
                           ],
                         ),
@@ -1833,47 +1849,50 @@ class _StickyAudioPlayer extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (!isMobile) ...[
-                              TextButton(
-                                onPressed: onCycleSpeed,
-                                style: TextButton.styleFrom(
-                                  foregroundColor: scheme.onSurfaceVariant,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppLayout.sp3,
-                                  ),
-                                  minimumSize: const Size(0, 36),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  shape: const StadiumBorder(),
-                                  visualDensity: VisualDensity.compact,
+                              LiquidGlassCapsule(
+                                onTap: onCycleSpeed,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppLayout.sp3,
+                                  vertical: AppLayout.sp1 + 2,
                                 ),
                                 child: Text(
                                   _speedLabel,
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
+                                    color: scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: AppLayout.sp1),
-                              _PlayerIconButton(
-                                icon: Icons.volume_up_rounded,
-                                size: 24,
-                                tooltip: S.audioVolume,
-                                onPressed: onVolume,
+                              GlassTouchButton(
+                                radius: AppLayout.radiusFull,
+                                child: _PlayerIconButton(
+                                  icon: Icons.volume_up_rounded,
+                                  size: 24,
+                                  tooltip: S.audioVolume,
+                                  onPressed: onVolume,
+                                ),
                               ),
                             ],
-                            _PlayerIconButton(
-                              icon: Icons.queue_music_rounded,
-                              size: 24,
-                              boxSize: isMobile ? 36 : 40,
-                              tooltip: S.audioQueue,
-                              onPressed: onQueue,
+                            GlassTouchButton(
+                              radius: AppLayout.radiusFull,
+                              child: _PlayerIconButton(
+                                icon: Icons.queue_music_rounded,
+                                size: 24,
+                                boxSize: isMobile ? 36 : 40,
+                                tooltip: S.audioQueue,
+                                onPressed: onQueue,
+                              ),
                             ),
-                            _PlayerIconButton(
-                              icon: Icons.close_rounded,
-                              size: 20,
-                              boxSize: isMobile ? 36 : 40,
-                              tooltip: S.audioClose,
-                              onPressed: onClose,
+                            GlassTouchButton(
+                              radius: AppLayout.radiusFull,
+                              child: _PlayerIconButton(
+                                icon: Icons.close_rounded,
+                                size: 20,
+                                boxSize: isMobile ? 36 : 40,
+                                tooltip: S.audioClose,
+                                onPressed: onClose,
+                              ),
                             ),
                           ],
                         ),
@@ -1885,7 +1904,6 @@ class _StickyAudioPlayer extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

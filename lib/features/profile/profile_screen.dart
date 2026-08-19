@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../../core/app_strings.dart';
 import '../../data/providers.dart';
@@ -8,6 +9,7 @@ import '../../data/repositories/reading_history_repository.dart';
 import '../../data/repositories/reading_stats_repository.dart';
 import '../browse/browse_screen.dart';
 import '../settings/settings_screen.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/quran_text_view.dart';
 
 /// Profil Pengguna — honest profile screen: an editable display name, real
@@ -24,6 +26,8 @@ class ProfileScreen extends ConsumerWidget {
     final stats = ref.watch(readingStatsProvider).value;
     final surahCount = ref.watch(surahsReadCountProvider).value;
     final recent = ref.watch(profileRecentSurahsProvider);
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -33,11 +37,13 @@ class ProfileScreen extends ConsumerWidget {
             const _ProfileAppBar(),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   AppLayout.sp5,
                   AppLayout.sp2,
                   AppLayout.sp5,
-                  AppLayout.sp8,
+                  isMobile
+                      ? glassNavClearance + MediaQuery.paddingOf(context).bottom
+                      : AppLayout.sp8,
                 ),
                 children: [
                   const _ProfileHeader(),
@@ -161,18 +167,21 @@ class _ProfileHeader extends ConsumerWidget {
             Positioned(
               right: -2,
               bottom: -2,
-              child: Material(
-                color: scheme.primary,
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => _editName(context, ref),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      Icons.edit_rounded,
-                      size: 16,
-                      color: scheme.onPrimary,
+              child: GlassTouchButton(
+                radius: AppLayout.radiusFull,
+                child: Material(
+                  color: scheme.primary,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => _editName(context, ref),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(
+                        Icons.edit_rounded,
+                        size: 16,
+                        color: scheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
