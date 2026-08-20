@@ -27,6 +27,7 @@ import '../spiritual/zakat_calculator_screen.dart';
 import '../spiritual/ratibul_haddad_screen.dart';
 import '../spiritual/spiritual_reader_screen.dart';
 import '../spiritual/tasbih_digital_screen.dart';
+import '../thematic/thematic_verse_screen.dart';
 import '../widgets/ayah_number_badge.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
@@ -959,151 +960,237 @@ class _QuickActionsBento extends StatelessWidget {
 
   final VoidCallback onOpenPrayer;
 
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final contentWidth =
-        math.min(screenWidth, AppConstants.contentColumnMaxWidth) -
-        AppLayout.sp6 * 2;
-    // Base width on 4 visible items, so the first 4 look identical to before
-    final itemWidth = (contentWidth - (AppLayout.sp2 * 3)) / 4;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.explore_rounded,
-              label: S.qaKiblat,
-              onTap: onOpenPrayer,
+  void _showMoreFeatures(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppLayout.radiusLg),
+        ),
+      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final scheme = theme.colorScheme;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppLayout.sp4,
+              AppLayout.sp3,
+              AppLayout.sp4,
+              AppLayout.sp6,
             ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.volunteer_activism_rounded,
-              label: S.qaDoaHarian,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const DoaHarianScreen(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.monetization_on_rounded,
-              label: S.qaZakat,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const ZakatCalculatorScreen(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.mosque_rounded,
-              label: S.qaMasjidTerdekat,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const MosqueScreen()),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.psychology_rounded,
-              label: 'Kepribadian', // Shortened label
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const PersonalityScreen(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.calendar_month_rounded,
-              label: S.qaKalenderHijriah,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const HijriCalendarScreen(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.auto_stories_rounded,
-              label: S.tahlilTitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => SpiritualReaderScreen(
-                    title: S.tahlilTitle,
-                    subtitle: S.tahlilCaption,
-                    items: tahlilDoaItems,
-                    icon: Icons.auto_stories_rounded,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: scheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.brightness_5_rounded,
-              label: S.ratibTitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const RatibulHaddadScreen(),
+                const SizedBox(height: AppLayout.sp4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Fitur Lainnya',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.checklist_rounded,
-              label: S.amalanIbadahTitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const AmalanIbadahScreen(),
+                const SizedBox(height: AppLayout.sp3),
+                GridView.count(
+                  crossAxisCount: 4,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: AppLayout.sp3,
+                  crossAxisSpacing: AppLayout.sp2,
+                  childAspectRatio: 0.82,
+                  children: [
+                    _QuickActionTile(
+                      icon: Icons.category_rounded,
+                      label: 'Ayat Tematik',
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ThematicVerseScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.monetization_on_rounded,
+                      label: S.qaZakat,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ZakatCalculatorScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.mosque_rounded,
+                      label: S.qaMasjidTerdekat,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const MosqueScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.psychology_rounded,
+                      label: 'Kepribadian',
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const PersonalityScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.calendar_month_rounded,
+                      label: S.qaKalenderHijriah,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const HijriCalendarScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.auto_stories_rounded,
+                      label: S.tahlilTitle,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => SpiritualReaderScreen(
+                              title: S.tahlilTitle,
+                              subtitle: S.tahlilCaption,
+                              items: tahlilDoaItems,
+                              icon: Icons.auto_stories_rounded,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.brightness_5_rounded,
+                      label: S.ratibTitle,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const RatibulHaddadScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.checklist_rounded,
+                      label: S.amalanIbadahTitle,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AmalanIbadahScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.stars_rounded,
+                      label: S.asmaulHusnaTitle,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AsmaulHusnaScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.explore_rounded,
+            label: S.qaKiblat,
+            onTap: onOpenPrayer,
+          ),
+        ),
+        const SizedBox(width: AppLayout.sp2),
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.volunteer_activism_rounded,
+            label: S.qaDoaHarian,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DoaHarianScreen(),
               ),
             ),
           ),
-          const SizedBox(width: AppLayout.sp2),
-          SizedBox(
-            width: itemWidth,
-            child: _QuickActionTile(
-              icon: Icons.stars_rounded,
-              label: S.asmaulHusnaTitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const AsmaulHusnaScreen(),
-                ),
+        ),
+        const SizedBox(width: AppLayout.sp2),
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.fingerprint_rounded,
+            label: 'Tasbih Digital',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const TasbihDigitalScreen(),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: AppLayout.sp2),
+        Expanded(
+          child: _QuickActionTile(
+            icon: Icons.grid_view_rounded,
+            label: 'Lainnya',
+            onTap: () => _showMoreFeatures(context),
+          ),
+        ),
+      ],
     );
   }
 }

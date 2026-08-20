@@ -28,6 +28,8 @@ class AudioPlaybackState {
 }
 
 abstract class AudioService {
+  AudioPlaybackState get currentState;
+
   Stream<AudioPlaybackState> get stateStream;
 
   Future<void> playAyah(int ayahId);
@@ -48,6 +50,9 @@ class NoopAudioService implements AudioService {
   NoopAudioService() {
     _controller.add(const AudioPlaybackState.idle());
   }
+
+  @override
+  AudioPlaybackState get currentState => const AudioPlaybackState.idle();
 
   final StreamController<AudioPlaybackState> _controller =
       StreamController<AudioPlaybackState>.broadcast();

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'dart:io' show HttpException;
 
@@ -208,6 +209,26 @@ final audioServiceProvider = Provider<AudioService>((ref) {
   ref.onDispose(service.dispose);
   return service;
 });
+
+class AudioPlaybackNotifier extends Notifier<AudioPlaybackState> {
+  StreamSubscription<AudioPlaybackState>? _subscription;
+
+  @override
+  AudioPlaybackState build() {
+    final service = ref.watch(audioServiceProvider);
+    _subscription?.cancel();
+    _subscription = service.stateStream.listen((newState) {
+      state = newState;
+    });
+    ref.onDispose(() => _subscription?.cancel());
+    return service.currentState;
+  }
+}
+
+final audioPlaybackStateProvider =
+    NotifierProvider<AudioPlaybackNotifier, AudioPlaybackState>(
+  AudioPlaybackNotifier.new,
+);
 
 /// Dedicated Ratib Al-Haddad audio service, kept separate from the Quran
 /// `audioServiceProvider` so the two playback paths never interfere.

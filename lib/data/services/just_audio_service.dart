@@ -293,6 +293,11 @@ class JustAudioService implements AudioService {
     }
   }
 
+  AudioPlaybackState _currentState = const AudioPlaybackState.idle();
+
+  @override
+  AudioPlaybackState get currentState => _currentState;
+
   /// Maps the current playlist index to a global ayah id.
   int? get _currentAyahId {
     if (_queue.isEmpty) return null;
@@ -303,11 +308,12 @@ class JustAudioService implements AudioService {
 
   void _emit({AudioStatus? status, int? ayahId}) {
     if (_disposed) return;
-    _controller.add(AudioPlaybackState(
+    _currentState = AudioPlaybackState(
       status: status ?? _statusFromPlayer(),
       ayahId: ayahId ?? _currentAyahId,
       position: _player.position,
       duration: _player.duration ?? Duration.zero,
-    ));
+    );
+    _controller.add(_currentState);
   }
 }

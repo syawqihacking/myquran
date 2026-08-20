@@ -90,15 +90,15 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     segments: const [
                       GlassSegment(
-                        label: S.themeSystem,
+                        // label: S.themeSystem,
                         icon: Icon(Icons.brightness_auto_rounded, size: 18),
                       ),
                       GlassSegment(
-                        label: S.themeLight,
+                        // label: S.themeLight,
                         icon: Icon(Icons.light_mode_rounded, size: 18),
                       ),
                       GlassSegment(
-                        label: S.themeDark,
+                        // label: S.themeDark,
                         icon: Icon(Icons.dark_mode_rounded, size: 18),
                       ),
                     ],

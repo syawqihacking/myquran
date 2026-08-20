@@ -33,15 +33,18 @@ class AyahNumberBadge extends StatelessWidget {
           width: 1.5,
         ),
       ),
-      child: Text(
-        toArabicIndic(number),
-        textDirection: TextDirection.rtl,
-        style: TextStyle(
-          fontFamily: AppConstants.fontQuran,
-          fontSize: size * 0.55,
-          height: 1.0,
-          color: quran.quranAccent,
-          letterSpacing: 0,
+      child: Center(
+        child: Text(
+          toArabicIndic(number),
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: AppConstants.fontQuran,
+            fontSize: size * 0.48,
+            height: 1.0,
+            color: quran.quranAccent,
+            letterSpacing: 0,
+          ),
         ),
       ),
     );
