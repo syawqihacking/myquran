@@ -20,7 +20,12 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final controller = ref.read(settingsProvider.notifier);
 
-    final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+
+    final isDark = theme.brightness == Brightness.dark;
+    final activeGreen = isDark ? const Color(0xFF67E8B5) : const Color(0xFF064E3B);
+    final inactiveColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -47,340 +52,389 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppLayout.sp6),
-        _Section(
-          title: S.appearanceSection,
-          children: [
-            _SettingRow(
-              icon: Icons.brightness_6_rounded,
-              title: S.themeModeLabel,
-              subtitle: S.themeModeSublabel,
-              bottom: LiquidGlassCapsule(
-                width: double.infinity,
-                padding: const EdgeInsets.all(2),
-                interactive: false,
-                child: SegmentedButton<ThemeMode>(
-                  segments: const [
-                    ButtonSegment(
-                      value: ThemeMode.system,
-                      label: Text(S.themeSystem),
-                      icon: Icon(Icons.brightness_auto_rounded, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.light,
-                      label: Text(S.themeLight),
-                      icon: Icon(Icons.light_mode_rounded, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.dark,
-                      label: Text(S.themeDark),
-                      icon: Icon(Icons.dark_mode_rounded, size: 16),
-                    ),
-                  ],
-                  selected: {settings.themeMode},
-                  onSelectionChanged: (s) => controller.setThemeMode(s.first),
-                  showSelectedIcon: false,
-                  style: ButtonStyle(
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return theme.colorScheme.primary.withValues(alpha: 0.28);
-                      }
-                      return Colors.transparent;
-                    }),
-                    side: const WidgetStatePropertyAll(BorderSide.none),
-                  ),
-                ),
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.format_size_rounded,
-              title: S.quranFontSizeLabel,
-              subtitle: S.quranFontSizeSublabel,
-              trailing: LiquidGlassCapsule(
-                onTap: controller.resetFontStep,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                child: Text(
-                  S.reset,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              bottom: Slider(
-                value: settings.quranFontStep.toDouble(),
-                min: AppConstants.minQuranFontStep.toDouble(),
-                max: AppConstants.maxQuranFontStep.toDouble(),
-                divisions: AppConstants.maxQuranFontStep -
-                    AppConstants.minQuranFontStep,
-                label: '${settings.quranFontStep}',
-                onChanged: (v) => controller.setFontStep(v.round()),
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.translate_rounded,
-              title: S.showTranslationLabel,
-              trailing: GlassSwitch(
-                value: settings.showTranslation,
-                onChanged: controller.setShowTranslation,
-                useOwnLayer: true,
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.format_align_right_rounded,
-              title: S.alignLabel,
-              subtitle: S.alignNote,
-              bottom: SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: true, label: Text(S.alignRight)),
-                    ButtonSegment(value: false, label: Text(S.alignCenter)),
-                  ],
-                  selected: {settings.alignArabicRight},
-                  onSelectionChanged: (s) =>
-                      controller.setAlignArabicRight(s.first),
-                  showSelectedIcon: false,
-                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                ),
-              ),
-            ),
-          ],
-        ),
-        _Section(
-          title: S.readingSection,
-          children: [
-            _SettingRow(
-              icon: Icons.menu_book_rounded,
-              title: S.tafsirDefaultLabel,
-              trailing: GlassSwitch(
-                value: settings.tafsirOpenByDefault,
-                onChanged: controller.setTafsirOpenByDefault,
-                useOwnLayer: true,
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.palette_rounded,
-              title: S.tajwidColorLabel,
-              subtitle: S.tajwidColorSublabel,
-              trailing: GlassSwitch(
-                value: settings.tajwidColor,
-                onChanged: controller.setTajwidColor,
-                useOwnLayer: true,
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.history_rounded,
-              title: S.restoreLastReadLabel,
-              trailing: GlassSwitch(
-                value: settings.restoreLastRead,
-                onChanged: controller.setRestoreLastRead,
-                useOwnLayer: true,
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.record_voice_over_rounded,
-              title: S.reciterLabel,
-              subtitle: _reciterName(ref),
-              trailing: Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              onTap: () => _pickReciter(context, ref),
-            ),
-          ],
-        ),
-        // Prayer notifications are a mobile feature (Android/iOS alarms);
-        // hidden on desktop where scheduling is not supported.
-        if (defaultTargetPlatform == TargetPlatform.android ||
-            defaultTargetPlatform == TargetPlatform.iOS) ...[
           _Section(
-            title: S.notificationsSection,
+            title: S.appearanceSection,
             children: [
               _SettingRow(
-                icon: Icons.notifications_active_rounded,
-                title: S.prayerNotificationsLabel,
-                subtitle: S.prayerNotificationsSublabel,
-                trailing: GlassSwitch(
-                  value: ref.watch(prayerNotificationsEnabledProvider),
-                  useOwnLayer: true,
-                  onChanged: (v) async {
-                    final ok = await ref
-                        .read(prayerNotificationsEnabledProvider.notifier)
-                        .setEnabled(v);
-                    if (!ok && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(S.prayerNotificationsDenied)),
-                      );
-                    }
-                  },
+                icon: Icons.brightness_6_rounded,
+                title: S.themeModeLabel,
+                subtitle: S.themeModeSublabel,
+                bottom: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: GlassSegmentedControl(
+                    useOwnLayer: true,
+                    selectedIndex: switch (settings.themeMode) {
+                      ThemeMode.system => 0,
+                      ThemeMode.light => 1,
+                      ThemeMode.dark => 2,
+                    },
+                    onSegmentSelected: (index) {
+                      final mode = switch (index) {
+                        0 => ThemeMode.system,
+                        1 => ThemeMode.light,
+                        2 => ThemeMode.dark,
+                        _ => ThemeMode.system,
+                      };
+                      controller.setThemeMode(mode);
+                    },
+                    selectedIconColor: activeGreen,
+                    selectedTextStyle: TextStyle(
+                      color: activeGreen,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                    unselectedTextStyle: TextStyle(
+                      color: inactiveColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                    segments: const [
+                      GlassSegment(
+                        label: S.themeSystem,
+                        icon: Icon(Icons.brightness_auto_rounded, size: 18),
+                      ),
+                      GlassSegment(
+                        label: S.themeLight,
+                        icon: Icon(Icons.light_mode_rounded, size: 18),
+                      ),
+                      GlassSegment(
+                        label: S.themeDark,
+                        icon: Icon(Icons.dark_mode_rounded, size: 18),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const _DividerRow(),
               _SettingRow(
-                icon: Icons.self_improvement_rounded,
-                title: S.dzikirReminderLabel,
-                subtitle: S.dzikirReminderSublabel,
-                trailing: GlassSwitch(
-                  value: ref.watch(dzikirReminderEnabledProvider),
+                icon: Icons.format_size_rounded,
+                title: S.quranFontSizeLabel,
+                subtitle: S.quranFontSizeSublabel,
+                trailing: GlassChip(
                   useOwnLayer: true,
-                  onChanged: (v) async {
-                    final ok = await ref
-                        .read(dzikirReminderEnabledProvider.notifier)
-                        .setEnabled(v);
-                    if (!ok && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(S.dzikirReminderDenied)),
-                      );
-                    }
-                  },
+                  label: S.reset,
+                  labelStyle: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: activeGreen,
+                    fontSize: 12,
+                  ),
+                  onTap: controller.resetFontStep,
+                ),
+                bottom: Slider(
+                  value: settings.quranFontStep.toDouble(),
+                  min: AppConstants.minQuranFontStep.toDouble(),
+                  max: AppConstants.maxQuranFontStep.toDouble(),
+                  divisions:
+                      AppConstants.maxQuranFontStep -
+                      AppConstants.minQuranFontStep,
+                  label: '${settings.quranFontStep}',
+                  onChanged: (v) => controller.setFontStep(v.round()),
                 ),
               ),
               const _DividerRow(),
               _SettingRow(
-                icon: Icons.notifications_rounded,
-                title: S.prayerNotificationsTest,
-                subtitle: S.prayerNotificationsTestSublabel,
-                bottom: Wrap(
-                  spacing: AppLayout.sp2,
-                  children: [
-                    GlassTouchButton(
-                      radius: AppLayout.radiusFull,
-                      child: TextButton.icon(
-                        onPressed: () => _sendTestNotification(
-                          context,
-                          ref,
-                          ref.read(selectedAdzanVoiceProvider),
-                        ),
-                        icon: const Icon(Icons.volume_up_rounded, size: 18),
-                        label: const Text(S.adzanTestSholat),
-                      ),
+                icon: Icons.translate_rounded,
+                title: S.showTranslationLabel,
+                trailing: GlassSwitch(
+                  value: settings.showTranslation,
+                  onChanged: controller.setShowTranslation,
+                  useOwnLayer: true,
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.format_align_right_rounded,
+                title: S.alignLabel,
+                subtitle: S.alignNote,
+                bottom: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: GlassSegmentedControl(
+                    useOwnLayer: true,
+                    selectedIndex: settings.alignArabicRight ? 0 : 1,
+                    onSegmentSelected: (index) {
+                      controller.setAlignArabicRight(index == 0);
+                    },
+                    selectedIconColor: activeGreen,
+                    selectedTextStyle: TextStyle(
+                      color: activeGreen,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
                     ),
-                    GlassTouchButton(
-                      radius: AppLayout.radiusFull,
-                      child: TextButton.icon(
-                        onPressed: () => _sendTestNotification(
-                          context,
-                          ref,
-                          ref.read(selectedFajrAdzanVoiceProvider),
-                        ),
-                        icon: const Icon(Icons.wb_twilight_rounded, size: 18),
-                        label: const Text(S.adzanTestFajr),
-                      ),
+                    unselectedTextStyle: TextStyle(
+                      color: inactiveColor,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
                     ),
-                  ],
+                    segments: const [
+                      GlassSegment(label: S.alignRight),
+                      GlassSegment(label: S.alignCenter),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          // The voice picker is a self-contained card, so it sits on its own
-          // outside the section container instead of nesting two rounded boxes.
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppLayout.sp6),
-            child: _buildAdzanVoiceCard(context, ref),
-          ),
-        ],
-        _Section(
-          title: S.dataSection,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp4,
-                vertical: AppLayout.sp3,
+          _Section(
+            title: S.readingSection,
+            children: [
+              _SettingRow(
+                icon: Icons.menu_book_rounded,
+                title: S.tafsirDefaultLabel,
+                trailing: GlassSwitch(
+                  value: settings.tafsirOpenByDefault,
+                  onChanged: controller.setTafsirOpenByDefault,
+                  useOwnLayer: true,
+                ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 20,
-                    color: theme.colorScheme.primary,
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.palette_rounded,
+                title: S.tajwidColorLabel,
+                subtitle: S.tajwidColorSublabel,
+                trailing: GlassSwitch(
+                  value: settings.tajwidColor,
+                  onChanged: controller.setTajwidColor,
+                  useOwnLayer: true,
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.history_rounded,
+                title: S.restoreLastReadLabel,
+                trailing: GlassSwitch(
+                  value: settings.restoreLastRead,
+                  onChanged: controller.setRestoreLastRead,
+                  useOwnLayer: true,
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.record_voice_over_rounded,
+                title: S.reciterLabel,
+                subtitle: _reciterName(ref),
+                trailing: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                onTap: () => _pickReciter(context, ref),
+              ),
+            ],
+          ),
+          // Prayer notifications are a mobile feature (Android/iOS alarms);
+          // hidden on desktop where scheduling is not supported.
+          if (defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS) ...[
+            _Section(
+              title: S.notificationsSection,
+              children: [
+                _SettingRow(
+                  icon: Icons.notifications_active_rounded,
+                  title: S.prayerNotificationsLabel,
+                  subtitle: S.prayerNotificationsSublabel,
+                  trailing: GlassSwitch(
+                    value: ref.watch(prayerNotificationsEnabledProvider),
+                    useOwnLayer: true,
+                    onChanged: (v) async {
+                      final ok = await ref
+                          .read(prayerNotificationsEnabledProvider.notifier)
+                          .setEnabled(v);
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(S.prayerNotificationsDenied)),
+                        );
+                      }
+                    },
                   ),
-                  const SizedBox(width: AppLayout.sp3),
-                  Expanded(
+                ),
+                const _DividerRow(),
+                _SettingRow(
+                  icon: Icons.self_improvement_rounded,
+                  title: S.dzikirReminderLabel,
+                  subtitle: S.dzikirReminderSublabel,
+                  trailing: GlassSwitch(
+                    value: ref.watch(dzikirReminderEnabledProvider),
+                    useOwnLayer: true,
+                    onChanged: (v) async {
+                      final ok = await ref
+                          .read(dzikirReminderEnabledProvider.notifier)
+                          .setEnabled(v);
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(S.dzikirReminderDenied)),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const _DividerRow(),
+                _SettingRow(
+                  icon: Icons.notifications_rounded,
+                  title: S.prayerNotificationsTest,
+                  subtitle: S.prayerNotificationsTestSublabel,
+                  bottom: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      spacing: AppLayout.sp2,
+                      runSpacing: AppLayout.sp2,
+                      children: [
+                        GlassChip(
+                          useOwnLayer: true,
+                          icon: Icon(
+                            Icons.volume_up_rounded,
+                            size: 18,
+                            color: activeGreen,
+                          ),
+                          label: S.adzanTestSholat,
+                          labelStyle: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onTap: () => _sendTestNotification(
+                            context,
+                            ref,
+                            ref.read(selectedAdzanVoiceProvider),
+                          ),
+                        ),
+                        GlassChip(
+                          useOwnLayer: true,
+                          icon: Icon(
+                            Icons.wb_twilight_rounded,
+                            size: 18,
+                            color: activeGreen,
+                          ),
+                          label: S.adzanTestFajr,
+                          labelStyle: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onTap: () => _sendTestNotification(
+                            context,
+                            ref,
+                            ref.read(selectedFajrAdzanVoiceProvider),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // The voice picker is a self-contained card, so it sits on its own
+            // outside the section container instead of nesting two rounded boxes.
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppLayout.sp6),
+              child: _buildAdzanVoiceCard(context, ref),
+            ),
+          ],
+          _Section(
+            title: S.dataSection,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppLayout.sp4,
+                  vertical: AppLayout.sp3,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: AppLayout.sp3),
+                    Expanded(
+                      child: Text(
+                        S.dataSourceLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const _DividerRow(),
+              _SettingRow(
+                icon: Icons.storage_rounded,
+                title: S.dataVersionLabel,
+                trailing: _ValueChip(
+                  text: 'v${AppConstants.quranDbSchemaVersion}',
+                ),
+              ),
+              const _DividerRow(),
+              const _SettingRow(
+                icon: Icons.balance_rounded,
+                title: S.licenseLabel,
+                trailing: _ValueChip(text: 'CC BY-SA 4.0'),
+              ),
+            ],
+          ),
+          _Section(
+            title: S.shortcutsSection,
+            children: const [
+              _ShortcutRow(
+                icon: Icons.search_rounded,
+                label: S.shortcutSearch,
+                keys: ['Ctrl', 'K'],
+              ),
+              _ShortcutRow(
+                icon: Icons.zoom_in_rounded,
+                label: S.shortcutZoomIn,
+                keys: ['Ctrl', '+'],
+              ),
+              _ShortcutRow(
+                icon: Icons.zoom_out_rounded,
+                label: S.shortcutZoomOut,
+                keys: ['Ctrl', '−'],
+              ),
+              _ShortcutRow(
+                icon: Icons.close_rounded,
+                label: S.shortcutClose,
+                keys: ['Esc'],
+              ),
+            ],
+          ),
+          _Section(
+            title: S.resetDataSection,
+            children: [
+              _SettingRow(
+                icon: Icons.delete_forever_rounded,
+                title: S.resetDataLabel,
+                subtitle: S.resetDataSublabel,
+                destructive: true,
+                trailing: GlassTouchButton(
+                  onTap: () => _confirmReset(context, ref),
+                  radius: AppLayout.radiusFull,
+                  style: glassChromeStyle(
+                    context,
+                    cornerRadius: AppLayout.radiusFull,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.error.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     child: Text(
-                      S.dataSourceLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.4,
+                      S.resetDataConfirm,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.error,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const _DividerRow(),
-            _SettingRow(
-              icon: Icons.storage_rounded,
-              title: S.dataVersionLabel,
-              trailing: _ValueChip(
-                text: 'v${AppConstants.quranDbSchemaVersion}',
-              ),
-            ),
-            const _DividerRow(),
-            const _SettingRow(
-              icon: Icons.balance_rounded,
-              title: S.licenseLabel,
-              trailing: _ValueChip(text: 'CC BY-SA 4.0'),
-            ),
-          ],
-        ),
-        _Section(
-          title: S.shortcutsSection,
-          children: const [
-            _ShortcutRow(
-              icon: Icons.search_rounded,
-              label: S.shortcutSearch,
-              keys: ['Ctrl', 'K'],
-            ),
-            _ShortcutRow(
-              icon: Icons.zoom_in_rounded,
-              label: S.shortcutZoomIn,
-              keys: ['Ctrl', '+'],
-            ),
-            _ShortcutRow(
-              icon: Icons.zoom_out_rounded,
-              label: S.shortcutZoomOut,
-              keys: ['Ctrl', '−'],
-            ),
-            _ShortcutRow(
-              icon: Icons.close_rounded,
-              label: S.shortcutClose,
-              keys: ['Esc'],
-            ),
-          ],
-        ),
-        _Section(
-          title: S.resetDataSection,
-          children: [
-            _SettingRow(
-              icon: Icons.delete_forever_rounded,
-              title: S.resetDataLabel,
-              subtitle: S.resetDataSublabel,
-              destructive: true,
-              trailing: LiquidGlassCapsule(
-                onTap: () => _confirmReset(context, ref),
-                backgroundColor: theme.colorScheme.error.withValues(alpha: 0.15),
-                glowColor: theme.colorScheme.error,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                child: Text(
-                  S.resetDataConfirm,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.error,
-                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ],
       ),
     );
@@ -421,9 +475,9 @@ class SettingsScreen extends ConsumerWidget {
     ref.invalidate(dailyActivityProvider);
 
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(S.resetDataDone)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(S.resetDataDone)));
   }
 
   /// Lets the user pick an adzan voice for one category: shows the voices of
@@ -499,8 +553,7 @@ class SettingsScreen extends ConsumerWidget {
                       title: Text(
                         v.name,
                         style: textTheme.bodyLarge?.copyWith(
-                          fontWeight:
-                              v.id == current ? FontWeight.w600 : null,
+                          fontWeight: v.id == current ? FontWeight.w600 : null,
                           color: v.id == current ? scheme.primary : null,
                         ),
                       ),
@@ -544,15 +597,15 @@ class SettingsScreen extends ConsumerWidget {
         await ref.read(selectedAdzanVoiceProvider.notifier).select(selected);
       }
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.adzanVoiceChanged)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.adzanVoiceChanged)));
     } catch (_) {
       if (!context.mounted) return;
       Navigator.of(context).pop(); // close the progress dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.adzanVoiceDownloadFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.adzanVoiceDownloadFailed)));
     }
   }
 
@@ -566,9 +619,9 @@ class SettingsScreen extends ConsumerWidget {
         .read(prayerNotificationsProvider)
         .showTestNotification(voiceId: voiceId);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.prayerNotificationsTestSent)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.prayerNotificationsTestSent)));
     }
   }
 
@@ -608,9 +661,9 @@ class SettingsScreen extends ConsumerWidget {
       reciters = await ref.read(recitersProvider.future);
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.reciterLoadFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.reciterLoadFailed)));
       return;
     }
     if (!context.mounted || reciters.isEmpty) return;
@@ -675,9 +728,9 @@ class SettingsScreen extends ConsumerWidget {
 
     await ref.read(selectedReciterProvider.notifier).select(selected);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(S.reciterChanged)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(S.reciterChanged)));
   }
 }
 
@@ -796,10 +849,10 @@ class _SettingRowState extends State<_SettingRow> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    
+
     final isDestructive = widget.destructive;
-    final iconBg = isDestructive 
-        ? scheme.errorContainer.withValues(alpha: 0.5) 
+    final iconBg = isDestructive
+        ? scheme.errorContainer.withValues(alpha: 0.5)
         : scheme.primaryContainer.withValues(alpha: 0.3);
     final iconColor = isDestructive ? scheme.error : scheme.primary;
 
@@ -893,66 +946,73 @@ class _AdzanVoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppLayout.sp4,
-              AppLayout.sp3,
-              AppLayout.sp4,
-              AppLayout.sp2,
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.campaign_rounded, size: 18, color: scheme.tertiary),
-                const SizedBox(width: AppLayout.sp2),
-                Text(
-                  S.adzanVoiceLabel,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+    return GlassTouchButton(
+      radius: AppLayout.radiusLg,
+      style: glassChromeStyle(context, cornerRadius: AppLayout.radiusLg),
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppLayout.sp4,
+                AppLayout.sp3,
+                AppLayout.sp4,
+                AppLayout.sp2,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.campaign_rounded,
+                    size: 18,
+                    color: scheme.tertiary,
                   ),
-                ),
-              ],
+                  const SizedBox(width: AppLayout.sp2),
+                  Text(
+                    S.adzanVoiceLabel,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Divider(
-            height: 1,
-            indent: AppLayout.sp4,
-            endIndent: AppLayout.sp4,
-            color: scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-          _AdzanVoiceOption(
-            icon: Icons.volume_up_rounded,
-            iconBackground: scheme.secondaryContainer,
-            iconColor: scheme.onSecondaryContainer,
-            title: S.adzanVoiceSholatLabel,
-            voiceName: regularVoiceName,
-            onTap: onRegularTap,
-          ),
-          Divider(
-            height: 1,
-            indent: AppLayout.sp4 + 40 + AppLayout.sp3,
-            endIndent: AppLayout.sp4,
-            color: scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-          _AdzanVoiceOption(
-            icon: Icons.wb_twilight_rounded,
-            iconBackground: scheme.tertiaryContainer,
-            iconColor: scheme.onTertiaryContainer,
-            title: S.adzanVoiceFajrLabel,
-            voiceName: fajrVoiceName,
-            onTap: onFajrTap,
-          ),
-        ],
+            Divider(
+              height: 1,
+              indent: AppLayout.sp4,
+              endIndent: AppLayout.sp4,
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            _AdzanVoiceOption(
+              icon: Icons.volume_up_rounded,
+              iconBackground: scheme.secondaryContainer,
+              iconColor: scheme.onSecondaryContainer,
+              title: S.adzanVoiceSholatLabel,
+              voiceName: regularVoiceName,
+              onTap: onRegularTap,
+            ),
+            Divider(
+              height: 1,
+              indent: AppLayout.sp4 + 40 + AppLayout.sp3,
+              endIndent: AppLayout.sp4,
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            _AdzanVoiceOption(
+              icon: Icons.wb_twilight_rounded,
+              iconBackground: scheme.tertiaryContainer,
+              iconColor: scheme.onTertiaryContainer,
+              title: S.adzanVoiceFajrLabel,
+              voiceName: fajrVoiceName,
+              onTap: onFajrTap,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1053,9 +1113,7 @@ class _ShortcutRow extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: theme.colorScheme.primary),
           const SizedBox(width: AppLayout.sp3),
-          Expanded(
-            child: Text(label, style: theme.textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
           for (final k in keys) ...[
             Container(
               margin: const EdgeInsets.only(left: AppLayout.sp1),

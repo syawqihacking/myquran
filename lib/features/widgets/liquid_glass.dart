@@ -13,7 +13,17 @@ export 'package:liquid_glass_easy/liquid_glass_easy.dart'
         LiquidGlassFlexAdvanced;
 
 export 'package:liquid_glass_widgets/liquid_glass_widgets.dart'
-    show GlassSwitch, GlassTabBar, GlassTab;
+    show
+        GlassSwitch,
+        GlassTabBar,
+        GlassTab,
+        GlassSegmentedControl,
+        GlassSegment,
+        GlassButton,
+        GlassIconButton,
+        GlassChip,
+        GlassCard,
+        GlassContainer;
 
 export 'liquid_glass_switch.dart';
 export 'liquid_glass_capsule.dart';
