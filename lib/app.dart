@@ -13,6 +13,7 @@ import 'data/providers.dart';
 import 'features/bookmarks/bookmarks_screen.dart';
 import 'features/browse/browse_screen.dart';
 import 'features/home/home_screen.dart';
+import 'features/onboarding/onboarding_screen.dart';
 import 'features/prayer/prayer_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/stats/stats_screen.dart';
@@ -61,7 +62,12 @@ class MyQuranApp extends ConsumerWidget {
       theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
       darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
       themeMode: settings.themeMode,
-      home: const AppShell(),
+      // First launch shows onboarding; completing/skipping it flips
+      // [onboardingDoneProvider] and this swaps to the app shell. On every
+      // later launch the flag is already set, so onboarding never reappears.
+      home: ref.watch(onboardingDoneProvider)
+          ? const AppShell()
+          : const OnboardingScreen(),
     );
   }
 }
@@ -82,8 +88,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   /// State of the unified Al-Qur'an page (list tab + search panel open state).
   /// Owned here so it survives IndexedStack switches and can be driven from
   /// outside (Ctrl+K, Beranda quick access).
-  final ValueNotifier<BrowseState> _browseState =
-      ValueNotifier(const BrowseState());
+  final ValueNotifier<BrowseState> _browseState = ValueNotifier(
+    const BrowseState(),
+  );
 
   /// Bumped on every Ctrl+K so the search field re-focuses even when the
   /// search panel is already open (focus may have been lost in between).
@@ -121,9 +128,9 @@ class _AppShellState extends ConsumerState<AppShell> {
           onOpenSurahs: () => _openBrowse(BrowseSegment.surah),
           onOpenJuzs: () => _openBrowse(BrowseSegment.juz),
           onOpenSearch: _openSearch,
-          onOpenPrayer: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const PrayerScreen()),
-          ),
+          onOpenPrayer: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const PrayerScreen())),
         ),
         BrowseScreen(state: _browseState, focusTick: _searchFocusTick),
         const BookmarksScreen(),
@@ -132,11 +139,13 @@ class _AppShellState extends ConsumerState<AppShell> {
       ],
     );
 
-    final isMobile = MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
+    final isMobile =
+        MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyK, control: true): _openSearch,
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+            _openSearch,
       },
       child: Scaffold(
         body: Stack(
@@ -183,10 +192,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.view,
-    required this.onSelect,
-  });
+  const _BottomNav({required this.view, required this.onSelect});
 
   final _View view;
   final ValueChanged<_View> onSelect;
@@ -202,8 +208,12 @@ class _BottomNav extends StatelessWidget {
     };
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeGreen = isDark ? const Color(0xFF67E8B5) : const Color(0xFF064E3B);
-    final inactiveColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final activeGreen = isDark
+        ? const Color(0xFF67E8B5)
+        : const Color(0xFF064E3B);
+    final inactiveColor = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return GlassTabBar.bottom(
       horizontalPadding: 16,
@@ -257,10 +267,7 @@ class _BottomNav extends StatelessWidget {
 }
 
 class _Sidebar extends StatelessWidget {
-  const _Sidebar({
-    required this.view,
-    required this.onSelect,
-  });
+  const _Sidebar({required this.view, required this.onSelect});
 
   final _View view;
   final ValueChanged<_View> onSelect;
@@ -268,8 +275,11 @@ class _Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rail = MediaQuery.sizeOf(context).width < AppConstants.sidebarBreakpoint;
-    final width = rail ? AppConstants.sidebarRailWidth : AppConstants.sidebarFullWidth;
+    final rail =
+        MediaQuery.sizeOf(context).width < AppConstants.sidebarBreakpoint;
+    final width = rail
+        ? AppConstants.sidebarRailWidth
+        : AppConstants.sidebarFullWidth;
 
     return Container(
       width: width,
@@ -288,9 +298,7 @@ class _Sidebar extends StatelessWidget {
             const Divider(height: 1)
           else
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
               child: Text(
                 'BACA',
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -318,9 +326,7 @@ class _Sidebar extends StatelessWidget {
             const Divider(height: 1)
           else
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
               child: Text(
                 'LAINNYA',
                 style: theme.textTheme.labelSmall?.copyWith(
@@ -435,8 +441,8 @@ class _NavItemState extends State<_NavItem> {
           color: selected
               ? theme.colorScheme.secondaryContainer
               : _hovered
-                  ? theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)
-                  : Colors.transparent,
+              ? theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppLayout.radiusMd),
           child: InkWell(
             onTap: widget.onTap,
@@ -502,13 +508,11 @@ class _SidebarFooter extends ConsumerWidget {
           IconButton(
             onPressed: cycle,
             tooltip: S.changeTheme,
-            icon: Icon(
-              switch (mode) {
-                ThemeMode.light => Icons.light_mode_rounded,
-                ThemeMode.dark => Icons.dark_mode_rounded,
-                ThemeMode.system => Icons.brightness_auto_rounded,
-              },
-            ),
+            icon: Icon(switch (mode) {
+              ThemeMode.light => Icons.light_mode_rounded,
+              ThemeMode.dark => Icons.dark_mode_rounded,
+              ThemeMode.system => Icons.brightness_auto_rounded,
+            }),
           ),
           if (!rail)
             Text(

@@ -5,7 +5,8 @@ abstract final class S {
   // Home.
   static const homeEyebrow = 'AL-QUR\'AN';
   static const homeTitle = 'Beranda';
-  static const homeCaption = 'Baca Al-Qur\'an dengan tenang — tanpa sambungan internet.';
+  static const homeCaption =
+      'Baca Al-Qur\'an dengan tenang — tanpa sambungan internet.';
   static const continueEyebrow = 'LANJUTKAN MEMBACA';
   static const continueButton = 'Lanjutkan';
   static const noHistoryTitle = 'Belum ada riwayat baca.';
@@ -161,7 +162,8 @@ abstract final class S {
   static const murottalDownload = 'Unduh murottal surah ini';
   static const murottalDownloading = 'Mengunduh murottal...';
   static const murottalCancel = 'Batalkan unduhan';
-  static const murottalDownloaded = 'Murottal tersimpan — ketuk untuk menghapus';
+  static const murottalDownloaded =
+      'Murottal tersimpan — ketuk untuk menghapus';
   static const murottalDeleteConfirmTitle = 'Hapus murottal?';
   static const murottalDeleteConfirmMessage =
       'Hapus rekaman surah ini dari perangkat?';
@@ -185,7 +187,8 @@ abstract final class S {
   // Bookmarks.
   static const bookmarksEyebrow = 'PENANDA BACA';
   static const bookmarksTitle = 'Favorit & Penanda';
-  static const bookmarksCaption = 'Ayat yang kamu tandai tersimpan di perangkat ini.';
+  static const bookmarksCaption =
+      'Ayat yang kamu tandai tersimpan di perangkat ini.';
   static const bookmarksEmptyTitle = 'Belum ada penanda baca';
   static const bookmarksEmptyMessage =
       'Tandai ayat dengan ikon bookmark saat membaca — ayat akan muncul di sini.';
@@ -236,7 +239,8 @@ abstract final class S {
   static const tajwidColorTooltip = 'Warna tajwid';
   static const restoreLastReadLabel = 'Pulihkan posisi baca terakhir';
   static const dataSection = 'Data & Sumber';
-  static const dataSourceLabel = 'Teks, terjemahan, dan tafsir — Quran Kementerian Agama RI. Semua data tersimpan offline di perangkat.';
+  static const dataSourceLabel =
+      'Teks, terjemahan, dan tafsir — Quran Kementerian Agama RI. Semua data tersimpan offline di perangkat.';
   static const dataVersionLabel = 'Versi data';
   static const licenseLabel = 'Lisensi';
   static const shortcutsSection = 'Pintasan keyboard';
@@ -273,7 +277,8 @@ abstract final class S {
   static const statsTodayLabel = 'Ayat dibaca hari ini';
   static const statsKhatamEyebrow = 'PROGRES KHATAM';
   static const statsJuzsOf = 'dari 30 juz';
-  static const statsKhatamCaption = 'Baca 1 juz per hari untuk khatam dalam 30 hari.';
+  static const statsKhatamCaption =
+      'Baca 1 juz per hari untuk khatam dalam 30 hari.';
   static const statsTotalDaysLabel = 'Total hari membaca';
   static const statsTotalAyahsLabel = 'Total ayat dibaca';
 
@@ -503,7 +508,15 @@ abstract final class S {
   static const hijriYearSuffix = 'H';
   static const gregorianYearSuffix = 'M';
   // Short weekday header labels, aligned to Dart weekday order (1=Senin..7=Ahad).
-  static const hijriWeekdays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Ahad'];
+  static const hijriWeekdays = [
+    'Sen',
+    'Sel',
+    'Rab',
+    'Kam',
+    'Jum',
+    'Sab',
+    'Ahad',
+  ];
   static const hijriTodayLabel = 'Hari ini';
 
   // Profil Pengguna (user profile).
@@ -560,4 +573,31 @@ abstract final class S {
   static const zakatRupiah = 'Rp';
   static const zakatFieldRequired = 'Lengkapi semua kolom terlebih dahulu';
   static const zakatHargaHasilHint = 'Kosongkan untuk menghitung dalam kg';
+
+  // Onboarding (first launch only).
+  static const onboardingSkip = 'Lewati';
+  static const onboardingNext = 'Lanjut';
+  static const onboardingStart = 'Mulai';
+  static const onboardingWelcomeEyebrow = 'SELAMAT DATANG';
+  static const onboardingWelcomeTitle = 'Al-Qur\'an';
+  static const onboardingWelcomeTagline =
+      'Pendamping ibadah harianmu — membaca, sholat, dan dzikir dalam satu tempat.';
+  static const onboardingReadTitle = 'Baca Al-Qur\'an';
+  static const onboardingReadDesc =
+      '114 surah dan 30 juz lengkap, dengan bacaan Arab yang jelas dan rapi.';
+  static const onboardingChipTranslation = 'Terjemahan';
+  static const onboardingChipTafsir = 'Tafsir';
+  static const onboardingChipTajwid = 'Warna tajwid';
+  static const onboardingHijriTitle = 'Kalender Hijriah';
+  static const onboardingHijriDesc =
+      'Lihat tanggal hijriah dan tandai perjalanan khatam Al-Qur\'anmu.';
+  static const onboardingChipHijriDate = 'Tanggal Hijriah';
+  static const onboardingChipKhatam = 'Target Khatam';
+  static const onboardingHijriLabel = 'HIJRIAH';
+  static const onboardingHijriYear = '1448 H';
+  static const onboardingMosqueTitle = 'Temukan Masjid';
+  static const onboardingMosqueDesc =
+      'Lacak masjid terdekat dan arah kiblat di sekitarmu.';
+  static const onboardingChipNearbyMosque = 'Masjid Terdekat';
+  static const onboardingChipQibla = 'Arah Kiblat';
 }

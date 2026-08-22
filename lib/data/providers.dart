@@ -31,11 +31,13 @@ import 'services/prayer_time_service.dart';
 
 /// Overridden in `main()` with the awaited instance.
 final sharedPreferencesProvider = Provider<SharedPreferences>(
-    (ref) => throw UnimplementedError('overridden in main'));
+  (ref) => throw UnimplementedError('overridden in main'),
+);
 
 /// Persists/restores the desktop window geometry across sessions.
 final windowStateServiceProvider = Provider<WindowStateService>(
-    (ref) => WindowStateService(ref.watch(sharedPreferencesProvider)));
+  (ref) => WindowStateService(ref.watch(sharedPreferencesProvider)),
+);
 
 final quranDatabaseProvider = Provider<QuranDatabase>((ref) {
   final db = QuranDatabase();
@@ -49,81 +51,102 @@ final userDatabaseProvider = Provider<UserDatabase>((ref) {
   return db;
 });
 
-final surahRepositoryProvider =
-    Provider((ref) => SurahRepository(ref.watch(quranDatabaseProvider)));
+final surahRepositoryProvider = Provider(
+  (ref) => SurahRepository(ref.watch(quranDatabaseProvider)),
+);
 
-final ayahRepositoryProvider =
-    Provider((ref) => AyahRepository(ref.watch(quranDatabaseProvider)));
+final ayahRepositoryProvider = Provider(
+  (ref) => AyahRepository(ref.watch(quranDatabaseProvider)),
+);
 
-final searchRepositoryProvider =
-    Provider((ref) => SearchRepository(ref.watch(quranDatabaseProvider)));
+final searchRepositoryProvider = Provider(
+  (ref) => SearchRepository(ref.watch(quranDatabaseProvider)),
+);
 
-final bookmarkRepositoryProvider = Provider((ref) => BookmarkRepository(
-      ref.watch(userDatabaseProvider),
-      ref.watch(quranDatabaseProvider),
-    ));
+final bookmarkRepositoryProvider = Provider(
+  (ref) => BookmarkRepository(
+    ref.watch(userDatabaseProvider),
+    ref.watch(quranDatabaseProvider),
+  ),
+);
 
-final lastReadRepositoryProvider =
-    Provider((ref) => LastReadRepository(ref.watch(userDatabaseProvider)));
+final lastReadRepositoryProvider = Provider(
+  (ref) => LastReadRepository(ref.watch(userDatabaseProvider)),
+);
 
-final doaBookmarkRepositoryProvider =
-    Provider((ref) => DoaBookmarkRepository(ref.watch(userDatabaseProvider)));
+final doaBookmarkRepositoryProvider = Provider(
+  (ref) => DoaBookmarkRepository(ref.watch(userDatabaseProvider)),
+);
 
-final readingStatsRepositoryProvider =
-    Provider((ref) => ReadingStatsRepository(ref.watch(userDatabaseProvider)));
+final readingStatsRepositoryProvider = Provider(
+  (ref) => ReadingStatsRepository(ref.watch(userDatabaseProvider)),
+);
 
-final sajdaRepositoryProvider =
-    Provider((ref) => SajdaRepository(ref.watch(userDatabaseProvider)));
+final sajdaRepositoryProvider = Provider(
+  (ref) => SajdaRepository(ref.watch(userDatabaseProvider)),
+);
 
-final khatamRepositoryProvider =
-    Provider((ref) => KhatamRepository(ref.watch(userDatabaseProvider)));
+final khatamRepositoryProvider = Provider(
+  (ref) => KhatamRepository(ref.watch(userDatabaseProvider)),
+);
 
-final surahPositionRepositoryProvider =
-    Provider((ref) => SurahPositionRepository(ref.watch(userDatabaseProvider)));
+final surahPositionRepositoryProvider = Provider(
+  (ref) => SurahPositionRepository(ref.watch(userDatabaseProvider)),
+);
 
-final readingHistoryRepositoryProvider = Provider((ref) =>
-    ReadingHistoryRepository(
-      ref.watch(userDatabaseProvider),
-      ref.watch(quranDatabaseProvider),
-    ));
+final readingHistoryRepositoryProvider = Provider(
+  (ref) => ReadingHistoryRepository(
+    ref.watch(userDatabaseProvider),
+    ref.watch(quranDatabaseProvider),
+  ),
+);
 
 /// Reading stats, auto-refreshing: emits immediately and re-emits whenever
 /// `reading_log` changes (no manual `invalidate` needed from the reader).
 final readingStatsProvider = StreamProvider<ReadingStats>(
-    (ref) => ref.watch(readingStatsRepositoryProvider).watchStats());
+  (ref) => ref.watch(readingStatsRepositoryProvider).watchStats(),
+);
 
 // ---- Phase 2 spiritual/reading-history streams ----------------------------
 
 /// Sujud tilawah marks (reader + stats).
 final sajdaLogProvider = StreamProvider<List<SajdaLogEntry>>(
-    (ref) => ref.watch(sajdaRepositoryProvider).watchSajdaLog());
+  (ref) => ref.watch(sajdaRepositoryProvider).watchSajdaLog(),
+);
 
 final sajdaCountProvider = FutureProvider<int>(
-    (ref) => ref.watch(sajdaRepositoryProvider).countSajdaDone());
+  (ref) => ref.watch(sajdaRepositoryProvider).countSajdaDone(),
+);
 
 /// The single active khatam target (nullable — no target yet).
 final khatamTargetProvider = StreamProvider<KhatamTarget?>(
-    (ref) => ref.watch(khatamRepositoryProvider).watchTarget());
+  (ref) => ref.watch(khatamRepositoryProvider).watchTarget(),
+);
 
 /// Recently-read surahs for the Beranda reading-history list.
 final recentSurahsProvider = StreamProvider<List<RecentSurahRead>>(
-    (ref) => ref.watch(readingHistoryRepositoryProvider).watchRecentSurahs(
-        limit: 5));
+  (ref) =>
+      ref.watch(readingHistoryRepositoryProvider).watchRecentSurahs(limit: 5),
+);
 
 /// Ayah-read counts per day for the stats calendar (30 days, oldest first).
 final dailyActivityProvider = FutureProvider<List<({int epochDay, int count})>>(
-    (ref) => ref.watch(readingHistoryRepositoryProvider).getDailyActivity());
+  (ref) => ref.watch(readingHistoryRepositoryProvider).getDailyActivity(),
+);
 
-final personalityRepositoryProvider = Provider((ref) => PersonalityRepository(
-      ref.watch(userDatabaseProvider),
-      ref.watch(quranDatabaseProvider),
-    ));
+final personalityRepositoryProvider = Provider(
+  (ref) => PersonalityRepository(
+    ref.watch(userDatabaseProvider),
+    ref.watch(quranDatabaseProvider),
+  ),
+);
 
 /// Personality analysis, auto-refreshing: emits immediately and re-emits
 /// whenever `reading_log` changes. Null = no reading data yet (honest empty
 /// state on the screen).
 final personalityProvider = StreamProvider<PersonalityAnalysis?>(
-    (ref) => ref.watch(personalityRepositoryProvider).watchAnalysis());
+  (ref) => ref.watch(personalityRepositoryProvider).watchAnalysis(),
+);
 
 // ---- Reciter (qari) selection --------------------------------------------------
 
@@ -141,7 +164,8 @@ final recitersProvider = FutureProvider<List<Reciter>>((ref) async {
 /// through this provider, so switching reciter takes effect immediately.
 final selectedReciterProvider =
     NotifierProvider<SelectedReciterController, int>(
-        SelectedReciterController.new);
+      SelectedReciterController.new,
+    );
 
 class SelectedReciterController extends Notifier<int> {
   static const _key = 'selected_reciter_id';
@@ -227,8 +251,8 @@ class AudioPlaybackNotifier extends Notifier<AudioPlaybackState> {
 
 final audioPlaybackStateProvider =
     NotifierProvider<AudioPlaybackNotifier, AudioPlaybackState>(
-  AudioPlaybackNotifier.new,
-);
+      AudioPlaybackNotifier.new,
+    );
 
 /// Dedicated Ratib Al-Haddad audio service, kept separate from the Quran
 /// `audioServiceProvider` so the two playback paths never interfere.
@@ -242,7 +266,9 @@ final ratibAudioServiceProvider = Provider<RatibAudioService>((ref) {
 
 /// The download service singleton. Resolves the same URL templates as the
 /// audio service (the selected reciter from the user DB).
-final murottalDownloadServiceProvider = Provider<MurottalDownloadService>((ref) {
+final murottalDownloadServiceProvider = Provider<MurottalDownloadService>((
+  ref,
+) {
   return MurottalDownloadService(
     resolveUrlTemplates: () => _resolveReciterTemplates(ref),
   );
@@ -307,8 +333,10 @@ class MurottalDownloadController
     if (current.status == MurottalDownloadStatus.downloading) return;
     _cancelled.remove(surahId);
 
-    final ayahs =
-        await ref.read(ayahRepositoryProvider).watchAyahs(surahId).first;
+    final ayahs = await ref
+        .read(ayahRepositoryProvider)
+        .watchAyahs(surahId)
+        .first;
     if (ayahs.isEmpty) return;
 
     state = {
@@ -388,21 +416,25 @@ class MurottalDownloadController
   }
 
   void _persist() {
-    final ids = state.entries
-        .where((e) => e.value.status == MurottalDownloadStatus.downloaded)
-        .map((e) => e.key)
-        .toList()
-      ..sort();
+    final ids =
+        state.entries
+            .where((e) => e.value.status == MurottalDownloadStatus.downloaded)
+            .map((e) => e.key)
+            .toList()
+          ..sort();
     ref.read(sharedPreferencesProvider).setString(_key, ids.join(','));
   }
 }
 
 final murottalDownloadProvider =
-    NotifierProvider<MurottalDownloadController, Map<int, MurottalDownloadState>>(
-        MurottalDownloadController.new);
+    NotifierProvider<
+      MurottalDownloadController,
+      Map<int, MurottalDownloadState>
+    >(MurottalDownloadController.new);
 
 final prayerTimeServiceProvider = Provider<PrayerTimeService>(
-    (ref) => PrayerTimeService());
+  (ref) => PrayerTimeService(),
+);
 
 /// Streams prayer schedule, refreshing every 30 seconds for live countdown.
 /// Uses GPS location with Jakarta fallback if permission is denied.
@@ -474,12 +506,13 @@ Future<String?> _reverseGeocode(double lat, double lng) async {
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     final address = data['address'] as Map<String, dynamic>?;
     if (address == null) return null;
-    final city = (address['city'] ??
-            address['town'] ??
-            address['village'] ??
-            address['county'] ??
-            address['state'])
-        as String?;
+    final city =
+        (address['city'] ??
+                address['town'] ??
+                address['village'] ??
+                address['county'] ??
+                address['state'])
+            as String?;
     final country = address['country'] as String?;
     if (city == null) return null;
     final name = country == null ? city : '$city, $country';
@@ -493,8 +526,9 @@ Future<String?> _reverseGeocode(double lat, double lng) async {
 // ---- Prayer notifications --------------------------------------------------
 
 /// The notification service singleton.
-final prayerNotificationsProvider =
-    Provider<NotificationService>((ref) => NotificationService());
+final prayerNotificationsProvider = Provider<NotificationService>(
+  (ref) => NotificationService(),
+);
 
 /// The selected adzan voice id (persisted; defaults to the first voice).
 final selectedAdzanVoiceProvider =
@@ -520,7 +554,8 @@ class AdzanVoiceController extends Notifier<String> {
 /// covers the other four prayers.
 final selectedFajrAdzanVoiceProvider =
     NotifierProvider<FajrAdzanVoiceController, String>(
-        FajrAdzanVoiceController.new);
+      FajrAdzanVoiceController.new,
+    );
 
 class FajrAdzanVoiceController extends Notifier<String> {
   static const _key = 'adzan_voice_fajr_id';
@@ -540,7 +575,8 @@ class FajrAdzanVoiceController extends Notifier<String> {
 /// Whether daily prayer-time notifications are enabled (persisted).
 final prayerNotificationsEnabledProvider =
     NotifierProvider<PrayerNotificationsController, bool>(
-        PrayerNotificationsController.new);
+      PrayerNotificationsController.new,
+    );
 
 class PrayerNotificationsController extends Notifier<bool> {
   static const _key = 'prayer_notifications_enabled';
@@ -554,8 +590,9 @@ class PrayerNotificationsController extends Notifier<bool> {
   /// permissions; returns false (and stays off) when the user denies them.
   Future<bool> setEnabled(bool enabled) async {
     if (enabled) {
-      final ok =
-          await ref.read(prayerNotificationsProvider).requestPermissions();
+      final ok = await ref
+          .read(prayerNotificationsProvider)
+          .requestPermissions();
       if (!ok) return false;
     }
     state = enabled;
@@ -596,7 +633,8 @@ final prayerNotificationSyncProvider = Provider<void>((ref) {
 /// (persisted).
 final dzikirReminderEnabledProvider =
     NotifierProvider<DzikirReminderController, bool>(
-        DzikirReminderController.new);
+      DzikirReminderController.new,
+    );
 
 class DzikirReminderController extends Notifier<bool> {
   static const _key = 'dzikir_reminder_enabled';
@@ -610,8 +648,9 @@ class DzikirReminderController extends Notifier<bool> {
   /// permissions; returns false (and stays off) when the user denies them.
   Future<bool> setEnabled(bool enabled) async {
     if (enabled) {
-      final ok =
-          await ref.read(prayerNotificationsProvider).requestPermissions();
+      final ok = await ref
+          .read(prayerNotificationsProvider)
+          .requestPermissions();
       if (!ok) return false;
     }
     state = enabled;
@@ -672,26 +711,30 @@ final hijriEventReminderSyncProvider = Provider<void>((ref) {
 // ---- Streams -------------------------------------------------------------
 
 final surahListProvider = StreamProvider<List<Surah>>(
-    (ref) => ref.watch(surahRepositoryProvider).watchSurahs());
+  (ref) => ref.watch(surahRepositoryProvider).watchSurahs(),
+);
 
 final surahByIdProvider = FutureProvider.family<Surah?, int>(
-    (ref, id) => ref.watch(surahRepositoryProvider).getSurah(id));
+  (ref, id) => ref.watch(surahRepositoryProvider).getSurah(id),
+);
 
 final ayahsProvider = StreamProvider.family<List<Ayah>, int>(
-    (ref, surahId) => ref.watch(ayahRepositoryProvider).watchAyahs(surahId));
+  (ref, surahId) => ref.watch(ayahRepositoryProvider).watchAyahs(surahId),
+);
 
 final juzListProvider = FutureProvider<List<JuzInfo>>(
-    (ref) => ref.watch(ayahRepositoryProvider).getJuzInfos());
+  (ref) => ref.watch(ayahRepositoryProvider).getJuzInfos(),
+);
 
 /// Resolved detail behind the last-read bookmark (Home hero).
-final lastReadDetailProvider = FutureProvider<({Ayah ayah, Surah surah})?>(
-    (ref) async {
+final lastReadDetailProvider = FutureProvider<({Ayah ayah, Surah surah})?>((
+  ref,
+) async {
   final lastRead = await ref.watch(lastReadProvider.future);
   if (lastRead == null) return null;
   final ayah = await ref.watch(ayahRepositoryProvider).getAyah(lastRead.ayahId);
   if (ayah == null) return null;
-  final surah =
-      await ref.watch(surahRepositoryProvider).getSurah(ayah.surahId);
+  final surah = await ref.watch(surahRepositoryProvider).getSurah(ayah.surahId);
   if (surah == null) return null;
   return (ayah: ayah, surah: surah);
 });
@@ -699,8 +742,9 @@ final lastReadDetailProvider = FutureProvider<({Ayah ayah, Surah surah})?>(
 /// Ayat Hari Ini — a deterministic day-of-year rotation over a handful of
 /// beloved ayahs, resolved straight from the offline `quran.db` (no new DB
 /// plumbing). Falls back to Al-Insyirah 5, the design's example verse.
-final dailyAyahProvider =
-    FutureProvider<({Ayah ayah, Surah surah})>((ref) async {
+final dailyAyahProvider = FutureProvider<({Ayah ayah, Surah surah})>((
+  ref,
+) async {
   const picks = [
     (surah: 94, ayah: 5), // Al-Insyirah 5 — sesudah kesulitan ada kemudahan
     (surah: 13, ayah: 28), // Ar-Ra'd 28 — hati tenteram dengan mengingat Allah
@@ -730,14 +774,17 @@ final dailyAyahProvider =
 });
 
 final bookmarksProvider = StreamProvider<List<BookmarkEntry>>(
-    (ref) => ref.watch(bookmarkRepositoryProvider).watchBookmarks());
+  (ref) => ref.watch(bookmarkRepositoryProvider).watchBookmarks(),
+);
 
 /// Bookmarked daily-prayer slugs (doa harian), auto-refreshing on toggle.
 final doaBookmarkIdsProvider = StreamProvider<Set<String>>(
-    (ref) => ref.watch(doaBookmarkRepositoryProvider).watchBookmarkedIds());
+  (ref) => ref.watch(doaBookmarkRepositoryProvider).watchBookmarkedIds(),
+);
 
 final lastReadProvider = StreamProvider<LastRead?>(
-    (ref) => ref.watch(lastReadRepositoryProvider).watch());
+  (ref) => ref.watch(lastReadRepositoryProvider).watch(),
+);
 
 // ---- Settings ------------------------------------------------------------
 
@@ -799,17 +846,18 @@ class SettingsController extends Notifier<SettingsState> {
   SettingsState build() {
     final prefs = ref.read(sharedPreferencesProvider);
     return SettingsState(
-      themeMode: ThemeMode.values.asNameMap()[prefs.getString(_kThemeMode)] ??
+      themeMode:
+          ThemeMode.values.asNameMap()[prefs.getString(_kThemeMode)] ??
           ThemeMode.system,
-      quranFontStep: prefs.getInt(_kFontStep) ??
-          AppConstants.defaultQuranFontStep,
+      quranFontStep:
+          prefs.getInt(_kFontStep) ?? AppConstants.defaultQuranFontStep,
       showTranslation: prefs.getBool(_kShowTranslation) ?? true,
       alignArabicRight: prefs.getBool(_kAlign) ?? true,
       tafsirOpenByDefault: prefs.getBool(_kTafsirDefault) ?? false,
       restoreLastRead: prefs.getBool(_kRestoreLastRead) ?? true,
       paperTheme:
           PaperTheme.values.asNameMap()[prefs.getString(_kPaperTheme)] ??
-              PaperTheme.hangat,
+          PaperTheme.hangat,
       tajwidColor: prefs.getBool(_kTajwid) ?? false,
     );
   }
@@ -836,8 +884,8 @@ class SettingsController extends Notifier<SettingsState> {
     final clamped = step < AppConstants.minQuranFontStep
         ? AppConstants.minQuranFontStep
         : (step > AppConstants.maxQuranFontStep
-            ? AppConstants.maxQuranFontStep
-            : step);
+              ? AppConstants.maxQuranFontStep
+              : step);
     state = state.copyWith(quranFontStep: clamped);
     _save();
   }
@@ -875,8 +923,33 @@ class SettingsController extends Notifier<SettingsState> {
   }
 }
 
-final settingsProvider =
-    NotifierProvider<SettingsController, SettingsState>(SettingsController.new);
+final settingsProvider = NotifierProvider<SettingsController, SettingsState>(
+  SettingsController.new,
+);
+
+// ---- Onboarding -----------------------------------------------------------
+
+/// Whether the first-launch onboarding has been completed (or skipped).
+/// Persisted in shared_preferences under `onboarding_done` — the same local
+/// storage every other setting uses, so no extra dependency is needed.
+class OnboardingController extends Notifier<bool> {
+  static const _kOnboardingDone = 'onboarding_done';
+
+  @override
+  bool build() =>
+      ref.read(sharedPreferencesProvider).getBool(_kOnboardingDone) ?? false;
+
+  /// Marks onboarding as seen: flips the state immediately (so the app shell
+  /// replaces the onboarding screen) and persists the flag for future launches.
+  Future<void> complete() async {
+    state = true;
+    await ref.read(sharedPreferencesProvider).setBool(_kOnboardingDone, true);
+  }
+}
+
+final onboardingDoneProvider = NotifierProvider<OnboardingController, bool>(
+  OnboardingController.new,
+);
 
 // ---- Pusat Belajar progress -------------------------------------------------
 
@@ -893,8 +966,7 @@ class CourseProgress {
 /// Loads/saves per-course learning progress in shared_preferences under
 /// `learning_progress_<courseId>` (a JSON string). Follows the amalan_ibadah
 /// persistence pattern — survives restarts, no extra dependencies.
-class LearningProgressController
-    extends Notifier<Map<String, CourseProgress>> {
+class LearningProgressController extends Notifier<Map<String, CourseProgress>> {
   static const _prefix = 'learning_progress_';
 
   @override
@@ -922,8 +994,8 @@ class LearningProgressController
 
   /// Marks [lessonIndex] of [course] done (or undone when [done] is false).
   void markLesson(Course course, int lessonIndex, {required bool done}) {
-    final current = state[course.id] ??
-        const CourseProgress(completed: {}, updatedAt: 0);
+    final current =
+        state[course.id] ?? const CourseProgress(completed: {}, updatedAt: 0);
     final completed = Set<int>.from(current.completed);
     if (done) {
       completed.add(lessonIndex);
@@ -943,8 +1015,7 @@ class LearningProgressController
   bool isCompleted(String courseId, int lessonIndex) =>
       state[courseId]?.completed.contains(lessonIndex) ?? false;
 
-  int completedCount(String courseId) =>
-      state[courseId]?.completed.length ?? 0;
+  int completedCount(String courseId) => state[courseId]?.completed.length ?? 0;
 
   /// Index of the first uncompleted lesson in [course] (0 when all done).
   int nextLessonIndex(Course course) {
@@ -998,7 +1069,8 @@ class LearningProgressController
 
 final learningProgressProvider =
     NotifierProvider<LearningProgressController, Map<String, CourseProgress>>(
-        LearningProgressController.new);
+      LearningProgressController.new,
+    );
 
 // ---- Profil Pengguna ---------------------------------------------------------
 
@@ -1020,8 +1092,9 @@ class ProfileNameController extends Notifier<String> {
   }
 }
 
-final profileNameProvider =
-    NotifierProvider<ProfileNameController, String>(ProfileNameController.new);
+final profileNameProvider = NotifierProvider<ProfileNameController, String>(
+  ProfileNameController.new,
+);
 
 /// Distinct surahs the user has read, derived from `reading_log` joined to the
 /// ayah table (bounded to the 200 most recent rows like the history repo).
@@ -1033,12 +1106,14 @@ final surahsReadCountProvider = StreamProvider<int>((ref) {
   return recent.watch().asyncMap((entries) async {
     if (entries.isEmpty) return 0;
     final ayahs = await ayahRepo.getAyahsByIds(
-        entries.map((e) => e.ayahId).toSet().toList());
+      entries.map((e) => e.ayahId).toSet().toList(),
+    );
     return ayahs.map((a) => a.surahId).toSet().length;
   });
 });
 
 /// Recently-read surahs for the Profil "Riwayat Bacaan Terakhir" list.
 final profileRecentSurahsProvider = StreamProvider<List<RecentSurahRead>>(
-    (ref) => ref.watch(readingHistoryRepositoryProvider).watchRecentSurahs(
-        limit: 8));
+  (ref) =>
+      ref.watch(readingHistoryRepositoryProvider).watchRecentSurahs(limit: 8),
+);
