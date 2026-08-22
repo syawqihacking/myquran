@@ -247,6 +247,7 @@ class _AsmaulHusnaCard extends StatefulWidget {
 
 class _AsmaulHusnaCardState extends State<_AsmaulHusnaCard> {
   bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -257,61 +258,72 @@ class _AsmaulHusnaCardState extends State<_AsmaulHusnaCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-          border: Border.all(
-            color: _hovered
-                ? scheme.primary.withValues(alpha: 0.4)
-                : scheme.surfaceContainerHigh,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.04),
-              blurRadius: _hovered ? 24 : 16,
-              offset: Offset(0, _hovered ? 8 : 4),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.96 : (_hovered ? 1.025 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+              border: Border.all(
+                color: _hovered
+                    ? scheme.primary.withValues(alpha: 0.5)
+                    : scheme.surfaceContainerHigh,
+                width: _hovered ? 1.4 : 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: _hovered ? 0.10 : 0.04),
+                  blurRadius: _hovered ? 24 : 16,
+                  offset: Offset(0, _hovered ? 8 : 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-            child: Padding(
-              padding: const EdgeInsets.all(AppLayout.sp4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _IdBadge(id: name.id),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+              child: InkWell(
+                onTap: widget.onTap,
+                borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppLayout.sp4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: _IdBadge(id: name.id),
+                      ),
+                      const SizedBox(height: AppLayout.sp3),
+                      QTextDisplay(
+                        text: name.arabic,
+                        step: 4,
+                        alignment: TextAlign.center,
+                        color: scheme.onSurface,
+                      ),
+                      const SizedBox(height: AppLayout.sp2),
+                      Text(
+                        name.transliteration,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: _hovered
+                              ? scheme.primary
+                              : scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: AppLayout.sp3),
-                  QTextDisplay(
-                    text: name.arabic,
-                    step: 4,
-                    alignment: TextAlign.center,
-                    color: scheme.onSurface,
-                  ),
-                  const SizedBox(height: AppLayout.sp2),
-                  Text(
-                    name.transliteration,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: _hovered
-                          ? scheme.primary
-                          : scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

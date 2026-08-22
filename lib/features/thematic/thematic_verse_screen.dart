@@ -303,6 +303,9 @@ class _ThematicVerseScreenState extends State<ThematicVerseScreen> {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       child: Row(
         children: [
           for (var i = 0; i < groups.length; i++) ...[
@@ -360,7 +363,7 @@ class _ThematicVerseScreenState extends State<ThematicVerseScreen> {
   }
 }
 
-class _FilterChip extends StatelessWidget {
+class _FilterChip extends StatefulWidget {
   const _FilterChip({
     required this.label,
     required this.selected,
@@ -372,42 +375,81 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_FilterChip> createState() => _FilterChipState();
+}
+
+class _FilterChipState extends State<_FilterChip> {
+  bool _hovered = false;
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final selected = widget.selected;
 
     final bg = selected
         ? scheme.primary
-        : scheme.surfaceContainerHighest.withValues(alpha: 0.5);
+        : _hovered
+            ? scheme.surfaceContainerHighest.withValues(alpha: 0.8)
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.5);
     final fg = selected ? scheme.onPrimary : scheme.onSurfaceVariant;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppLayout.sp4,
-          vertical: 7,
-        ),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: fg,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _pressed ? 0.94 : (_hovered ? 1.04 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppLayout.sp4,
+              vertical: 7,
+            ),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+              border: Border.all(
+                color: selected
+                    ? Colors.transparent
+                    : _hovered
+                        ? scheme.primary.withValues(alpha: 0.3)
+                        : Colors.transparent,
+                width: 1,
+              ),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : _hovered
+                      ? [
+                          BoxShadow(
+                            color: scheme.primary.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+            ),
+            child: Text(
+              widget.label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: fg,
+              ),
+            ),
           ),
         ),
       ),
@@ -430,6 +472,7 @@ class _MinimalThemeCard extends StatefulWidget {
 
 class _MinimalThemeCardState extends State<_MinimalThemeCard> {
   bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -440,116 +483,126 @@ class _MinimalThemeCardState extends State<_MinimalThemeCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          border: Border.all(
-            color: _hovered
-                ? scheme.primary.withValues(alpha: 0.5)
-                : scheme.outlineVariant.withValues(alpha: 0.4),
-            width: _hovered ? 1.4 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.02),
-              blurRadius: _hovered ? 16 : 8,
-              offset: const Offset(0, 4),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.98 : (_hovered ? 1.015 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+              border: Border.all(
+                color: _hovered
+                    ? scheme.primary.withValues(alpha: 0.5)
+                    : scheme.outlineVariant.withValues(alpha: 0.4),
+                width: _hovered ? 1.4 : 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: _hovered ? 0.09 : 0.02),
+                  blurRadius: _hovered ? 20 : 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            child: Padding(
-              padding: const EdgeInsets.all(AppLayout.sp4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Minimalist Icon container
-                  Container(
-                    width: 44,
-                    height: 44,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-                    ),
-                    child: Icon(
-                      cat.icon,
-                      color: scheme.primary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: AppLayout.sp4),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+              child: InkWell(
+                onTap: widget.onTap,
+                borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppLayout.sp4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Minimalist Icon container
+                      Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                        ),
+                        child: Icon(
+                          cat.icon,
+                          color: scheme.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: AppLayout.sp4),
 
-                  // Text info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      // Text info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                cat.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: scheme.onSurface,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    cat.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: scheme.onSurface,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: scheme.surfaceContainerHighest
+                                        .withValues(alpha: 0.5),
+                                    borderRadius:
+                                        BorderRadius.circular(AppLayout.radiusFull),
+                                  ),
+                                  child: Text(
+                                    '${cat.verses.length} ayat',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: scheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.5),
-                                borderRadius:
-                                    BorderRadius.circular(AppLayout.radiusFull),
-                              ),
-                              child: Text(
-                                '${cat.verses.length} ayat',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: scheme.onSurfaceVariant,
-                                ),
+                            const SizedBox(height: 4),
+                            Text(
+                              cat.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 12,
+                                color: scheme.onSurfaceVariant,
+                                height: 1.35,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          cat.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 12,
-                            color: scheme.onSurfaceVariant,
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: scheme.outline.withValues(alpha: 0.6),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20,
-                    color: scheme.outline.withValues(alpha: 0.6),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

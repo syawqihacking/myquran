@@ -72,6 +72,11 @@ abstract final class S {
       'Pengingat harian untuk membaca dzikir pagi dan petang';
   static const dzikirReminderDenied =
       'Izin notifikasi ditolak. Aktifkan lewat pengaturan sistem.';
+  static const hijriEventReminderLabel = 'Pengingat Peristiwa Hijriah';
+  static const hijriEventReminderSublabel =
+      'Pengingat otomatis pada hari peristiwa penting di kalender Islam';
+  static const hijriEventReminderDenied =
+      'Izin notifikasi ditolak. Aktifkan lewat pengaturan sistem.';
   static const dzikirReminderMorningTitle = 'Dzikir Pagi';
   static const dzikirReminderMorningBody = 'Waktunya membaca dzikir pagi.';
   static const dzikirReminderEveningTitle = 'Dzikir Petang';
@@ -87,6 +92,7 @@ abstract final class S {
   static const adzanVoiceFajrHint = 'Dipakai khusus untuk adzan subuh';
   static const adzanTestSholat = 'Suara Sholat';
   static const adzanTestFajr = 'Suara Fajr';
+  static const testHijriEvent = 'Peristiwa Hijriah';
 
   // Browse (unified surah/juz/search page).
   static const browseEyebrow = 'BACA';

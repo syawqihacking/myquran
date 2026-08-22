@@ -632,6 +632,43 @@ final dzikirReminderSyncProvider = Provider<void>((ref) {
   }
 });
 
+/// Whether the Hijri event reminder notifications are enabled (persisted).
+final hijriEventReminderEnabledProvider =
+    NotifierProvider<HijriEventReminderController, bool>(
+        HijriEventReminderController.new);
+
+class HijriEventReminderController extends Notifier<bool> {
+  static const _key = 'hijri_event_reminder_enabled';
+
+  @override
+  bool build() {
+    return ref.watch(sharedPreferencesProvider).getBool(_key) ?? false;
+  }
+
+  /// Enables/disables the Hijri event reminders.
+  Future<bool> setEnabled(bool enabled) async {
+    if (enabled) {
+      final ok =
+          await ref.read(prayerNotificationsProvider).requestPermissions();
+      if (!ok) return false;
+    }
+    state = enabled;
+    await ref.read(sharedPreferencesProvider).setBool(_key, enabled);
+    return true;
+  }
+}
+
+/// Keeps the Hijri event reminder notifications in sync with the toggle.
+final hijriEventReminderSyncProvider = Provider<void>((ref) {
+  final enabled = ref.watch(hijriEventReminderEnabledProvider);
+  final service = ref.watch(prayerNotificationsProvider);
+  if (enabled) {
+    service.scheduleHijriEvents();
+  } else {
+    service.cancelHijriEvents();
+  }
+});
+
 // ---- Streams -------------------------------------------------------------
 
 final surahListProvider = StreamProvider<List<Surah>>(

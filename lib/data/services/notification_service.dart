@@ -11,6 +11,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:hijri/hijri_calendar.dart';
+
+import '../../features/hijri/hijri_event.dart';
 import '../models/adzan_voice.dart';
 import 'adzan_foreground_handler.dart';
 import 'prayer_time_service.dart';
@@ -296,6 +299,41 @@ class NotificationService {
     );
   }
 
+  /// Shows an immediate test notification for Hijri events.
+  Future<void> showHijriTestNotification() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+
+    final hijriNow = HijriCalendar.now();
+    HijriEvent? todayEvent;
+    for (final event in kIslamicEvents) {
+      if (event.month == hijriNow.hMonth && event.day == hijriNow.hDay) {
+        todayEvent = event;
+        break;
+      }
+    }
+
+    final body = todayEvent != null
+        ? 'Hari ini: ${todayEvent.title}'
+        : 'Ini adalah uji coba pengingat peristiwa penting Hijriah. Hari ini tidak ada peristiwa khusus.';
+
+    await _plugin.show(
+      id: 998,
+      title: 'Peringatan Kalender Hijriah',
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'hijri_events',
+          'Peristiwa Penting Hijriah',
+          channelDescription: 'Pengingat peristiwa penting di kalender Islam',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
   /// Cancels all pending prayer notifications. Skips when nothing was
   /// scheduled (the sync provider re-runs on every schedule refresh).
   Future<void> cancelAll() async {
@@ -371,6 +409,74 @@ class NotificationService {
     if (!_isMobile) return;
     await _plugin.cancel(id: 1001);
     await _plugin.cancel(id: 1002);
+  }
+
+  /// Schedules local notifications for Hijri calendar events for the current
+  /// and next Hijri year at 07:00 AM on the day of the event. Uses distinct ids
+  /// starting from 2000.
+  Future<void> scheduleHijriEvents() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    _exactAllowed = await android?.requestExactAlarmsPermission() ?? false;
+
+    final now = tz.TZDateTime.now(tz.local);
+    final hijriNow = HijriCalendar.now();
+    final currentYear = hijriNow.hYear;
+    
+    // Schedule for the current Hijri year and the next one
+    final years = [currentYear, currentYear + 1];
+    int notificationId = 2000;
+    
+    for (final year in years) {
+      for (final event in kIslamicEvents) {
+        final date = hijriNow.hijriToGregorian(year, event.month, event.day);
+        
+        final scheduled = tz.TZDateTime(
+          tz.local,
+          date.year,
+          date.month,
+          date.day,
+          7, // 07:00 AM
+          0,
+        );
+        
+        if (scheduled.isAfter(now)) {
+          await _plugin.zonedSchedule(
+            id: notificationId,
+            title: 'Peringatan Kalender Hijriah',
+            body: 'Hari ini: ${event.title}',
+            scheduledDate: scheduled,
+            notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'hijri_events',
+                'Peristiwa Penting Hijriah',
+                channelDescription: 'Pengingat peristiwa penting di kalender Islam',
+                importance: Importance.high,
+                priority: Priority.high,
+              ),
+              iOS: DarwinNotificationDetails(),
+            ),
+            androidScheduleMode: _exactAllowed
+                ? AndroidScheduleMode.exactAllowWhileIdle
+                : AndroidScheduleMode.inexactAllowWhileIdle,
+          );
+        }
+        notificationId++;
+      }
+    }
+  }
+
+  /// Cancels all scheduled Hijri event notifications (IDs 2000 to ~2200).
+  Future<void> cancelHijriEvents() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+    
+    for (int i = 2000; i < 2200; i++) {
+      await _plugin.cancel(id: i);
+    }
   }
 
   /// Starts (or updates) the foreground service that plays the full adzan at

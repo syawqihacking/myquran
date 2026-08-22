@@ -230,20 +230,22 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
   @override
   void initState() {
     super.initState();
-    // Start at a large number to allow swiping backwards initially if we wanted to,
-    // but 0 is fine if we only auto-scroll forward.
-    // Let's start at an index that is a multiple of 3, e.g., 3000.
     _currentPage = 3000;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pageController.jumpToPage(_currentPage);
     });
 
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 6), (Timer timer) {
       if (_pageController.hasClients) {
         _currentPage++;
         _pageController.animateToPage(
           _currentPage,
-          duration: const Duration(milliseconds: 1400),
+          duration: const Duration(milliseconds: 1000),
           curve: Curves.fastLinearToSlowEaseIn,
         );
       }
@@ -261,38 +263,68 @@ class _HeroCarouselState extends ConsumerState<_HeroCarousel> {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width - (AppLayout.sp6 * 2);
     const gap = 12.0;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
-    return SizedBox(
-      height: 180,
-      child: OverflowBox(
-        maxWidth: width + gap,
-        alignment: Alignment.centerLeft,
-        child: PageView.builder(
-          controller: _pageController,
-          onPageChanged: (int page) {
-            _currentPage = page;
-          },
-          itemBuilder: (context, index) {
-            final realIndex = index % _pageCount;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 180,
+          child: OverflowBox(
+            maxWidth: width + gap,
+            alignment: Alignment.centerLeft,
+            child: PageView.builder(
+              controller: _pageController,
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              onPageChanged: (int page) {
+                setState(() => _currentPage = page);
+              },
+              itemBuilder: (context, index) {
+                final realIndex = index % _pageCount;
 
-            Widget child;
-            if (realIndex == 0) {
-              child = const _LastReadHero();
-            } else if (realIndex == 1) {
-              child = const _RandomDoaHeroSlide();
-            } else if (realIndex == 2) {
-              child = const _RandomAsmaulHusnaHeroSlide();
-            } else {
-              child = const _TasbihHeroSlide();
-            }
+                Widget child;
+                if (realIndex == 0) {
+                  child = const _LastReadHero();
+                } else if (realIndex == 1) {
+                  child = const _RandomDoaHeroSlide();
+                } else if (realIndex == 2) {
+                  child = const _RandomAsmaulHusnaHeroSlide();
+                } else {
+                  child = const _TasbihHeroSlide();
+                }
 
-            return Padding(
-              padding: const EdgeInsets.only(right: gap),
-              child: child,
-            );
-          },
+                return Padding(
+                  padding: const EdgeInsets.only(right: gap),
+                  child: child,
+                );
+              },
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_pageCount, (index) {
+            final active = (_currentPage % _pageCount) == index;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: active ? 22 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: active
+                    ? scheme.primary
+                    : scheme.outlineVariant.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }
@@ -1311,61 +1343,97 @@ class _FeatureCardsRow extends StatelessWidget {
 }
 
 /// Compact vertical tile for Pusat Belajar.
-class _LearningTile extends StatelessWidget {
+class _LearningTile extends StatefulWidget {
   const _LearningTile();
+
+  @override
+  State<_LearningTile> createState() => _LearningTileState();
+}
+
+class _LearningTileState extends State<_LearningTile> {
+  bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => const LearningScreen())),
-        child: Container(
-          padding: const EdgeInsets.all(AppLayout.sp4),
-          decoration: BoxDecoration(
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.975 : (_hovered ? 1.015 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: Material(
+            color: scheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(color: scheme.outlineVariant),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const LearningScreen()),
+              ),
+              child: AnimatedContainer(
+                duration: AppLayout.durBase,
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.all(AppLayout.sp4),
                 decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+                  border: Border.all(
+                    color: _hovered
+                        ? scheme.primary.withValues(alpha: 0.5)
+                        : scheme.outlineVariant,
+                    width: _hovered ? 1.4 : 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.02),
+                      blurRadius: _hovered ? 16 : 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.school_rounded,
-                  size: 24,
-                  color: scheme.primary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                      ),
+                      child: Icon(
+                        Icons.school_rounded,
+                        size: 24,
+                        color: scheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: AppLayout.sp3),
+                    Text(
+                      S.learningHomeEntryTitle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      S.learningHomeEntrySubtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppLayout.sp3),
-              Text(
-                S.learningHomeEntryTitle,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                S.learningHomeEntrySubtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1374,63 +1442,99 @@ class _LearningTile extends StatelessWidget {
 }
 
 /// Compact vertical tile for Doa Setelah Sholat.
-class _DoaSetelahSholatTile extends StatelessWidget {
+class _DoaSetelahSholatTile extends StatefulWidget {
   const _DoaSetelahSholatTile();
+
+  @override
+  State<_DoaSetelahSholatTile> createState() => _DoaSetelahSholatTileState();
+}
+
+class _DoaSetelahSholatTileState extends State<_DoaSetelahSholatTile> {
+  bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Material(
-      color: scheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const DoaSetelahSholatScreen(),
-          ),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(AppLayout.sp4),
-          decoration: BoxDecoration(
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.975 : (_hovered ? 1.015 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: Material(
+            color: scheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(color: scheme.outlineVariant),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DoaSetelahSholatScreen(),
+                ),
+              ),
+              child: AnimatedContainer(
+                duration: AppLayout.durBase,
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.all(AppLayout.sp4),
                 decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                  borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+                  border: Border.all(
+                    color: _hovered
+                        ? scheme.primary.withValues(alpha: 0.5)
+                        : scheme.outlineVariant,
+                    width: _hovered ? 1.4 : 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.02),
+                      blurRadius: _hovered ? 16 : 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Icon(
-                  Icons.back_hand_rounded,
-                  size: 24,
-                  color: scheme.primary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                      ),
+                      child: Icon(
+                        Icons.back_hand_rounded,
+                        size: 24,
+                        color: scheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: AppLayout.sp3),
+                    Text(
+                      S.doaSetelahSholatHomeTitle,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      S.doaSetelahSholatHomeSubtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppLayout.sp3),
-              Text(
-                S.doaSetelahSholatHomeTitle,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                S.doaSetelahSholatHomeSubtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1629,61 +1733,6 @@ class _VerseContent extends StatelessWidget {
 //   }
 // }
 
-class _QuickLink extends StatelessWidget {
-  const _QuickLink({
-    required this.icon,
-    required this.title,
-    required this.caption,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String caption;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return HoverTile(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-            ),
-            child: Icon(icon, color: theme.colorScheme.tertiary, size: 24),
-          ),
-          const SizedBox(width: AppLayout.sp4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 2),
-                Text(
-                  caption,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Reading history ──────────────────────────────────────────────────────
 

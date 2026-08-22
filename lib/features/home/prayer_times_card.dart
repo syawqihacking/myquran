@@ -80,6 +80,9 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
                     ScrollConfiguration.of(context).copyWith(scrollbars: false),
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
                   // Edge padding gives the gold pulse dot room to breathe on
                   // all sides so it never overflows the viewport when the
                   // active card sits at the strip's edge.
@@ -149,6 +152,7 @@ String _formatPrayerTime(DateTime time) {
 
 // ── Section header ──────────────────────────────────────────────────────
 
+/// Header row: "Jadwal Sholat" + current location name.
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.locationName});
 
@@ -159,25 +163,32 @@ class _SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: Text(
-            S.prayerScheduleTitle,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+        Icon(Icons.schedule_rounded, size: 20, color: scheme.primary),
+        const SizedBox(width: AppLayout.sp2),
+        Text(
+          S.prayerTimesEyebrow.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            letterSpacing: 1.2,
           ),
         ),
-        if (locationName.isNotEmpty)
+        const Spacer(),
+        if (locationName.isNotEmpty) ...[
+          Icon(
+            Icons.location_on_outlined,
+            size: 14,
+            color: scheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 4),
           Text(
             locationName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
             ),
           ),
+        ],
       ],
     );
   }
@@ -185,9 +196,8 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Prayer card ──────────────────────────────────────────────────────────
 
-/// A single prayer in the strip: label + time, and for the next prayer the
-/// highlighted emerald container, the gold pulse dot, and the live countdown.
-class _PrayerCard extends StatelessWidget {
+/// One prayer tile inside the horizontal strip.
+class _PrayerCard extends StatefulWidget {
   const _PrayerCard({
     required this.entry,
     required this.isNext,
@@ -201,91 +211,123 @@ class _PrayerCard extends StatelessWidget {
   final String? countdownText;
 
   @override
+  State<_PrayerCard> createState() => _PrayerCardState();
+}
+
+class _PrayerCardState extends State<_PrayerCard> {
+  bool _hovered = false;
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final timeStr = _formatPrayerTime(entry.time);
+    final timeStr = _formatPrayerTime(widget.entry.time);
+    final isNext = widget.isNext;
+    final isPast = widget.isPast;
 
-    return AnimatedContainer(
-      duration: AppLayout.durBase,
-      width: 100,
-      decoration: BoxDecoration(
-        color: isNext
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-        border: Border.all(
-          color: isNext
-              ? scheme.primaryFixedDim.withValues(alpha: 0.35)
-              : Colors.transparent,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: isNext ? 0.10 : 0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          if (isNext)
-            const Positioned(top: -8, right: -8, child: _PulseDot()),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppLayout.sp1,
-              vertical: AppLayout.sp3,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.96 : (_hovered ? 1.03 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            width: 100,
+            decoration: BoxDecoration(
+              color: isNext
+                  ? scheme.primaryContainer
+                  : _hovered
+                      ? scheme.surfaceContainerLow
+                      : scheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+              border: Border.all(
+                color: isNext
+                    ? scheme.primaryFixedDim.withValues(alpha: 0.5)
+                    : _hovered
+                        ? scheme.primary.withValues(alpha: 0.3)
+                        : Colors.transparent,
+                width: (isNext || _hovered) ? 1.4 : 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(
+                    alpha: isNext ? (_hovered ? 0.16 : 0.10) : (_hovered ? 0.08 : 0.04),
+                  ),
+                  blurRadius: _hovered ? 24 : 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                Text(
-                  entry.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: isNext
-                        ? scheme.onPrimaryContainer
-                        : isPast
-                            ? scheme.onSurfaceVariant.withValues(alpha: 0.75)
-                            : scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                if (isNext)
+                  const Positioned(top: -8, right: -8, child: _PulseDot()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppLayout.sp1,
+                    vertical: AppLayout.sp3,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.entry.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isNext
+                              ? scheme.onPrimaryContainer
+                              : isPast
+                                  ? scheme.onSurfaceVariant.withValues(alpha: 0.75)
+                                  : scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppLayout.sp1),
+                      Text(
+                        timeStr,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 15,
+                          color: isNext
+                              ? scheme.onPrimaryContainer
+                              : isPast
+                                  ? scheme.onSurface.withValues(alpha: 0.7)
+                                  : scheme.onSurface,
+                          fontWeight: isNext ? FontWeight.w700 : FontWeight.w600,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      if (widget.countdownText != null) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.countdownText!,
+                          style: TextStyle(
+                            fontSize: 10,
+                            height: 1.0,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.6,
+                            color:
+                                scheme.onPrimaryContainer.withValues(alpha: 0.85),
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(height: AppLayout.sp1),
-                Text(
-                  timeStr,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 15,
-                    color: isNext
-                        ? scheme.onPrimaryContainer
-                        : isPast
-                            ? scheme.onSurface.withValues(alpha: 0.7)
-                            : scheme.onSurface,
-                    fontWeight: isNext ? FontWeight.w700 : FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                if (countdownText != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    countdownText!,
-                    style: TextStyle(
-                      fontSize: 10,
-                      height: 1.0,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.6,
-                      color:
-                          scheme.onPrimaryContainer.withValues(alpha: 0.85),
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -87,6 +87,15 @@ ThemeData buildAppTheme(
 
   return base.copyWith(
     dividerColor: scheme.outlineVariant,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+      },
+    ),
     // InkSparkle requires the framework shader `shaders/ink_sparkle.frag`,
     // which the Flutter tool (3.35.7) copies to flutter_assets but does not
     // register in AssetManifest — so rootBundle.load fails at runtime on

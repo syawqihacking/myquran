@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -218,22 +217,22 @@ class _DoaHarianScreenState extends ConsumerState<DoaHarianScreen> {
   }
 
   Widget _buildChips() {
-    return ScrollConfiguration(
-      behavior: _ChipScrollBehavior(),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (var i = 0; i < doaCategories.length; i++) ...[
-              if (i > 0) const SizedBox(width: AppLayout.sp3),
-              _CategoryChip(
-                label: doaCategories[i],
-                selected: _category == doaCategories[i],
-                onTap: () => setState(() => _category = doaCategories[i]),
-              ),
-            ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < doaCategories.length; i++) ...[
+            if (i > 0) const SizedBox(width: AppLayout.sp3),
+            _CategoryChip(
+              label: doaCategories[i],
+              selected: _category == doaCategories[i],
+              onTap: () => setState(() => _category = doaCategories[i]),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -258,14 +257,13 @@ class _DoaAppBar extends StatelessWidget {
         fontSize: 20,
         height: 28 / 20,
         fontWeight: FontWeight.w700,
-        color: theme.colorScheme.primary,
       ),
       leading: GlassPill(
         padding: EdgeInsets.zero,
         child: IconButton(
-          onPressed: onBack,
-          tooltip: S.back,
           icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: S.back,
+          onPressed: onBack,
         ),
       ),
     );
@@ -273,26 +271,8 @@ class _DoaAppBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Category chips (Stitch §2): horizontal scroll, single select.
+// Category chip (Stitch §2): pill, primary on select, surfaceContainer on idle.
 // ---------------------------------------------------------------------------
-
-/// Hides the horizontal scrollbar but keeps mouse-drag scrolling.
-class _ChipScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Widget buildScrollbar(
-    BuildContext context,
-    Widget child,
-    ScrollableDetails details,
-  ) => child;
-
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-    PointerDeviceKind.stylus,
-  };
-}
 
 class _CategoryChip extends StatefulWidget {
   const _CategoryChip({
@@ -311,52 +291,64 @@ class _CategoryChip extends StatefulWidget {
 
 class _CategoryChipState extends State<_CategoryChip> {
   bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final selected = widget.selected;
+
     final bg = selected
         ? scheme.primary
-        : (_hovered
-              ? scheme.secondaryContainer
-              : scheme.surfaceContainerHighest);
+        : _hovered
+            ? scheme.surfaceContainerHigh
+            : scheme.surfaceContainer;
     final fg = selected
         ? scheme.onPrimary
-        : (_hovered ? scheme.onSecondaryContainer : scheme.onSurfaceVariant);
+        : _hovered
+            ? scheme.onSurface
+            : scheme.onSurfaceVariant;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: AppLayout.durBase,
-          curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppLayout.sp5,
-            vertical: AppLayout.sp2,
-          ),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: scheme.primary.withValues(alpha: 0.15),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            widget.label.toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.6, // 0.05em on label-sm (12px)
-              color: fg,
+        child: AnimatedScale(
+          scale: _pressed ? 0.94 : (_hovered ? 1.04 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppLayout.sp5,
+              vertical: AppLayout.sp2,
+            ),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(AppLayout.radiusFull),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              widget.label.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.6, // 0.05em on label-sm (12px)
+                color: fg,
+              ),
             ),
           ),
         ),
@@ -388,6 +380,7 @@ class _DoaCard extends StatefulWidget {
 
 class _DoaCardState extends State<_DoaCard> {
   bool _hovered = false;
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -398,121 +391,134 @@ class _DoaCardState extends State<_DoaCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: AppLayout.durBase,
-        curve: Curves.easeOut,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-          border: Border.all(color: scheme.surfaceContainerHigh),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: _hovered ? 0.08 : 0.04),
-              blurRadius: _hovered ? 32 : 20,
-              offset: Offset(0, _hovered ? 12 : 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // 4px vertical accent bar (primary/20 → primary on hover).
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: AnimatedContainer(
-                duration: AppLayout.durBase,
-                width: 4,
-                color: _hovered
-                    ? scheme.primary
-                    : scheme.primary.withValues(alpha: 0.2),
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.98 : (_hovered ? 1.015 : 1.0),
+          duration: AppLayout.durQuick,
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: AppLayout.durBase,
+            curve: Curves.easeOutCubic,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-              child: InkWell(
-                onTap: widget.onTap,
-                borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppLayout.sp4,
-                    AppLayout.sp5,
-                    AppLayout.sp5,
-                    AppLayout.sp5,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              doa.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontSize: 20,
-                                height: 28 / 20,
-                                fontWeight: FontWeight.w600,
-                                color: _hovered
-                                    ? scheme.primary
-                                    : scheme.onSurface,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppLayout.sp2),
-                          _BookmarkButton(
-                            bookmarked: widget.bookmarked,
-                            onPressed: widget.onToggleBookmark,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppLayout.sp4),
-                      // Arabic, Amiri, right-aligned, on-surface @ 0.9.
-                      QTextDisplay(
-                        text: doa.arabic,
-                        step: 4,
-                        alignment: TextAlign.right,
-                        color: scheme.onSurface.withValues(alpha: 0.9),
-                      ),
-                      const SizedBox(height: AppLayout.sp4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppLayout.sp2,
-                            vertical: AppLayout.sp1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scheme.secondaryContainer.withValues(
-                              alpha: 0.5,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AppLayout.radiusSm,
-                            ),
-                          ),
-                          child: Text(
-                            doa.category.toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.6,
-                              color: scheme.secondary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+              border: Border.all(
+                color: _hovered
+                    ? scheme.primary.withValues(alpha: 0.4)
+                    : scheme.surfaceContainerHigh,
+                width: _hovered ? 1.4 : 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: _hovered ? 0.09 : 0.04),
+                  blurRadius: _hovered ? 32 : 20,
+                  offset: Offset(0, _hovered ? 12 : 4),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: AnimatedContainer(
+                    duration: AppLayout.durBase,
+                    width: 4,
+                    color: _hovered
+                        ? scheme.primary
+                        : scheme.primary.withValues(alpha: 0.2),
                   ),
                 ),
+                Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                  child: InkWell(
+                    onTap: widget.onTap,
+                    borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppLayout.sp4,
+                        AppLayout.sp5,
+                        AppLayout.sp5,
+                        AppLayout.sp5,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  doa.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontSize: 20,
+                                    height: 28 / 20,
+                                    fontWeight: FontWeight.w600,
+                                    color: _hovered
+                                        ? scheme.primary
+                                        : scheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                                _BookmarkButton(
+                                  bookmarked: widget.bookmarked,
+                                  onPressed: widget.onToggleBookmark,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppLayout.sp4),
+                            // Arabic, Amiri, right-aligned, on-surface @ 0.9.
+                            QTextDisplay(
+                              text: doa.arabic,
+                              step: 4,
+                              alignment: TextAlign.right,
+                              color: scheme.onSurface.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(height: AppLayout.sp4),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppLayout.sp2,
+                                  vertical: AppLayout.sp1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scheme.secondaryContainer.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppLayout.radiusSm,
+                                  ),
+                                ),
+                                child: Text(
+                                  doa.category.toUpperCase(),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.6,
+                                    color: scheme.secondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
   }
 }
 

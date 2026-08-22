@@ -269,6 +269,26 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const _DividerRow(),
                 _SettingRow(
+                  icon: Icons.event_rounded,
+                  title: S.hijriEventReminderLabel,
+                  subtitle: S.hijriEventReminderSublabel,
+                  trailing: GlassSwitch(
+                    value: ref.watch(hijriEventReminderEnabledProvider),
+                    useOwnLayer: true,
+                    onChanged: (v) async {
+                      final ok = await ref
+                          .read(hijriEventReminderEnabledProvider.notifier)
+                          .setEnabled(v);
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(S.hijriEventReminderDenied)),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const _DividerRow(),
+                _SettingRow(
                   icon: Icons.notifications_rounded,
                   title: S.prayerNotificationsTest,
                   subtitle: S.prayerNotificationsTestSublabel,
@@ -314,6 +334,24 @@ class SettingsScreen extends ConsumerWidget {
                             context,
                             ref,
                             ref.read(selectedFajrAdzanVoiceProvider),
+                          ),
+                        ),
+                        GlassChip(
+                          useOwnLayer: true,
+                          icon: Icon(
+                            Icons.event_rounded,
+                            size: 18,
+                            color: activeGreen,
+                          ),
+                          label: S.testHijriEvent,
+                          labelStyle: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          onTap: () => _sendHijriTestNotification(
+                            context,
+                            ref,
                           ),
                         ),
                       ],
@@ -618,6 +656,27 @@ class SettingsScreen extends ConsumerWidget {
     await ref
         .read(prayerNotificationsProvider)
         .showTestNotification(voiceId: voiceId);
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.prayerNotificationsTestSent)));
+    }
+  }
+
+  /// Sends a test notification for Hijri events, then confirms.
+  Future<void> _sendHijriTestNotification(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final ok = await ref.read(prayerNotificationsProvider).requestPermissions();
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(S.hijriEventReminderDenied)),
+      );
+      return;
+    }
+
+    await ref.read(prayerNotificationsProvider).showHijriTestNotification();
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,

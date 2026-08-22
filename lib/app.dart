@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +18,28 @@ import 'features/profile/profile_screen.dart';
 import 'features/stats/stats_screen.dart';
 import 'features/widgets/liquid_glass.dart';
 
+/// Provides ultra-smooth scrolling physics, overscroll bouncing, and mouse/touch drag support.
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.unknown,
+      };
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+    );
+  }
+}
+
 /// App root: watches the theme setting and applies the MyQuran theme.
 class MyQuranApp extends ConsumerWidget {
   const MyQuranApp({super.key});
@@ -28,9 +52,12 @@ class MyQuranApp extends ConsumerWidget {
     ref.watch(prayerNotificationSyncProvider);
     // Keep the dzikir reminders in sync with their toggle for the whole session.
     ref.watch(dzikirReminderSyncProvider);
+    // Keep the hijri event reminders in sync for the whole session.
+    ref.watch(hijriEventReminderSyncProvider);
     return MaterialApp(
       title: S.appName,
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const AppScrollBehavior(),
       theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
       darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
       themeMode: settings.themeMode,

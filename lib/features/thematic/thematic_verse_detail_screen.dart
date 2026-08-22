@@ -173,66 +173,90 @@ class _ThematicVerseDetailScreenState
 
                       final verses = snapshot.data ?? const [];
 
-                      return ListView(
+                      if (verses.isEmpty) {
+                        return ListView(
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          padding: const EdgeInsets.fromLTRB(
+                            AppLayout.sp6,
+                            AppLayout.sp10 + AppLayout.sp5,
+                            AppLayout.sp6,
+                            AppLayout.sp8,
+                          ),
+                          children: [
+                            _buildThemeHeaderCard(scheme, theme, title, subtitle, 0),
+                            const SizedBox(height: AppLayout.sp5),
+                            _buildEmptyState(scheme, theme),
+                          ],
+                        );
+                      }
+
+                      return ListView.builder(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
                         padding: const EdgeInsets.fromLTRB(
                           AppLayout.sp6,
                           AppLayout.sp10 + AppLayout.sp5,
                           AppLayout.sp6,
                           AppLayout.sp8,
                         ),
-                        children: [
-                          // Top info banner
-                          _buildThemeHeaderCard(scheme, theme, title, subtitle, verses.length),
-                          const SizedBox(height: AppLayout.sp5),
+                        itemCount: verses.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: AppLayout.sp5),
+                              child: _buildThemeHeaderCard(
+                                scheme,
+                                theme,
+                                title,
+                                subtitle,
+                                verses.length,
+                              ),
+                            );
+                          }
 
-                          if (verses.isEmpty)
-                            _buildEmptyState(scheme, theme)
-                          else
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: verses.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: AppLayout.sp4),
-                              itemBuilder: (context, index) {
-                                final item = verses[index];
-                                final isPlaying = audioState.ayahId == item.ayah.id &&
-                                    (audioState.status == AudioStatus.playing ||
-                                        audioState.status == AudioStatus.buffering);
-                                final isBookmarked =
-                                    bookmarkedIds.contains(item.ayah.id);
+                          final verseIndex = index - 1;
+                          final item = verses[verseIndex];
+                          final isPlaying = audioState.ayahId == item.ayah.id &&
+                              (audioState.status == AudioStatus.playing ||
+                                  audioState.status == AudioStatus.buffering);
+                          final isBookmarked =
+                              bookmarkedIds.contains(item.ayah.id);
 
-                                return _MinimalVerseCard(
-                                  item: item,
-                                  isPlaying: isPlaying,
-                                  isBookmarked: isBookmarked,
-                                  onTogglePlay: () {
-                                    if (isPlaying) {
-                                      audioService.pause();
-                                    } else {
-                                      audioService.playAyah(item.ayah.id);
-                                    }
-                                  },
-                                  onToggleBookmark: () {
-                                    ref
-                                        .read(bookmarkRepositoryProvider)
-                                        .toggleBookmark(item.ayah.id);
-                                  },
-                                  onOpenReader: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => ReaderScreen(
-                                          surahId: item.surah.id,
-                                          initialAyahId: item.ayah.id,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  onShare: () => _shareVerse(item),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: AppLayout.sp4),
+                            child: _MinimalVerseCard(
+                              item: item,
+                              isPlaying: isPlaying,
+                              isBookmarked: isBookmarked,
+                              onTogglePlay: () {
+                                if (isPlaying) {
+                                  audioService.pause();
+                                } else {
+                                  audioService.playAyah(item.ayah.id);
+                                }
+                              },
+                              onToggleBookmark: () {
+                                ref
+                                    .read(bookmarkRepositoryProvider)
+                                    .toggleBookmark(item.ayah.id);
+                              },
+                              onOpenReader: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => ReaderScreen(
+                                      surahId: item.surah.id,
+                                      initialAyahId: item.ayah.id,
+                                    ),
+                                  ),
                                 );
                               },
+                              onShare: () => _shareVerse(item),
                             ),
-                        ],
+                          );
+                        },
                       );
                     },
                   ),
@@ -374,7 +398,7 @@ class _ThematicVerseDetailScreenState
   }
 }
 
-class _MinimalVerseCard extends StatelessWidget {
+class _MinimalVerseCard extends StatefulWidget {
   const _MinimalVerseCard({
     required this.item,
     required this.isPlaying,
@@ -394,30 +418,55 @@ class _MinimalVerseCard extends StatelessWidget {
   final VoidCallback onShare;
 
   @override
+  State<_MinimalVerseCard> createState() => _MinimalVerseCardState();
+}
+
+class _MinimalVerseCardState extends State<_MinimalVerseCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final item = widget.item;
+    final isPlaying = widget.isPlaying;
+    final isBookmarked = widget.isBookmarked;
+    final onTogglePlay = widget.onTogglePlay;
+    final onToggleBookmark = widget.onToggleBookmark;
+    final onOpenReader = widget.onOpenReader;
+    final onShare = widget.onShare;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        border: Border.all(
-          color: isPlaying
-              ? scheme.primary.withValues(alpha: 0.6)
-              : scheme.outlineVariant.withValues(alpha: 0.4),
-          width: isPlaying ? 1.6 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.primary.withValues(alpha: isPlaying ? 0.08 : 0.02),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: AppLayout.durBase,
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          border: Border.all(
+            color: isPlaying
+                ? scheme.primary.withValues(alpha: 0.7)
+                : _hovered
+                    ? scheme.primary.withValues(alpha: 0.4)
+                    : scheme.outlineVariant.withValues(alpha: 0.4),
+            width: (isPlaying || _hovered) ? 1.4 : 1.0,
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppLayout.sp5),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(
+                alpha: isPlaying
+                    ? (_hovered ? 0.14 : 0.08)
+                    : (_hovered ? 0.07 : 0.02),
+              ),
+              blurRadius: _hovered ? 20 : 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppLayout.sp5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -597,7 +646,8 @@ class _MinimalVerseCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
