@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,7 @@ import 'package:path/path.dart' as p;
 ///
 /// The decoder reads the tajwid annotation marks already embedded in the
 /// Uthmani text (seed downloaded with `marks=true`), so these tests run against
-/// the REAL bundled `assets/db/quran.db` to prove the decoder is not dead code
+/// the REAL bundled `assets/db/quran.db.gz` to prove the decoder is not dead code
 /// and produces well-formed, correctly-attached ranges.
 void main() {
   late Directory tmp;
@@ -20,9 +21,11 @@ void main() {
   setUpAll(() async {
     tmp = await Directory.systemTemp.createTemp('myquran_tajwid_test');
     final file = File(p.join(tmp.path, 'quran.db'));
-    final asset = File('assets/db/quran.db');
-    expect(asset.existsSync(), isTrue, reason: 'quran.db asset must exist');
-    await file.writeAsBytes(await asset.readAsBytes());
+    final assetGz = File('assets/db/quran.db.gz');
+    expect(assetGz.existsSync(), isTrue, reason: 'quran.db.gz asset must exist');
+    final gzBytes = await assetGz.readAsBytes();
+    final dbBytes = Uint8List.fromList(gzip.decode(gzBytes));
+    await file.writeAsBytes(dbBytes);
     db = QuranDatabase(executor: NativeDatabase(file));
   });
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +7,7 @@ import 'package:myquran/data/db/quran_database.dart';
 import 'package:myquran/data/repositories/quran_repositories.dart';
 import 'package:path/path.dart' as p;
 
-/// Integration test against the REAL prebuilt asset (`assets/db/quran.db`).
+/// Integration test against the REAL prebuilt asset (`assets/db/quran.db.gz`).
 ///
 /// Regression guard: the bundled DB must open with the drift schema and serve
 /// every repository query. This is the exact path that failed when the SQL
@@ -19,9 +20,11 @@ void main() {
   setUpAll(() async {
     tmp = await Directory.systemTemp.createTemp('myquran_db_test');
     final file = File(p.join(tmp.path, 'quran.db'));
-    final asset = File('assets/db/quran.db');
-    expect(asset.existsSync(), isTrue, reason: 'quran.db asset must exist');
-    await file.writeAsBytes(await asset.readAsBytes());
+    final assetGz = File('assets/db/quran.db.gz');
+    expect(assetGz.existsSync(), isTrue, reason: 'quran.db.gz asset must exist');
+    final gzBytes = await assetGz.readAsBytes();
+    final dbBytes = Uint8List.fromList(gzip.decode(gzBytes));
+    await file.writeAsBytes(dbBytes);
     db = QuranDatabase(executor: NativeDatabase(file));
   });
 

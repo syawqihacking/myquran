@@ -112,10 +112,11 @@ class QuranDatabase extends _$QuranDatabase {
       final versionOk =
           exists && _readUserVersion(file) == AppConstants.quranDbSchemaVersion;
       if (!versionOk) {
-        final data =
-            await rootBundle.load(AppConstants.quranDbAsset); // asset copied at build time
-        final bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        // Load the gzipped database asset and decompress it.
+        final gzData = await rootBundle.load('${AppConstants.quranDbAsset}.gz');
+        final gzBytes =
+            gzData.buffer.asUint8List(gzData.offsetInBytes, gzData.lengthInBytes);
+        final bytes = gzip.decode(gzBytes);
         // Drop stale WAL sidecars: a leftover -wal/-shm from a previous,
         // differently-versioned database would be replayed onto the fresh
         // file and corrupt it on open.

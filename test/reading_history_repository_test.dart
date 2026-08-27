@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,10 +38,12 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('myquran_history_$name');
     final user =
         UserDatabase(executor: NativeDatabase(File(p.join(dir.path, 'user.db'))));
-    final asset = File('assets/db/quran.db');
-    expect(asset.existsSync(), isTrue, reason: 'quran.db asset must exist');
+    final assetGz = File('assets/db/quran.db.gz');
+    expect(assetGz.existsSync(), isTrue, reason: 'quran.db.gz asset must exist');
+    final gzBytes = await assetGz.readAsBytes();
+    final dbBytes = Uint8List.fromList(gzip.decode(gzBytes));
     final quranFile = File(p.join(dir.path, 'quran.db'));
-    await quranFile.writeAsBytes(await asset.readAsBytes());
+    await quranFile.writeAsBytes(dbBytes);
     final quran = QuranDatabase(executor: NativeDatabase(quranFile));
     return (user: user, quran: quran, dir: dir);
   }
