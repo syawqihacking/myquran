@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import 'browse_utils.dart';
@@ -57,11 +57,12 @@ class SurahCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return HoverCard(
       onTap: onTap,
       child: SurahRowContent(
         surah: surah,
-        metaTrailing: '${surah.ayahCount} ${S.ayatCount}',
+        metaTrailing: '${surah.ayahCount} ${l10n.ayatCount}',
       ),
     );
   }

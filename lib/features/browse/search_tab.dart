@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/quran_repositories.dart';
@@ -174,6 +174,7 @@ class SearchTabState extends ConsumerState<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,7 +185,7 @@ class SearchTabState extends ConsumerState<SearchTab> {
           onChanged: _onChanged,
           onSubmitted: (_) => _activateIndex(_selected >= 0 ? _selected : 0),
           decoration: InputDecoration(
-            hintText: S.browseSearchHint,
+            hintText: l10n.browseSearchHint,
             prefixIcon: const Icon(Icons.search_rounded),
             prefixIconColor: scheme.outline,
             suffixIcon: _controller.text.isEmpty
@@ -195,7 +196,7 @@ class SearchTabState extends ConsumerState<SearchTab> {
                       _onChanged('');
                       _searchNode.requestFocus();
                     },
-                    tooltip: S.cancel,
+                    tooltip: l10n.cancel,
                     icon: const Icon(Icons.close_rounded),
                   ),
             filled: true,
@@ -221,6 +222,7 @@ class SearchTabState extends ConsumerState<SearchTab> {
   }
 
   Widget _buildResults() {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final rows = _rows;
 
@@ -244,10 +246,10 @@ class SearchTabState extends ConsumerState<SearchTab> {
               color: theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppLayout.sp3),
-            Text(S.noResultsTitle, style: theme.textTheme.titleMedium),
+            Text(l10n.noResultsTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppLayout.sp1),
             Text(
-              S.noResultsHint,
+              l10n.noResultsHint,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -264,7 +266,7 @@ class SearchTabState extends ConsumerState<SearchTab> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (hasSurah) ...[
-          const GroupHeader(S.searchGroupSurah),
+          GroupHeader(l10n.searchGroupSurah),
           for (var i = 0; i < _surahs.length; i++)
             SurahResultRow(
               surah: _surahs[i],
@@ -275,8 +277,8 @@ class SearchTabState extends ConsumerState<SearchTab> {
         if (hasAyah) ...[
           GroupHeader(
             _ayahs.first.matchKind == 'arabic'
-                ? S.searchGroupAyah
-                : S.searchGroupTranslation,
+                ? l10n.searchGroupAyah
+                : l10n.searchGroupTranslation,
           ),
           for (var i = 0; i < _ayahs.length; i++)
             AyahResultRow(
@@ -457,12 +459,13 @@ class PopularSurahs extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final surahs = ref.watch(surahListProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const GroupHeader(S.popularSurahs),
+        GroupHeader(l10n.popularSurahs),
         if (surahs.value == null)
           const Padding(
             padding: EdgeInsets.all(24),

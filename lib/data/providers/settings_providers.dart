@@ -1,13 +1,27 @@
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/quran_palette.dart';
 import 'database_providers.dart';
 
+/// Supported app languages.
+enum AppLocale {
+  id('id', 'Indonesia'),
+  en('en', 'English'),
+  ar('ar', 'العربية');
+
+  const AppLocale(this.code, this.displayName);
+  final String code;
+  final String displayName;
+
+  Locale toLocale() => Locale(code);
+}
+
 class SettingsState {
   const SettingsState({
     this.themeMode = ThemeMode.system,
+    this.locale = AppLocale.id,
     this.quranFontStep = AppConstants.defaultQuranFontStep,
     this.showTranslation = true,
     this.alignArabicRight = true,
@@ -18,6 +32,7 @@ class SettingsState {
   });
 
   final ThemeMode themeMode;
+  final AppLocale locale;
   final int quranFontStep;
   final bool showTranslation;
   final bool alignArabicRight;
@@ -28,6 +43,7 @@ class SettingsState {
 
   SettingsState copyWith({
     ThemeMode? themeMode,
+    AppLocale? locale,
     int? quranFontStep,
     bool? showTranslation,
     bool? alignArabicRight,
@@ -38,6 +54,7 @@ class SettingsState {
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
+      locale: locale ?? this.locale,
       quranFontStep: quranFontStep ?? this.quranFontStep,
       showTranslation: showTranslation ?? this.showTranslation,
       alignArabicRight: alignArabicRight ?? this.alignArabicRight,
@@ -51,6 +68,7 @@ class SettingsState {
 
 class SettingsController extends Notifier<SettingsState> {
   static const _kThemeMode = 'theme_mode';
+  static const _kLocale = 'app_locale';
   static const _kFontStep = 'quran_font_step';
   static const _kShowTranslation = 'show_translation';
   static const _kAlign = 'align_arabic_right';
@@ -62,10 +80,12 @@ class SettingsController extends Notifier<SettingsState> {
   @override
   SettingsState build() {
     final prefs = ref.read(sharedPreferencesProvider);
+    final savedLocale = prefs.getString(_kLocale);
     return SettingsState(
       themeMode:
           ThemeMode.values.asNameMap()[prefs.getString(_kThemeMode)] ??
           ThemeMode.system,
+      locale: AppLocale.values.asNameMap()[savedLocale] ?? AppLocale.id,
       quranFontStep:
           prefs.getInt(_kFontStep) ?? AppConstants.defaultQuranFontStep,
       showTranslation: prefs.getBool(_kShowTranslation) ?? true,
@@ -83,6 +103,7 @@ class SettingsController extends Notifier<SettingsState> {
     final prefs = ref.read(sharedPreferencesProvider);
     final s = state;
     prefs.setString(_kThemeMode, s.themeMode.name);
+    prefs.setString(_kLocale, s.locale.name);
     prefs.setInt(_kFontStep, s.quranFontStep);
     prefs.setBool(_kShowTranslation, s.showTranslation);
     prefs.setBool(_kAlign, s.alignArabicRight);
@@ -136,6 +157,11 @@ class SettingsController extends Notifier<SettingsState> {
 
   void setTajwidColor(bool v) {
     state = state.copyWith(tajwidColor: v);
+    _save();
+  }
+
+  void setLocale(AppLocale l) {
+    state = state.copyWith(locale: l);
     _save();
   }
 }

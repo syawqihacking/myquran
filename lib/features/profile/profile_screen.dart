@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../../data/repositories/reading_stats_repository.dart';
@@ -27,6 +27,7 @@ class ProfileScreen extends ConsumerWidget {
     final stats = ref.watch(readingStatsProvider).value;
     final surahCount = ref.watch(surahsReadCountProvider).value;
     final recent = ref.watch(profileRecentSurahsProvider);
+    final l10n = AppLocalizations.of(context)!;
     final isMobile =
         MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
@@ -53,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
                   _StatsGrid(surahCount: surahCount, stats: stats),
                   const SizedBox(height: AppLayout.sp7),
                   Text(
-                    S.profileHistoryTitle,
+                    l10n.profileHistoryTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: scheme.primary,
@@ -63,7 +64,7 @@ class ProfileScreen extends ConsumerWidget {
                   _HistorySection(recent: recent),
                   const SizedBox(height: AppLayout.sp7),
                   Text(
-                    S.profileSettingsTitle,
+                    l10n.profileSettingsTitle,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: scheme.primary,
@@ -95,13 +96,14 @@ class _ProfileAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     // As a top-level shell view there is nothing to pop, so the back button
     // is hidden and the title is centered; when pushed as a route the back
     // pill appears (and the title stays centered via the balance spacer).
     final canPop = Navigator.of(context).canPop();
     return GlassHeader(
-      title: S.profileTitle,
+      title: l10n.profileTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -113,7 +115,7 @@ class _ProfileAppBar extends StatelessWidget {
               padding: EdgeInsets.zero,
               child: IconButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                tooltip: S.back,
+                tooltip: l10n.back,
                 icon: const Icon(Icons.arrow_back_rounded),
               ),
             )
@@ -192,20 +194,21 @@ class _ProfileHeader extends ConsumerWidget {
 
   /// Rename dialog — the edit badge is a real control, not decoration.
   Future<void> _editName(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(
       text: ref.read(profileNameProvider),
     );
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.profileNameDialogTitle),
+        title: Text(l10n.profileNameDialogTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
           maxLength: 30,
           textInputAction: TextInputAction.done,
           decoration: InputDecoration(
-            hintText: S.profileNameHint,
+            hintText: l10n.profileNameHint,
             counterText: '',
           ),
           onSubmitted: (v) => Navigator.of(ctx).pop(v),
@@ -213,11 +216,11 @@ class _ProfileHeader extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(S.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(controller.text),
-            child: const Text(S.profileSave),
+            child: Text(l10n.profileSave),
           ),
         ],
       ),
@@ -238,18 +241,19 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
-        _StatCell(value: _formatCount(surahCount), label: S.profileSurahRead),
+        _StatCell(value: _formatCount(surahCount), label: l10n.profileSurahRead),
         const SizedBox(width: AppLayout.sp2),
         _StatCell(
           value: _formatCount(stats?.totalAyahs),
-          label: S.profileAyahRead,
+          label: l10n.profileAyahRead,
         ),
         const SizedBox(width: AppLayout.sp2),
         _StatCell(
           value: _formatCount(stats?.streakDays),
-          label: S.profileStreakDays,
+          label: l10n.profileStreakDays,
           icon: Icons.local_fire_department_rounded,
         ),
       ],
@@ -340,6 +344,7 @@ class _HistorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -362,7 +367,7 @@ class _HistorySection extends StatelessWidget {
                 Icon(Icons.history_rounded, size: 32, color: scheme.outline),
                 const SizedBox(height: AppLayout.sp3),
                 Text(
-                  S.profileHistoryEmpty,
+                  l10n.profileHistoryEmpty,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: scheme.onSurfaceVariant,
@@ -370,7 +375,7 @@ class _HistorySection extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  S.profileHistoryEmptyHint,
+                  l10n.profileHistoryEmptyHint,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.outline,
@@ -407,6 +412,7 @@ class _HistoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final surah = item.surah;
@@ -436,7 +442,7 @@ class _HistoryRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${item.readAyahCount}/${item.totalAyahCount} ${S.ayatCount}',
+                    '${item.readAyahCount}/${item.totalAyahCount} ${l10n.ayatCount}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -457,7 +463,7 @@ class _HistoryRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _relativeTime(item.lastReadAt),
+                  _relativeTime(item.lastReadAt, l10n),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: scheme.secondary,
                   ),
@@ -471,20 +477,20 @@ class _HistoryRow extends StatelessWidget {
   }
 
   /// "Baru saja" / "X menit lalu" / "X jam lalu" / "Kemarin" / "X hari lalu".
-  static String _relativeTime(int epochSeconds) {
+  static String _relativeTime(int epochSeconds, AppLocalizations l10n) {
     final now = DateTime.now();
     final then = DateTime.fromMillisecondsSinceEpoch(epochSeconds * 1000);
     final diff = now.difference(then);
-    if (diff.inMinutes < 1) return S.profileTimeJustNow;
+    if (diff.inMinutes < 1) return l10n.profileTimeJustNow;
     if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} ${S.profileTimeMinutesAgo}';
+      return '${diff.inMinutes} ${l10n.profileTimeMinutesAgo}';
     }
-    if (diff.inHours < 24) return '${diff.inHours} ${S.profileTimeHoursAgo}';
+    if (diff.inHours < 24) return '${diff.inHours} ${l10n.profileTimeHoursAgo}';
     final today = DateTime(now.year, now.month, now.day);
     final day = DateTime(then.year, then.month, then.day);
     final days = today.difference(day).inDays;
-    if (days == 1) return S.profileTimeYesterday;
-    return '$days ${S.profileTimeDaysAgo}';
+    if (days == 1) return l10n.profileTimeYesterday;
+    return '$days ${l10n.profileTimeDaysAgo}';
   }
 }
 
@@ -495,13 +501,19 @@ class _SettingsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final settings = ref.watch(settingsProvider);
     final themeLabel = switch (settings.themeMode) {
-      ThemeMode.system => S.themeSystem,
-      ThemeMode.light => S.themeLight,
-      ThemeMode.dark => S.themeDark,
+      ThemeMode.system => l10n.themeSystem,
+      ThemeMode.light => l10n.themeLight,
+      ThemeMode.dark => l10n.themeDark,
+    };
+    final languageLabel = switch (settings.locale) {
+      AppLocale.id => 'Indonesia',
+      AppLocale.en => 'English',
+      AppLocale.ar => 'العربية',
     };
 
     return Container(
@@ -514,20 +526,66 @@ class _SettingsSection extends ConsumerWidget {
         children: [
           _SettingRow(
             icon: Icons.settings_rounded,
-            title: S.profileThemeLabel,
+            title: l10n.profileThemeLabel,
             subtitle: themeLabel,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
             ),
           ),
           const _DividerRow(),
-          const _SettingRow(
+          _SettingRow(
             icon: Icons.language_rounded,
-            title: S.profileLanguageLabel,
-            subtitle: S.profileLanguageValue,
+            title: l10n.profileLanguageLabel,
+            subtitle: languageLabel,
+            onTap: () => _showLanguagePicker(context, ref),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (ctx, setSheetState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                    child: Text(
+                      l10n.profileLanguageLabel,
+                      style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.primary,
+                      ),
+                    ),
+                  ),
+                  for (final locale in AppLocale.values)
+                    RadioListTile<AppLocale>(
+                      title: Text(locale.displayName),
+                      value: locale,
+                      groupValue: ref.read(settingsProvider).locale,
+                      onChanged: (v) {
+                        if (v != null) {
+                          ref.read(settingsProvider.notifier).setLocale(v);
+                          setSheetState(() {});
+                        }
+                      },
+                    ),
+                  const SizedBox(height: 8),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

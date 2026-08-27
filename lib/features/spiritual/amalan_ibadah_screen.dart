@@ -4,19 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/amalan_ibadah_data.dart';
 import '../../data/providers.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 
 /// Filter chips in the Stitch design's order. `null` = "Semua".
-const List<(DeedCategory?, String)> _amalanChips = [
-  (null, S.amalanCatSemua),
-  (DeedCategory.wajib, S.amalanCatWajib),
-  (DeedCategory.sunnah, S.amalanCatSunnah),
-  (DeedCategory.dzikir, S.amalanCatDzikir),
-  (DeedCategory.sosial, S.amalanCatSosial),
+List<(DeedCategory?, String)> _amalanChips(AppLocalizations l10n) => [
+  (null, l10n.amalanCatSemua),
+  (DeedCategory.wajib, l10n.amalanCatWajib),
+  (DeedCategory.sunnah, l10n.amalanCatSunnah),
+  (DeedCategory.dzikir, l10n.amalanCatDzikir),
+  (DeedCategory.sosial, l10n.amalanCatSosial),
 ];
 
 /// Height of the pinned search+chips header (search 48 + gap 12 + chips 32 +
@@ -246,9 +246,10 @@ class _AmalanAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.amalanIbadahTitle,
+      title: l10n.amalanIbadahTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -259,7 +260,7 @@ class _AmalanAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -276,11 +277,12 @@ class _HeaderTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final wide =
         MediaQuery.sizeOf(context).width >= AppConstants.mobileBreakpoint;
     return Text(
-      S.amalanIbadahTitle,
+      l10n.amalanIbadahTitle,
       style: theme.textTheme.headlineSmall?.copyWith(
         fontSize: wide ? 32 : 24,
         height: (wide ? 40 : 32) / (wide ? 32 : 24),
@@ -309,6 +311,7 @@ class _GoalProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return ClipRRect(
@@ -341,7 +344,7 @@ class _GoalProgressCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        S.amalanGoalProgress,
+                        l10n.amalanGoalProgress,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 20,
                           height: 28 / 20,
@@ -351,7 +354,7 @@ class _GoalProgressCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        S.amalanGoalSubtitle,
+                        l10n.amalanGoalSubtitle,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 16,
                           height: 24 / 16,
@@ -372,7 +375,7 @@ class _GoalProgressCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppLayout.radiusFull),
                   ),
                   child: Text(
-                    S.amalanProgress(done, total),
+                    l10n.amalanProgress(done, total),
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: scheme.onSecondaryContainer,
@@ -449,6 +452,7 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -469,15 +473,15 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildSearch(theme, scheme),
+          _buildSearch(theme, scheme, l10n),
           const SizedBox(height: AppLayout.sp3),
-          _buildChips(theme, scheme),
+          _buildChips(theme, scheme, l10n),
         ],
       ),
     );
   }
 
-  Widget _buildSearch(ThemeData theme, ColorScheme scheme) {
+  Widget _buildSearch(ThemeData theme, ColorScheme scheme, AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         // Design inset shadow: inset_0_2px_4px rgba(0,0,0,0.02).
@@ -496,7 +500,7 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
         onChanged: onQueryChanged,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: S.amalanSearchHint,
+          hintText: l10n.amalanSearchHint,
           prefixIcon: const Icon(Icons.search_rounded),
           prefixIconColor: scheme.outline,
           suffixIcon: query.isEmpty
@@ -507,7 +511,7 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
                     onQueryChanged('');
                     searchFocus.requestFocus();
                   },
-                  tooltip: S.cancel,
+                  tooltip: l10n.cancel,
                   icon: const Icon(Icons.close_rounded),
                 ),
           filled: true,
@@ -529,19 +533,19 @@ class _StickySearchHeader extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildChips(ThemeData theme, ColorScheme scheme) {
+  Widget _buildChips(ThemeData theme, ColorScheme scheme, AppLocalizations l10n) {
     return ScrollConfiguration(
       behavior: _ChipScrollBehavior(),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            for (var i = 0; i < _amalanChips.length; i++) ...[
+            for (var i = 0; i < _amalanChips(l10n).length; i++) ...[
               if (i > 0) const SizedBox(width: AppLayout.sp3),
               _FilterChip(
-                label: _amalanChips[i].$2,
-                selected: category == _amalanChips[i].$1,
-                onTap: () => onCategoryChanged(_amalanChips[i].$1),
+                label: _amalanChips(l10n)[i].$2,
+                selected: category == _amalanChips(l10n)[i].$1,
+                onTap: () => onCategoryChanged(_amalanChips(l10n)[i].$1),
               ),
             ],
           ],
@@ -861,9 +865,10 @@ class _DeedCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Tooltip(
-      message: checked ? S.amalanToggleUndone : S.amalanToggleDone,
+      message: checked ? l10n.amalanToggleUndone : l10n.amalanToggleDone,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -938,6 +943,7 @@ class _LearnMoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return LiquidGlassCapsule(
@@ -950,7 +956,7 @@ class _LearnMoreButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            S.amalanLearnMore,
+            l10n.amalanLearnMore,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.primary,
               fontWeight: FontWeight.w700,
@@ -976,6 +982,7 @@ class _DeedDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return SafeArea(
@@ -1027,7 +1034,7 @@ class _DeedDetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: AppLayout.sp5),
             Text(
-              S.amalanDetailPenjelasan,
+              l10n.amalanDetailPenjelasan,
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
@@ -1045,7 +1052,7 @@ class _DeedDetailSheet extends StatelessWidget {
             ),
             const SizedBox(height: AppLayout.sp4),
             Text(
-              S.amalanDetailDalil,
+              l10n.amalanDetailDalil,
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
@@ -1086,6 +1093,7 @@ class _DeedsEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -1098,10 +1106,10 @@ class _DeedsEmpty extends StatelessWidget {
             color: scheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppLayout.sp3),
-          Text(S.amalanEmpty, style: theme.textTheme.titleMedium),
+          Text(l10n.amalanEmpty, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp1),
           Text(
-            S.amalanEmptyHint,
+            l10n.amalanEmptyHint,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,

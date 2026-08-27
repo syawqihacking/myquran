@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/user_repositories.dart';
@@ -73,11 +73,12 @@ class FavoritRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return HoverCard(
       onTap: () => openSurah(context, surah.id, initialAyahId: firstAyahId),
       child: SurahRowContent(
         surah: surah,
-        metaTrailing: '$count ${S.penandaCount}',
+        metaTrailing: '$count ${l10n.penandaCount}',
       ),
     );
   }
@@ -88,6 +89,7 @@ class FavoritEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -108,10 +110,10 @@ class FavoritEmpty extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppLayout.sp4),
-          Text(S.favoritEmptyTitle, style: theme.textTheme.titleMedium),
+          Text(l10n.favoritEmptyTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.favoritEmptyMessage,
+            l10n.favoritEmptyMessage,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,

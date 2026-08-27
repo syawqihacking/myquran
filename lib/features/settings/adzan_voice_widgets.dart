@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/liquid_glass.dart';
 
 /// A grouped card for choosing the adzan voices: a small header plus one
@@ -23,6 +23,7 @@ class AdzanVoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return GlassTouchButton(
@@ -53,7 +54,7 @@ class AdzanVoiceCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppLayout.sp2),
                   Text(
-                    S.adzanVoiceLabel,
+                    l10n.adzanVoiceLabel,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -72,7 +73,7 @@ class AdzanVoiceCard extends StatelessWidget {
               icon: Icons.volume_up_rounded,
               iconBackground: scheme.secondaryContainer,
               iconColor: scheme.onSecondaryContainer,
-              title: S.adzanVoiceSholatLabel,
+              title: l10n.adzanVoiceSholatLabel,
               voiceName: regularVoiceName,
               onTap: onRegularTap,
             ),
@@ -86,7 +87,7 @@ class AdzanVoiceCard extends StatelessWidget {
               icon: Icons.wb_twilight_rounded,
               iconBackground: scheme.tertiaryContainer,
               iconColor: scheme.onTertiaryContainer,
-              title: S.adzanVoiceFajrLabel,
+              title: l10n.adzanVoiceFajrLabel,
               voiceName: fajrVoiceName,
               onTap: onFajrTap,
             ),

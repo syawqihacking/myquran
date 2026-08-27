@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 
 /// The bar's settings icon → reading options that don't need a dedicated
@@ -41,6 +41,7 @@ class ReaderSettingsMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
 
     // Murottal status → icon + label for the menu row.
@@ -48,28 +49,28 @@ class ReaderSettingsMenu extends StatelessWidget {
         switch (murottalState.status) {
       MurottalDownloadStatus.downloading => (
           Icons.close_rounded,
-          S.murottalCancel,
+          l10n.murottalCancel,
           scheme.primary,
         ),
       MurottalDownloadStatus.downloaded => (
           Icons.download_done_rounded,
-          S.murottalDownloaded,
+          l10n.murottalDownloaded,
           scheme.tertiaryFixedDim,
         ),
       MurottalDownloadStatus.error => (
           Icons.error_outline_rounded,
-          S.murottalDownloadFailed,
+          l10n.murottalDownloadFailed,
           scheme.error,
         ),
       MurottalDownloadStatus.notDownloaded => (
           Icons.download_rounded,
-          S.murottalDownload,
+          l10n.murottalDownload,
           scheme.onSurfaceVariant,
         ),
     };
 
     return PopupMenuButton<String>(
-      tooltip: S.readerSettings,
+      tooltip: l10n.readerSettings,
       style: IconButton.styleFrom(
         shape: const CircleBorder(),
         foregroundColor: scheme.onSurfaceVariant,
@@ -97,7 +98,7 @@ class ReaderSettingsMenu extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppLayout.sp3),
-              Text(showTranslation ? S.hideTranslation : S.showTranslationLabel),
+              Text(showTranslation ? l10n.hideTranslation : l10n.showTranslationLabel),
             ],
           ),
         ),
@@ -108,7 +109,7 @@ class ReaderSettingsMenu extends StatelessWidget {
               Icon(Icons.unfold_more_rounded,
                   size: 20, color: scheme.onSurfaceVariant),
               const SizedBox(width: AppLayout.sp3),
-              Text(S.jumpToAyah),
+              Text(l10n.jumpToAyah),
             ],
           ),
         ),
@@ -125,7 +126,7 @@ class ReaderSettingsMenu extends StatelessWidget {
                     : scheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppLayout.sp3),
-              Expanded(child: Text(S.tajwidColorLabel)),
+              Expanded(child: Text(l10n.tajwidColorLabel)),
               if (tajwidColor)
                 Icon(Icons.check_rounded, size: 18, color: scheme.tertiary),
             ],
@@ -148,7 +149,7 @@ class ReaderSettingsMenu extends StatelessWidget {
                 const SizedBox(width: AppLayout.sp3),
                 Expanded(
                   child: Text(
-                    isCurrentBookmarked ? S.removeBookmark : S.bookmarkAyah,
+                    isCurrentBookmarked ? l10n.removeBookmark : l10n.bookmarkAyah,
                   ),
                 ),
               ],
@@ -173,7 +174,7 @@ class ReaderSettingsMenu extends StatelessWidget {
                 const SizedBox(width: AppLayout.sp3),
                 Expanded(
                   child: Text(
-                    isCurrentSajdaDone ? S.sujudUnmark : S.sujudMark,
+                    isCurrentSajdaDone ? l10n.sujudUnmark : l10n.sujudMark,
                   ),
                 ),
               ],

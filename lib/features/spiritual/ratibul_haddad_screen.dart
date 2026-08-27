@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/ratib_data.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/providers.dart';
@@ -167,10 +167,11 @@ class _RatibAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return GlassHeader(
-      title: S.ratibulHaddadTitle,
+      title: l10n.ratibulHaddadTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -189,7 +190,7 @@ class _RatibAppBar extends StatelessWidget {
           ),
           child: IconButton(
             onPressed: onBack,
-            tooltip: S.back,
+            tooltip: l10n.back,
             padding: EdgeInsets.zero,
             icon: Icon(Icons.arrow_back_rounded, color: scheme.primary),
           ),
@@ -235,6 +236,7 @@ class _IntroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -291,7 +293,7 @@ class _IntroCard extends StatelessWidget {
                       ),
                       const SizedBox(width: AppLayout.sp1),
                       Text(
-                        S.ratibIntroChip,
+                        l10n.ratibIntroChip,
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: scheme.onSecondaryContainer,
@@ -302,7 +304,7 @@ class _IntroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppLayout.sp4),
                 Text(
-                  S.ratibulHaddadTitle,
+                  l10n.ratibulHaddadTitle,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontSize: 24,
                     height: 32 / 24,
@@ -312,7 +314,7 @@ class _IntroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppLayout.sp2),
                 Text(
-                  S.ratibIntroDesc,
+                  l10n.ratibIntroDesc,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 16,
                     height: 24 / 16,
@@ -524,6 +526,7 @@ class _RepeatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -542,7 +545,7 @@ class _RepeatChip extends StatelessWidget {
           Icon(Icons.repeat_rounded, size: 16, color: scheme.secondary),
           const SizedBox(width: AppLayout.sp1),
           Text(
-            S.readNTimes(count),
+            l10n.readNTimes(count),
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               letterSpacing: 0.6,
@@ -575,6 +578,7 @@ class _RepeatCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final done = count >= total;
@@ -595,7 +599,7 @@ class _RepeatCounter extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    S.counterLabel,
+                    l10n.counterLabel,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: scheme.outline,
@@ -619,7 +623,7 @@ class _RepeatCounter extends StatelessWidget {
         const SizedBox(width: AppLayout.sp1),
         IconButton(
           onPressed: onReset,
-          tooltip: S.counterReset,
+          tooltip: l10n.counterReset,
           icon: Icon(Icons.refresh_rounded, size: 16, color: scheme.outline),
           padding: const EdgeInsets.all(6),
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -691,6 +695,7 @@ class _AudioBarState extends ConsumerState<_AudioBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final buffering = _state.status == AudioStatus.buffering;
@@ -742,7 +747,7 @@ class _AudioBarState extends ConsumerState<_AudioBar> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            S.playingLabel.toUpperCase(),
+                            l10n.playingLabel.toUpperCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.labelSmall?.copyWith(
@@ -753,7 +758,7 @@ class _AudioBarState extends ConsumerState<_AudioBar> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            S.ratibFullTitle,
+                            l10n.ratibFullTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -908,6 +913,7 @@ class _EndFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppLayout.sp8),
@@ -920,7 +926,7 @@ class _EndFooter extends StatelessWidget {
           ),
           const SizedBox(height: AppLayout.sp4),
           Text(
-            'Selesai membaca ${S.ratibulHaddadTitle}',
+            'Selesai membaca ${l10n.ratibulHaddadTitle}',
             style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: AppLayout.sp2),
@@ -934,7 +940,7 @@ class _EndFooter extends StatelessWidget {
           const SizedBox(height: AppLayout.sp6),
           LiquidGlassButton.filled(
             onPressed: () => Navigator.of(context).maybePop(),
-            label: S.back,
+            label: l10n.back,
           ),
         ],
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../browse/browse_screen.dart';
@@ -16,6 +16,7 @@ class ReadingHistory extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final recent = ref.watch(recentSurahsProvider);
     final hero = ref.watch(lastReadDetailProvider).value;
@@ -31,7 +32,7 @@ class ReadingHistory extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          S.historyEyebrow,
+          l10n.historyEyebrow,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

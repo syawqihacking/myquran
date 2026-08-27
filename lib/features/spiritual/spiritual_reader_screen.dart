@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/spiritual_content.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
@@ -62,17 +62,18 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
     }
   }
 
-  /// The Tahlil hub passes `S.tahlilTitle`; give that screen the design's
+  /// The Tahlil hub passes `l10n.tahlilTitle`; give that screen the design's
   /// dedicated header copy, and fall back to title/subtitle for everyone else
   /// (Ratib, Doa Harian detail).
-  bool get _isTahlil => widget.title == S.tahlilTitle;
+  bool _isTahlil(BuildContext context) => widget.title == AppLocalizations.of(context)!.tahlilTitle;
 
   void _showComingSoon() {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.audioComingSoon),
+          content: Text(l10n.audioComingSoon),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 1800),
         ),
@@ -81,6 +82,7 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return CallbackShortcuts(
       bindings: {
@@ -118,13 +120,13 @@ class _SpiritualReaderScreenState extends State<SpiritualReaderScreen> {
                                   2, // header + items + footer
                               itemBuilder: (context, index) {
                                 if (index == 0) {
-                                  return _SpiritualHeader(
-                                    title: _isTahlil
-                                        ? S.tahlilHeaderTitle
-                                        : widget.title,
-                                    description: _isTahlil
-                                        ? S.tahlilHeaderDesc
-                                        : widget.subtitle,
+                                   return _SpiritualHeader(
+                                     title: _isTahlil(context)
+                                         ? l10n.tahlilHeaderTitle
+                                         : widget.title,
+                                     description: _isTahlil(context)
+                                         ? l10n.tahlilHeaderDesc
+                                         : widget.subtitle,
                                     itemCount: widget.items.length,
                                   );
                                 }
@@ -199,6 +201,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return GlassHeader(
@@ -213,7 +216,7 @@ class _TopBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
           color: scheme.primary,
         ),
@@ -360,6 +363,7 @@ class _SpiritualItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final item = this.item;
@@ -478,7 +482,7 @@ class _SpiritualItemTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppLayout.radiusFull),
                   ),
                   child: Text(
-                    S.readNTimes(item.repeatCount),
+                    l10n.readNTimes(item.repeatCount),
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.6, // tracking-wider on label-sm
@@ -507,6 +511,7 @@ class _AudioFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
@@ -521,7 +526,7 @@ class _AudioFab extends StatelessWidget {
       ),
       child: FloatingActionButton(
         onPressed: onPressed,
-        tooltip: S.audioPlay,
+        tooltip: l10n.audioPlay,
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
         elevation: 0,
@@ -544,6 +549,7 @@ class _EndFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppLayout.sp8),
@@ -567,7 +573,7 @@ class _EndFooter extends StatelessWidget {
           const SizedBox(height: AppLayout.sp6),
           LiquidGlassButton.filled(
             onPressed: () => Navigator.of(context).maybePop(),
-            label: S.back,
+            label: l10n.back,
           ),
         ],
       ),

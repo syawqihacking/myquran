@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/quran_scale.dart';
 import '../../core/tajwid.dart';
 import '../../data/db/quran_database.dart';
@@ -315,11 +315,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   void _openJump(int ayahCount) {
+    final l10n = AppLocalizations.of(context)!;
     _jumpController.text = '${_currentAyahNumber ?? 1}';
     showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: S.cancel,
+      barrierLabel: l10n.cancel,
       barrierColor: Colors.transparent,
       transitionDuration: AppLayout.durQuick,
       pageBuilder: (ctx, _, __) {
@@ -340,7 +341,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        S.jumpToAyah,
+                        l10n.jumpToAyah,
                         style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
                               color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                             ),
@@ -357,7 +358,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                                   _submitJump(ctx, ayahCount),
                               decoration: InputDecoration(
                                 isDense: true,
-                                prefixText: '${S.jumpLabel} ',
+                                prefixText: '${l10n.jumpLabel} ',
                                 hintText: '1–$ayahCount',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(
@@ -369,7 +370,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                           const SizedBox(width: AppLayout.sp2),
                           FilledButton(
                             onPressed: () => _submitJump(ctx, ayahCount),
-                            child: const Text(S.jumpButton),
+                            child: Text(l10n.jumpButton),
                           ),
                         ],
                       ),
@@ -385,10 +386,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   void _submitJump(BuildContext ctx, int ayahCount) {
+    final l10n = AppLocalizations.of(context)!;
     final n = int.tryParse(_jumpController.text.trim());
     if (n == null || n < 1 || n > ayahCount) {
       ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(content: Text(S.jumpOutOfRange)),
+        SnackBar(content: Text(l10n.jumpOutOfRange)),
       );
       return;
     }
@@ -422,6 +424,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
     final zen = ref.watch(zenModeProvider);
     final ayahsAsync = ref.watch(ayahsProvider(widget.surahId));
@@ -442,7 +445,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     // label while the reciter list is loading or unavailable.
     final selectedReciterId = ref.watch(selectedReciterProvider);
     final reciters = ref.watch(recitersProvider).value;
-    String reciterName = S.audioReciter;
+    String reciterName = l10n.audioReciter;
     for (final r in reciters ?? const <Reciter>[]) {
       if (r.id == selectedReciterId) {
         reciterName = r.name;
@@ -730,11 +733,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   /// Honest "coming soon" SnackBar, used while NoopAudioService is wired in.
   void _showComingSoon() {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.comingSoon),
+          content: Text(l10n.comingSoon),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 1800),
         ),
@@ -743,11 +747,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   /// Displays an error SnackBar when audio playback fails.
   void _showAudioError() {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.audioError),
+          content: Text(l10n.audioError),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 2500),
         ),
@@ -857,6 +862,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   Future<void> _startMurottalDownload(int surahId) async {
+    final l10n = AppLocalizations.of(context)!;
     await ref.read(murottalDownloadProvider.notifier).download(surahId);
     if (!mounted) return;
     final state = ref.read(murottalDownloadProvider)[surahId];
@@ -865,7 +871,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: const Text(S.murottalDownloadFailed),
+            content: Text(l10n.murottalDownloadFailed),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -874,7 +880,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: const Text(S.murottalDownloadDone),
+            content: Text(l10n.murottalDownloadDone),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(milliseconds: 1800),
           ),
@@ -883,19 +889,20 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   Future<void> _confirmDeleteMurottal(int surahId) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.murottalDeleteConfirmTitle),
-        content: const Text(S.murottalDeleteConfirmMessage),
+        title: Text(l10n.murottalDeleteConfirmTitle),
+        content: Text(l10n.murottalDeleteConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(S.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(S.murottalDelete),
+            child: Text(l10n.murottalDelete),
           ),
         ],
       ),

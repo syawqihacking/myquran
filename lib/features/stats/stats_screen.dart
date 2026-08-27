@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/user_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_stats_repository.dart';
@@ -21,6 +21,7 @@ class StatsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final stats = ref.watch(readingStatsProvider);
     final isMobile =
@@ -37,16 +38,16 @@ class StatsScreen extends ConsumerWidget {
       ),
       children: [
         Text(
-          S.statsEyebrow,
+          l10n.statsEyebrow,
           style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.tertiary,
           ),
         ),
         const SizedBox(height: AppLayout.sp2),
-        Text(S.statsTitle, style: theme.textTheme.displaySmall),
+        Text(l10n.statsTitle, style: theme.textTheme.displaySmall),
         const SizedBox(height: AppLayout.sp2),
         Text(
-          S.statsCaption,
+          l10n.statsCaption,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -65,7 +66,7 @@ class StatsScreen extends ConsumerWidget {
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(48),
-                child: Text(S.statsError, style: theme.textTheme.bodyMedium),
+                child: Text(l10n.statsError, style: theme.textTheme.bodyMedium),
               ),
             ),
           ],
@@ -97,6 +98,7 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final gradient = LinearGradient(
       begin: Alignment.topLeft,
@@ -121,7 +123,7 @@ class _StreakCard extends StatelessWidget {
               child: _StatBlock(
                 icon: Icons.local_fire_department_rounded,
                 value: _formatCount(stats.streakDays),
-                label: S.statsStreakLabel,
+                label: l10n.statsStreakLabel,
               ),
             ),
             const SizedBox(width: AppLayout.sp5),
@@ -135,7 +137,7 @@ class _StreakCard extends StatelessWidget {
               child: _StatBlock(
                 icon: Icons.auto_stories_rounded,
                 value: _formatCount(stats.todayAyahs),
-                label: S.statsTodayLabel,
+                label: l10n.statsTodayLabel,
               ),
             ),
           ],
@@ -193,6 +195,7 @@ class _KhatamCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final target = ref.watch(khatamTargetProvider).value;
     final progress = (stats.juzsRead / 30).clamp(0.0, 1.0);
@@ -242,7 +245,7 @@ class _KhatamCard extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            S.statsJuzsOf,
+                            l10n.statsJuzsOf,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -258,7 +261,7 @@ class _KhatamCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        S.statsKhatamEyebrow,
+                        l10n.statsKhatamEyebrow,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.tertiary,
                         ),
@@ -283,7 +286,7 @@ class _KhatamCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppLayout.sp3),
                       Text(
-                        S.statsKhatamCaption,
+                        l10n.statsKhatamCaption,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -312,6 +315,7 @@ class _KhatamPlanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     final t = target;
@@ -326,12 +330,12 @@ class _KhatamPlanner extends ConsumerWidget {
                   startDate: DateTime.now(),
                 ),
             icon: const Icon(Icons.event_available_rounded, size: 18),
-            label: S.khatamPlan30,
+            label: l10n.khatamPlan30,
           ),
           LiquidGlassButton.tonal(
             onPressed: () => _pickTargetDate(context, ref),
             icon: const Icon(Icons.calendar_month_rounded, size: 18),
-            label: S.khatamPickDate,
+            label: l10n.khatamPickDate,
           ),
         ],
       );
@@ -356,16 +360,16 @@ class _KhatamPlanner extends ConsumerWidget {
     final String title;
     final String subtitle;
     if (reached) {
-      title = S.khatamDone;
-      subtitle = S.statsKhatamCaption;
+      title = l10n.khatamDone;
+      subtitle = l10n.statsKhatamCaption;
     } else if (overdue) {
       // Date passed but khatam unfinished — show how many juz remain.
       final remaining = 30 - stats.juzsRead;
-      title = '${S.khatamDaysLeft} $remaining ${S.khatamJuz}';
-      subtitle = S.statsKhatamCaption;
+      title = '${l10n.khatamDaysLeft} $remaining ${l10n.khatamJuz}';
+      subtitle = l10n.statsKhatamCaption;
     } else {
-      title = '${S.khatamJuz} $juzToday ${S.khatamJuzToday}';
-      subtitle = '${S.khatamDaysLeft} ${_formatCount(daysLeft)} ${S.khatamDays}';
+      title = '${l10n.khatamJuz} $juzToday ${l10n.khatamJuzToday}';
+      subtitle = '${l10n.khatamDaysLeft} ${_formatCount(daysLeft)} ${l10n.khatamDays}';
     }
 
     return Row(
@@ -399,7 +403,7 @@ class _KhatamPlanner extends ConsumerWidget {
               Icon(Icons.delete_outline_rounded, size: 16, color: theme.colorScheme.error),
               const SizedBox(width: 4),
               Text(
-                S.khatamClear,
+                l10n.khatamClear,
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: theme.colorScheme.error,
@@ -413,6 +417,7 @@ class _KhatamPlanner extends ConsumerWidget {
   }
 
   Future<void> _pickTargetDate(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final picked = await showDatePicker(
@@ -420,7 +425,7 @@ class _KhatamPlanner extends ConsumerWidget {
       initialDate: today.add(const Duration(days: 30)),
       firstDate: today,
       lastDate: today.add(const Duration(days: 365)),
-      helpText: S.khatamPickDate,
+      helpText: l10n.khatamPickDate,
     );
     if (picked == null) return;
     await ref.read(khatamRepositoryProvider).setTarget(
@@ -430,18 +435,19 @@ class _KhatamPlanner extends ConsumerWidget {
   }
 
   Future<void> _confirmClearTarget(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.khatamClearConfirm),
+        title: Text(l10n.khatamClearConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(S.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(S.remove),
+            child: Text(l10n.remove),
           ),
         ],
       ),
@@ -462,6 +468,7 @@ class _CalendarCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final days = ref.watch(dailyActivityProvider);
 
@@ -476,16 +483,16 @@ class _CalendarCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            S.calendarEyebrow,
+            l10n.calendarEyebrow,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.tertiary,
             ),
           ),
           const SizedBox(height: AppLayout.sp2),
-          Text(S.calendarTitle, style: theme.textTheme.titleMedium),
+          Text(l10n.calendarTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.calendarCaption,
+            l10n.calendarCaption,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -499,7 +506,7 @@ class _CalendarCard extends ConsumerWidget {
               ),
             ),
             error: (_, __) =>
-                Text(S.statsError, style: theme.textTheme.bodyMedium),
+                Text(l10n.statsError, style: theme.textTheme.bodyMedium),
             data: (list) => _HeatmapGrid(days: list),
           ),
         ],
@@ -515,6 +522,7 @@ class _HeatmapGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final maxCount = days.fold<int>(0, (m, d) => d.count > m ? d.count : m);
     final today = DateTime.now();
@@ -551,7 +559,7 @@ class _HeatmapGrid extends StatelessWidget {
         Row(
           children: [
             Text(
-              S.calendarFew,
+              l10n.calendarFew,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -570,7 +578,7 @@ class _HeatmapGrid extends StatelessWidget {
             _LegendDot(color: theme.colorScheme.primary),
             const SizedBox(width: AppLayout.sp2),
             Text(
-              S.calendarMany,
+              l10n.calendarMany,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -595,6 +603,7 @@ class _HeatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final Color color;
     if (count == 0) {
@@ -604,7 +613,7 @@ class _HeatCell extends StatelessWidget {
       color = scheme.primary.withValues(alpha: 0.25 + 0.75 * t);
     }
     return Tooltip(
-      message: '${_formatDay(date)} · $count ${S.ayatCount}',
+      message: '${_formatDay(date)} · $count ${l10n.ayatCount}',
       child: Container(
         decoration: BoxDecoration(
           color: color,
@@ -642,6 +651,7 @@ class _SummaryRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sujud = ref.watch(sajdaCountProvider);
 
@@ -653,14 +663,14 @@ class _SummaryRow extends ConsumerWidget {
             Expanded(
               child: _SummaryTile(
                 value: _formatCount(stats.totalDays),
-                label: S.statsTotalDaysLabel,
+                label: l10n.statsTotalDaysLabel,
               ),
             ),
             const SizedBox(width: AppLayout.sp4),
             Expanded(
               child: _SummaryTile(
                 value: _formatCount(stats.totalAyahs),
-                label: S.statsTotalAyahsLabel,
+                label: l10n.statsTotalAyahsLabel,
               ),
             ),
           ],
@@ -682,7 +692,7 @@ class _SummaryRow extends ConsumerWidget {
               ),
               const SizedBox(width: AppLayout.sp2),
               Text(
-                '$count ${S.sujudOf}',
+                '$count ${l10n.sujudOf}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -762,6 +772,7 @@ class _PersonalityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Material(
@@ -795,12 +806,12 @@ class _PersonalityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      S.statsPersonalityTitle,
+                      l10n.statsPersonalityTitle,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      S.statsPersonalityCaption,
+                      l10n.statsPersonalityCaption,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),

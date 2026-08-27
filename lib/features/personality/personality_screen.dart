@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/personality_data.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/personality_repository.dart';
@@ -21,6 +21,7 @@ class PersonalityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final analysis = ref.watch(personalityProvider);
@@ -39,7 +40,7 @@ class PersonalityScreen extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(AppLayout.sp6),
                     child: Text(
-                      S.personalityError,
+                      l10n.personalityError,
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -74,9 +75,10 @@ class _PersonalityAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.personalityTitle,
+      title: l10n.personalityTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -87,7 +89,7 @@ class _PersonalityAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -106,6 +108,7 @@ class _AnalysisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -119,7 +122,7 @@ class _AnalysisView extends StatelessWidget {
         children: [
           // Header.
           Text(
-            S.personalityHeaderTitle,
+            l10n.personalityHeaderTitle,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontSize: 24,
               height: 32 / 24,
@@ -128,7 +131,7 @@ class _AnalysisView extends StatelessWidget {
           ),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.personalitySubtitle,
+            l10n.personalitySubtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -279,6 +282,7 @@ class _DnaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -295,7 +299,7 @@ class _DnaCard extends StatelessWidget {
             children: [
               Icon(Icons.fingerprint, size: 20, color: scheme.primary),
               const SizedBox(width: AppLayout.sp2),
-              Text(S.personalityDnaTitle, style: theme.textTheme.titleMedium),
+              Text(l10n.personalityDnaTitle, style: theme.textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: AppLayout.sp4),
@@ -364,6 +368,7 @@ class _SlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -391,7 +396,7 @@ class _SlotCard extends StatelessWidget {
           ),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.personalityActiveSlotLabel,
+            l10n.personalityActiveSlotLabel,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
@@ -419,6 +424,7 @@ class _FavoriteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -446,7 +452,7 @@ class _FavoriteCard extends StatelessWidget {
           ),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.personalityFavoriteLabel,
+            l10n.personalityFavoriteLabel,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
@@ -478,6 +484,7 @@ class _NextStepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -495,7 +502,7 @@ class _NextStepCard extends StatelessWidget {
             children: [
               Icon(Icons.auto_awesome, size: 20, color: scheme.secondary),
               const SizedBox(width: AppLayout.sp2),
-              Text(S.personalityNextTitle, style: theme.textTheme.titleMedium),
+              Text(l10n.personalityNextTitle, style: theme.textTheme.titleMedium),
             ],
           ),
           const SizedBox(height: AppLayout.sp3),
@@ -508,7 +515,7 @@ class _NextStepCard extends StatelessWidget {
           const SizedBox(height: AppLayout.sp4),
           LiquidGlassButton.filled(
             onPressed: () => openSurah(context, surahId),
-            label: S.personalityNextButton,
+            label: l10n.personalityNextButton,
           ),
         ],
       ),
@@ -525,6 +532,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Center(
@@ -539,10 +547,10 @@ class _EmptyState extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppLayout.sp3),
-            Text(S.personalityEmptyTitle, style: theme.textTheme.titleMedium),
+            Text(l10n.personalityEmptyTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppLayout.sp1),
             Text(
-              S.personalityEmptyMessage,
+              l10n.personalityEmptyMessage,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -551,7 +559,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: AppLayout.sp4),
             LiquidGlassButton.tonal(
               onPressed: () => openSurah(context, 1),
-              label: S.personalityEmptyCta,
+              label: l10n.personalityEmptyCta,
             ),
           ],
         ),

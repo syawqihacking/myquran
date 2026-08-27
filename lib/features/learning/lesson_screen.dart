@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
 import '../widgets/liquid_glass.dart';
@@ -25,6 +25,7 @@ class LessonScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final lesson = course.lessons[lessonIndex];
@@ -58,8 +59,8 @@ class LessonScreen extends ConsumerWidget {
                       ),
                       children: [
                         Text(
-                          '${S.learningLangkah} ${lessonIndex + 1} '
-                          '${S.learningLangkahDari} ${course.lessons.length}',
+                          '${l10n.learningLangkah} ${lessonIndex + 1} '
+                          '${l10n.learningLangkahDari} ${course.lessons.length}',
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
@@ -96,7 +97,7 @@ class LessonScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: AppLayout.sp1),
                                 Text(
-                                  S.learningSelesai,
+                                  l10n.learningSelesai,
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: scheme.onPrimaryContainer,
@@ -209,6 +210,7 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -232,7 +234,7 @@ class _BottomBar extends StatelessWidget {
                   Expanded(
                     child: LiquidGlassButton.tonal(
                       onPressed: onMarkUndone,
-                      label: S.learningMarkUndone,
+                      label: l10n.learningMarkUndone,
                       height: 48,
                     ),
                   ),
@@ -242,8 +244,8 @@ class _BottomBar extends StatelessWidget {
                     child: LiquidGlassButton.filled(
                       onPressed: isLast ? onBackToCourse : onNext,
                       label: isLast
-                          ? S.learningBackToCourse
-                          : S.learningNextLesson,
+                          ? l10n.learningBackToCourse
+                          : l10n.learningNextLesson,
                       height: 48,
                     ),
                   ),
@@ -251,7 +253,7 @@ class _BottomBar extends StatelessWidget {
               )
             : LiquidGlassButton.filled(
                 onPressed: onMarkDone,
-                label: S.learningMarkDone,
+                label: l10n.learningMarkDone,
                 height: 48,
                 width: double.infinity,
               ),

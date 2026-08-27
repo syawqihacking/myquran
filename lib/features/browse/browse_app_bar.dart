@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/glass_pill.dart' show GlassHeader, GlassPill;
 import '../widgets/glass_touch_button.dart';
 
@@ -18,10 +18,11 @@ class BrowseAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return GlassHeader(
-      title: S.browseTitle,
+      title: l10n.browseTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
         color: scheme.primary,
@@ -31,7 +32,7 @@ class BrowseAppBar extends StatelessWidget {
         child: GlassTouchButton(
           radius: AppLayout.radiusFull,
           child: IconButton(
-            tooltip: searchOpen ? S.closeSearch : S.openSearch,
+            tooltip: searchOpen ? l10n.closeSearch : l10n.openSearch,
             isSelected: searchOpen,
             onPressed: onToggleSearch,
             icon: Icon(Icons.search_rounded, color: scheme.primary),

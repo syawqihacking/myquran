@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../widgets/quran_text_view.dart';
 
@@ -17,6 +17,7 @@ class SurahRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isFirst = surah.id == 1;
@@ -47,7 +48,7 @@ class SurahRowContent extends StatelessWidget {
               MetaRow(
                 translation: surah.nameIndonesian,
                 trailing: metaTrailing,
-                meta: isMakki ? S.makkiyah : S.madaniyah,
+                meta: isMakki ? l10n.makkiyah : l10n.madaniyah,
                 isMakki: isMakki,
               ),
             ],

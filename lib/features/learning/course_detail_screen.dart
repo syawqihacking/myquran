@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
 import 'learning_widgets.dart';
@@ -18,6 +18,7 @@ class CourseDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final progress = ref.watch(learningProgressProvider);
@@ -109,7 +110,7 @@ class CourseDetailScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: AppLayout.sp3),
                             Text(
-                              '$done/$total ${S.learningLangkah}',
+                              '$done/$total ${l10n.learningLangkah}',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
                                 fontFeatures: const [
@@ -124,7 +125,7 @@ class CourseDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppLayout.sp5),
                   Text(
-                    S.learningDaftarLangkah,
+                    l10n.learningDaftarLangkah,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: AppLayout.sp3),

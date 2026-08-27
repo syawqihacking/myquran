@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/services/audio_service.dart';
 import '../widgets/liquid_glass.dart';
 
@@ -72,11 +72,12 @@ class _PlayPauseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final buffering = status == AudioStatus.buffering;
     final playing = status == AudioStatus.playing;
     return Tooltip(
-      message: playing || buffering ? S.audioPause : S.audioPlay,
+      message: playing || buffering ? l10n.audioPause : l10n.audioPlay,
       child: Material(
         color: scheme.primary,
         shape: const CircleBorder(),
@@ -181,6 +182,7 @@ class ReaderAudioPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isMobile =
@@ -261,7 +263,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        S.audioCaption(
+                                        l10n.audioCaption(
                                           surahName,
                                           ayahNumber,
                                         ),
@@ -290,7 +292,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                 icon: Icons.skip_previous_rounded,
                                 size: 28,
                                 boxSize: isMobile ? 36 : 40,
-                                tooltip: S.audioPrev,
+                                tooltip: l10n.audioPrev,
                                 onPressed: onPrev,
                               ),
                             ),
@@ -309,7 +311,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                 icon: Icons.skip_next_rounded,
                                 size: 28,
                                 boxSize: isMobile ? 36 : 40,
-                                tooltip: S.audioNext,
+                                tooltip: l10n.audioNext,
                                 onPressed: onNext,
                               ),
                             ),
@@ -342,7 +344,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                 child: _PlayerIconButton(
                                   icon: Icons.volume_up_rounded,
                                   size: 24,
-                                  tooltip: S.audioVolume,
+                                  tooltip: l10n.audioVolume,
                                   onPressed: onVolume,
                                 ),
                               ),
@@ -353,7 +355,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                 icon: Icons.queue_music_rounded,
                                 size: 24,
                                 boxSize: isMobile ? 36 : 40,
-                                tooltip: S.audioQueue,
+                                tooltip: l10n.audioQueue,
                                 onPressed: onQueue,
                               ),
                             ),
@@ -363,7 +365,7 @@ class ReaderAudioPlayer extends StatelessWidget {
                                 icon: Icons.close_rounded,
                                 size: 20,
                                 boxSize: isMobile ? 36 : 40,
-                                tooltip: S.audioClose,
+                                tooltip: l10n.audioClose,
                                 onPressed: onClose,
                               ),
                             ),

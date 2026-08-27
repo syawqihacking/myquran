@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/ayah_number_badge.dart';
 
 /// Jump pill — a floating button at the bottom-left that opens the jump dialog.
@@ -17,6 +17,7 @@ class ReaderJumpPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Material(
       elevation: 3,
@@ -34,7 +35,7 @@ class ReaderJumpPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${S.jumpLabel} ${toArabicIndic(currentAyahNumber ?? 1)}',
+                '${l10n.jumpLabel} ${toArabicIndic(currentAyahNumber ?? 1)}',
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.tertiary,
                 ),

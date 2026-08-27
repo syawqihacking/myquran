@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/doa_setelah_sholat_data.dart';
 import '../../data/models/spiritual_content.dart';
 import 'spiritual_reader_screen.dart';
@@ -92,6 +92,7 @@ class _AppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -109,13 +110,13 @@ class _AppBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            tooltip: S.back,
+            tooltip: l10n.back,
             icon: const Icon(Icons.arrow_back_rounded),
           ),
           const SizedBox(width: AppLayout.sp2),
           Expanded(
             child: Text(
-              S.doaSetelahSholatTitle,
+              l10n.doaSetelahSholatTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: scheme.primary,
@@ -135,6 +136,7 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -194,7 +196,7 @@ class _HeaderCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          S.doaSetelahSholatTitle,
+                          l10n.doaSetelahSholatTitle,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: scheme.onPrimary,
@@ -202,7 +204,7 @@ class _HeaderCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          S.doaSetelahSholatCaption,
+                          l10n.doaSetelahSholatCaption,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: scheme.onPrimary.withValues(alpha: 0.8),
                           ),

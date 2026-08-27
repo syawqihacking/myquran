@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/models/tahlil_doa_data.dart';
 import 'amalan_ibadah_screen.dart';
@@ -19,13 +19,14 @@ class SpiritualScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: Text(S.spiritualNav),
+        title: Text(l10n.spiritualNav),
         backgroundColor: scheme.surface.withValues(alpha: 0.9),
         surfaceTintColor: Colors.transparent,
       ),
@@ -55,8 +56,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Doa Harian card ---
         _SpiritualCard(
           icon: Icons.wb_sunny_rounded,
-          title: S.doaHarianTitle,
-          caption: S.doaHarianCaption,
+          title: l10n.doaHarianTitle,
+          caption: l10n.doaHarianCaption,
           gradient: [
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
@@ -70,16 +71,16 @@ class SpiritualScreen extends StatelessWidget {
         // --- Tahlil & Doa card ---
         _SpiritualCard(
           icon: Icons.auto_stories_rounded,
-          title: S.tahlilTitle,
-          caption: S.tahlilCaption,
+          title: l10n.tahlilTitle,
+          caption: l10n.tahlilCaption,
           gradient: [
             theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
           ],
           onTap: () => _openReader(
             context,
-            title: S.tahlilTitle,
-            subtitle: S.tahlilCaption,
+            title: l10n.tahlilTitle,
+            subtitle: l10n.tahlilCaption,
             items: tahlilDoaItems,
             icon: Icons.auto_stories_rounded,
           ),
@@ -89,8 +90,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Ratib Al-Haddad card ---
         _SpiritualCard(
           icon: Icons.brightness_5_rounded,
-          title: S.ratibTitle,
-          caption: S.ratibCaption,
+          title: l10n.ratibTitle,
+          caption: l10n.ratibCaption,
           gradient: [
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.4),
@@ -123,8 +124,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Amalan Ibadah card ---
         _SpiritualCard(
           icon: Icons.checklist_rounded,
-          title: S.amalanIbadahTitle,
-          caption: S.amalanIbadahCaption,
+          title: l10n.amalanIbadahTitle,
+          caption: l10n.amalanIbadahCaption,
           gradient: [
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
@@ -140,8 +141,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Dzikir Pagi & Petang card ---
         _SpiritualCard(
           icon: Icons.self_improvement_rounded,
-          title: S.dzikirTitle,
-          caption: S.dzikirCaption,
+          title: l10n.dzikirTitle,
+          caption: l10n.dzikirCaption,
           gradient: [
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
@@ -157,8 +158,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Niat Shalat card ---
         _SpiritualCard(
           icon: Icons.wc_rounded,
-          title: S.niatShalatTitle,
-          caption: S.niatShalatCaption,
+          title: l10n.niatShalatTitle,
+          caption: l10n.niatShalatCaption,
           gradient: [
             theme.colorScheme.primaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.4),
@@ -174,8 +175,8 @@ class SpiritualScreen extends StatelessWidget {
         // --- Tadabbur Harian card ---
         _SpiritualCard(
           icon: Icons.auto_awesome_rounded,
-          title: S.tadabburTitle,
-          caption: S.tadabburCaption,
+          title: l10n.tadabburTitle,
+          caption: l10n.tadabburCaption,
           gradient: [
             theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
             theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),

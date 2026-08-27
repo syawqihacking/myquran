@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/user_database.dart';
 import '../../data/models/adzan_voice.dart';
 import '../../data/providers.dart';
@@ -19,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final controller = ref.read(settingsProvider.notifier);
@@ -40,28 +41,28 @@ class SettingsScreen extends ConsumerWidget {
         ),
         children: [
           Text(
-            S.settingsEyebrow,
+            l10n.settingsEyebrow,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.tertiary,
             ),
           ),
           const SizedBox(height: AppLayout.sp2),
-          Text(S.settingsTitle, style: theme.textTheme.displaySmall),
+          Text(l10n.settingsTitle, style: theme.textTheme.displaySmall),
           const SizedBox(height: AppLayout.sp2),
           Text(
-            S.settingsCaption,
+            l10n.settingsCaption,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppLayout.sp6),
           Section(
-            title: S.appearanceSection,
+            title: l10n.appearanceSection,
             children: [
               SettingRow(
                 icon: Icons.brightness_6_rounded,
-                title: S.themeModeLabel,
-                subtitle: S.themeModeSublabel,
+                title: l10n.themeModeLabel,
+                subtitle: l10n.themeModeSublabel,
                 bottom: Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: GlassSegmentedControl(
@@ -93,15 +94,15 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     segments: const [
                       GlassSegment(
-                        // label: S.themeSystem,
+                        // label: l10n.themeSystem,
                         icon: Icon(Icons.brightness_auto_rounded, size: 18),
                       ),
                       GlassSegment(
-                        // label: S.themeLight,
+                        // label: l10n.themeLight,
                         icon: Icon(Icons.light_mode_rounded, size: 18),
                       ),
                       GlassSegment(
-                        // label: S.themeDark,
+                        // label: l10n.themeDark,
                         icon: Icon(Icons.dark_mode_rounded, size: 18),
                       ),
                     ],
@@ -111,11 +112,11 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.format_size_rounded,
-                title: S.quranFontSizeLabel,
-                subtitle: S.quranFontSizeSublabel,
+                title: l10n.quranFontSizeLabel,
+                subtitle: l10n.quranFontSizeSublabel,
                 trailing: GlassChip(
                   useOwnLayer: true,
-                  label: S.reset,
+                  label: l10n.reset,
                   labelStyle: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: activeGreen,
@@ -137,7 +138,7 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.translate_rounded,
-                title: S.showTranslationLabel,
+                title: l10n.showTranslationLabel,
                 trailing: GlassSwitch(
                   value: settings.showTranslation,
                   onChanged: controller.setShowTranslation,
@@ -147,8 +148,8 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.format_align_right_rounded,
-                title: S.alignLabel,
-                subtitle: S.alignNote,
+                title: l10n.alignLabel,
+                subtitle: l10n.alignNote,
                 bottom: Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: GlassSegmentedControl(
@@ -168,9 +169,9 @@ class SettingsScreen extends ConsumerWidget {
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
                     ),
-                    segments: const [
-                      GlassSegment(label: S.alignRight),
-                      GlassSegment(label: S.alignCenter),
+                    segments: [
+                      GlassSegment(label: l10n.alignRight),
+                      GlassSegment(label: l10n.alignCenter),
                     ],
                   ),
                 ),
@@ -178,11 +179,11 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           Section(
-            title: S.readingSection,
+            title: l10n.readingSection,
             children: [
               SettingRow(
                 icon: Icons.menu_book_rounded,
-                title: S.tafsirDefaultLabel,
+                title: l10n.tafsirDefaultLabel,
                 trailing: GlassSwitch(
                   value: settings.tafsirOpenByDefault,
                   onChanged: controller.setTafsirOpenByDefault,
@@ -192,8 +193,8 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.palette_rounded,
-                title: S.tajwidColorLabel,
-                subtitle: S.tajwidColorSublabel,
+                title: l10n.tajwidColorLabel,
+                subtitle: l10n.tajwidColorSublabel,
                 trailing: GlassSwitch(
                   value: settings.tajwidColor,
                   onChanged: controller.setTajwidColor,
@@ -203,7 +204,7 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.history_rounded,
-                title: S.restoreLastReadLabel,
+                title: l10n.restoreLastReadLabel,
                 trailing: GlassSwitch(
                   value: settings.restoreLastRead,
                   onChanged: controller.setRestoreLastRead,
@@ -213,8 +214,8 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.record_voice_over_rounded,
-                title: S.reciterLabel,
-                subtitle: _reciterName(ref),
+                title: l10n.reciterLabel,
+                subtitle: _reciterName(context, ref),
                 trailing: Icon(
                   Icons.chevron_right_rounded,
                   size: 20,
@@ -229,12 +230,12 @@ class SettingsScreen extends ConsumerWidget {
           if (defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS) ...[
             Section(
-              title: S.notificationsSection,
+              title: l10n.notificationsSection,
               children: [
                 SettingRow(
                   icon: Icons.notifications_active_rounded,
-                  title: S.prayerNotificationsLabel,
-                  subtitle: S.prayerNotificationsSublabel,
+                  title: l10n.prayerNotificationsLabel,
+                  subtitle: l10n.prayerNotificationsSublabel,
                   trailing: GlassSwitch(
                     value: ref.watch(prayerNotificationsEnabledProvider),
                     useOwnLayer: true,
@@ -244,7 +245,7 @@ class SettingsScreen extends ConsumerWidget {
                           .setEnabled(v);
                       if (!ok && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.prayerNotificationsDenied)),
+                          SnackBar(content: Text(l10n.prayerNotificationsDenied)),
                         );
                       }
                     },
@@ -253,8 +254,8 @@ class SettingsScreen extends ConsumerWidget {
                 const DividerRow(),
                 SettingRow(
                   icon: Icons.self_improvement_rounded,
-                  title: S.dzikirReminderLabel,
-                  subtitle: S.dzikirReminderSublabel,
+                  title: l10n.dzikirReminderLabel,
+                  subtitle: l10n.dzikirReminderSublabel,
                   trailing: GlassSwitch(
                     value: ref.watch(dzikirReminderEnabledProvider),
                     useOwnLayer: true,
@@ -264,7 +265,7 @@ class SettingsScreen extends ConsumerWidget {
                           .setEnabled(v);
                       if (!ok && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.dzikirReminderDenied)),
+                          SnackBar(content: Text(l10n.dzikirReminderDenied)),
                         );
                       }
                     },
@@ -273,8 +274,8 @@ class SettingsScreen extends ConsumerWidget {
                 const DividerRow(),
                 SettingRow(
                   icon: Icons.event_rounded,
-                  title: S.hijriEventReminderLabel,
-                  subtitle: S.hijriEventReminderSublabel,
+                  title: l10n.hijriEventReminderLabel,
+                  subtitle: l10n.hijriEventReminderSublabel,
                   trailing: GlassSwitch(
                     value: ref.watch(hijriEventReminderEnabledProvider),
                     useOwnLayer: true,
@@ -284,7 +285,7 @@ class SettingsScreen extends ConsumerWidget {
                           .setEnabled(v);
                       if (!ok && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.hijriEventReminderDenied)),
+                          SnackBar(content: Text(l10n.hijriEventReminderDenied)),
                         );
                       }
                     },
@@ -293,8 +294,8 @@ class SettingsScreen extends ConsumerWidget {
                 const DividerRow(),
                 SettingRow(
                   icon: Icons.notifications_rounded,
-                  title: S.prayerNotificationsTest,
-                  subtitle: S.prayerNotificationsTestSublabel,
+                  title: l10n.prayerNotificationsTest,
+                  subtitle: l10n.prayerNotificationsTestSublabel,
                   bottom: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Wrap(
@@ -308,7 +309,7 @@ class SettingsScreen extends ConsumerWidget {
                             size: 18,
                             color: activeGreen,
                           ),
-                          label: S.adzanTestSholat,
+                          label: l10n.adzanTestSholat,
                           labelStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 13,
@@ -327,7 +328,7 @@ class SettingsScreen extends ConsumerWidget {
                             size: 18,
                             color: activeGreen,
                           ),
-                          label: S.adzanTestFajr,
+                          label: l10n.adzanTestFajr,
                           labelStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 13,
@@ -346,7 +347,7 @@ class SettingsScreen extends ConsumerWidget {
                             size: 18,
                             color: activeGreen,
                           ),
-                          label: S.testHijriEvent,
+                          label: l10n.testHijriEvent,
                           labelStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black87,
                             fontSize: 13,
@@ -371,7 +372,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
           Section(
-            title: S.dataSection,
+            title: l10n.dataSection,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -389,7 +390,7 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(width: AppLayout.sp3),
                     Expanded(
                       child: Text(
-                        S.dataSourceLabel,
+                        l10n.dataSourceLabel,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           height: 1.4,
@@ -402,51 +403,51 @@ class SettingsScreen extends ConsumerWidget {
               const DividerRow(),
               SettingRow(
                 icon: Icons.storage_rounded,
-                title: S.dataVersionLabel,
+                title: l10n.dataVersionLabel,
                 trailing: ValueChip(
                   text: 'v${AppConstants.quranDbSchemaVersion}',
                 ),
               ),
               const DividerRow(),
-              const SettingRow(
+              SettingRow(
                 icon: Icons.balance_rounded,
-                title: S.licenseLabel,
+                title: l10n.licenseLabel,
                 trailing: ValueChip(text: 'CC BY-SA 4.0'),
               ),
             ],
           ),
           Section(
-            title: S.shortcutsSection,
-            children: const [
+            title: l10n.shortcutsSection,
+            children: [
               ShortcutRow(
                 icon: Icons.search_rounded,
-                label: S.shortcutSearch,
+                label: l10n.shortcutSearch,
                 keys: ['Ctrl', 'K'],
               ),
               ShortcutRow(
                 icon: Icons.zoom_in_rounded,
-                label: S.shortcutZoomIn,
+                label: l10n.shortcutZoomIn,
                 keys: ['Ctrl', '+'],
               ),
               ShortcutRow(
                 icon: Icons.zoom_out_rounded,
-                label: S.shortcutZoomOut,
+                label: l10n.shortcutZoomOut,
                 keys: ['Ctrl', '−'],
               ),
               ShortcutRow(
                 icon: Icons.close_rounded,
-                label: S.shortcutClose,
+                label: l10n.shortcutClose,
                 keys: ['Esc'],
               ),
             ],
           ),
           Section(
-            title: S.resetDataSection,
+            title: l10n.resetDataSection,
             children: [
               SettingRow(
                 icon: Icons.delete_forever_rounded,
-                title: S.resetDataLabel,
-                subtitle: S.resetDataSublabel,
+                title: l10n.resetDataLabel,
+                subtitle: l10n.resetDataSublabel,
                 destructive: true,
                 trailing: GlassTouchButton(
                   onTap: () => _confirmReset(context, ref),
@@ -465,7 +466,7 @@ class SettingsScreen extends ConsumerWidget {
                       vertical: 6,
                     ),
                     child: Text(
-                      S.resetDataConfirm,
+                      l10n.resetDataConfirm,
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: theme.colorScheme.error,
@@ -485,15 +486,16 @@ class SettingsScreen extends ConsumerWidget {
   /// (user.db only — never quran.db) and refreshes the one-shot providers
   /// that do not auto-update via drift table streams.
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(S.resetDataConfirmTitle),
-        content: const Text(S.resetDataConfirmMessage),
+        title: Text(l10n.resetDataConfirmTitle),
+        content: Text(l10n.resetDataConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(S.cancel),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -501,7 +503,7 @@ class SettingsScreen extends ConsumerWidget {
               backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Theme.of(ctx).colorScheme.onError,
             ),
-            child: const Text(S.resetDataConfirm),
+            child: Text(l10n.resetDataConfirm),
           ),
         ],
       ),
@@ -518,7 +520,7 @@ class SettingsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(S.resetDataDone)));
+    ).showSnackBar(SnackBar(content: Text(l10n.resetDataDone)));
   }
 
   /// Lets the user pick an adzan voice for one category: shows the voices of
@@ -530,6 +532,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AdzanCategory category,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final isFajr = category == AdzanCategory.fajr;
     final current = isFajr
         ? ref.read(selectedFajrAdzanVoiceProvider)
@@ -557,7 +560,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(width: AppLayout.sp3),
               Expanded(
                 child: Text(
-                  isFajr ? S.adzanVoiceFajrLabel : S.adzanVoiceSholatLabel,
+                  isFajr ? l10n.adzanVoiceFajrLabel : l10n.adzanVoiceSholatLabel,
                 ),
               ),
             ],
@@ -571,7 +574,7 @@ class SettingsScreen extends ConsumerWidget {
                 AppLayout.sp2,
               ),
               child: Text(
-                isFajr ? S.adzanVoiceFajrHint : S.adzanVoiceSholatHint,
+                isFajr ? l10n.adzanVoiceFajrHint : l10n.adzanVoiceSholatHint,
                 style: textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -614,12 +617,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => const AlertDialog(
+      builder: (ctx) => AlertDialog(
         content: Row(
           children: [
-            CircularProgressIndicator(),
-            SizedBox(width: AppLayout.sp4),
-            Expanded(child: Text(S.adzanVoiceDownloading)),
+            const CircularProgressIndicator(),
+            const SizedBox(width: AppLayout.sp4),
+            Expanded(child: Text(l10n.adzanVoiceDownloading)),
           ],
         ),
       ),
@@ -640,14 +643,14 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(S.adzanVoiceChanged)));
+      ).showSnackBar(SnackBar(content: Text(l10n.adzanVoiceChanged)));
     } catch (e) {
       debugPrint('SettingsScreen._selectAdzanVoice: voice download/selection failed — $e');
       if (!context.mounted) return;
       Navigator.of(context).pop(); // close the progress dialog
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(S.adzanVoiceDownloadFailed)));
+      ).showSnackBar(SnackBar(content: Text(l10n.adzanVoiceDownloadFailed)));
     }
   }
 
@@ -657,13 +660,14 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     String voiceId,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     await ref
         .read(prayerNotificationsProvider)
         .showTestNotification(voiceId: voiceId);
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(S.prayerNotificationsTestSent)));
+      ).showSnackBar(SnackBar(content: Text(l10n.prayerNotificationsTestSent)));
     }
   }
 
@@ -672,10 +676,11 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final ok = await ref.read(prayerNotificationsProvider).requestPermissions();
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.hijriEventReminderDenied)),
+        SnackBar(content: Text(l10n.hijriEventReminderDenied)),
       );
       return;
     }
@@ -684,7 +689,7 @@ class SettingsScreen extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(S.prayerNotificationsTestSent)));
+      ).showSnackBar(SnackBar(content: Text(l10n.prayerNotificationsTestSent)));
     }
   }
 
@@ -703,7 +708,8 @@ class SettingsScreen extends ConsumerWidget {
 
   /// The selected reciter's display name, falling back to the default while
   /// the reciter list is still loading or unavailable.
-  String _reciterName(WidgetRef ref) {
+  String _reciterName(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final reciters = ref.watch(recitersProvider).value;
     final selectedId = ref.watch(selectedReciterProvider);
     if (reciters != null) {
@@ -711,13 +717,14 @@ class SettingsScreen extends ConsumerWidget {
         if (r.id == selectedId) return r.name;
       }
     }
-    return S.reciterDefault;
+    return l10n.reciterDefault;
   }
 
   /// Lets the user pick a qari: shows the reciter list from the DB and
   /// switches the selection immediately — no download, murottal files are
   /// resolved at playback time via the reciter's URL template.
   Future<void> _pickReciter(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final current = ref.read(selectedReciterProvider);
     final List<Reciter> reciters;
     try {
@@ -727,7 +734,7 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(S.reciterLoadFailed)));
+      ).showSnackBar(SnackBar(content: Text(l10n.reciterLoadFailed)));
       return;
     }
     if (!context.mounted || reciters.isEmpty) return;
@@ -752,7 +759,7 @@ class SettingsScreen extends ConsumerWidget {
                 color: scheme.primary,
               ),
               const SizedBox(width: AppLayout.sp3),
-              Expanded(child: Text(S.reciterDialogTitle)),
+              Expanded(child: Text(l10n.reciterDialogTitle)),
             ],
           ),
           children: [
@@ -794,6 +801,6 @@ class SettingsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(S.reciterChanged)));
+    ).showSnackBar(SnackBar(content: Text(l10n.reciterChanged)));
   }
 }

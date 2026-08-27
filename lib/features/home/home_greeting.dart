@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 
 class Greeting extends ConsumerWidget {
@@ -9,6 +9,7 @@ class Greeting extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final name = ref.watch(profileNameProvider);
     return Row(
@@ -19,7 +20,7 @@ class Greeting extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                S.homeGreeting,
+                l10n.homeGreeting,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/glass_pill.dart';
 import 'hijri_event.dart';
 
@@ -69,6 +69,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -108,7 +109,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
                 children: [
                   _MonthNavigator(
                     label:
-                        '${month.getLongMonthName()} $_year ${S.hijriYearSuffix}',
+                        '${month.getLongMonthName()} $_year ${l10n.hijriYearSuffix}',
                     atMin: _atMin,
                     atMax: _atMax,
                     onPrevious: _previousMonth,
@@ -139,7 +140,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
               ),
             ),
             // Floating glass header pills, over the scrolling content.
-            Positioned(top: 0, left: 0, right: 0, child: _HijriAppBar()),
+            Positioned(top: 0, left: 0, right: 0, child: const _HijriAppBar()),
           ],
         ),
       ),
@@ -156,9 +157,10 @@ class _HijriAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.hijriTitle,
+      title: l10n.hijriTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
         color: theme.colorScheme.primary,
@@ -167,7 +169,7 @@ class _HijriAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: () => Navigator.of(context).maybePop(),
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -274,6 +276,7 @@ class _CalendarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -294,7 +297,15 @@ class _CalendarCard extends StatelessWidget {
           // Weekday header.
           Row(
             children: [
-              for (final day in S.hijriWeekdays)
+              for (final day in [
+                l10n.hijriWeekdaySen,
+                l10n.hijriWeekdaySel,
+                l10n.hijriWeekdayRab,
+                l10n.hijriWeekdayKam,
+                l10n.hijriWeekdayJum,
+                l10n.hijriWeekdaySab,
+                l10n.hijriWeekdayAhad,
+              ])
                 Expanded(
                   child: Center(
                     child: Text(
@@ -420,6 +431,7 @@ class _TodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final gregorian = _converter.hijriToGregorian(
@@ -444,7 +456,7 @@ class _TodayCard extends StatelessWidget {
               Icon(Icons.today_rounded, size: 18, color: scheme.primary),
               const SizedBox(width: AppLayout.sp1),
               Text(
-                S.hijriTodayLabel,
+                l10n.hijriTodayLabel,
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: scheme.primary,
                   fontWeight: FontWeight.w700,
@@ -455,7 +467,7 @@ class _TodayCard extends StatelessWidget {
           const SizedBox(height: AppLayout.sp3),
           Text(
             '${today.getDayName()}, ${today.hDay} ${today.getLongMonthName()} '
-            '${today.hYear} ${S.hijriYearSuffix}',
+            '${today.hYear} ${l10n.hijriYearSuffix}',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
               color: scheme.onSurface,
@@ -464,7 +476,7 @@ class _TodayCard extends StatelessWidget {
           const SizedBox(height: AppLayout.sp1),
           Text(
             '$gregorianDayName, ${gregorian.day} ${_gregorianMonthName(gregorian.month)} '
-            '${gregorian.year} ${S.gregorianYearSuffix}',
+            '${gregorian.year} ${l10n.gregorianYearSuffix}',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
             ),

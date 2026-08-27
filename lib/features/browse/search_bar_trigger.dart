@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/glass_touch_button.dart';
 
 /// The design's full-width rounded search bar. Not a real field — it opens the
@@ -21,6 +21,7 @@ class SearchBarTriggerState extends State<SearchBarTrigger> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return MouseRegion(
@@ -61,7 +62,7 @@ class SearchBarTriggerState extends State<SearchBarTrigger> {
                     Icon(Icons.search_rounded, color: scheme.outline),
                     const SizedBox(width: AppLayout.sp3),
                     Text(
-                      S.browseSearchHint,
+                      l10n.browseSearchHint,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),

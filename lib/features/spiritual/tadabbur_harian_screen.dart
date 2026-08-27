@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/tadabbur_harian_data.dart';
 import 'spiritual_reader_screen.dart';
 
@@ -12,9 +12,10 @@ class TadabburHarianScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SpiritualReaderScreen(
-      title: S.tadabburTitle,
-      subtitle: S.tadabburCaption,
+      title: l10n.tadabburTitle,
+      subtitle: l10n.tadabburCaption,
       items: tadabburHarianItems,
       icon: Icons.auto_awesome_rounded,
     );

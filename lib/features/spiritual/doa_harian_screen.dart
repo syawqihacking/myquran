@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/doa_harian_data.dart';
 import '../../data/models/spiritual_content.dart';
 import '../../data/providers.dart';
@@ -162,6 +162,7 @@ class _DoaHarianScreenState extends ConsumerState<DoaHarianScreen> {
   }
 
   Widget _buildSearch(ColorScheme scheme) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedContainer(
       duration: AppLayout.durBase,
       decoration: BoxDecoration(
@@ -183,7 +184,7 @@ class _DoaHarianScreenState extends ConsumerState<DoaHarianScreen> {
         onChanged: (v) => setState(() => _query = v),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: S.doaSearchHint,
+          hintText: l10n.doaSearchHint,
           prefixIcon: const Icon(Icons.search_rounded),
           prefixIconColor: scheme.outline,
           suffixIcon: _query.isEmpty
@@ -194,7 +195,7 @@ class _DoaHarianScreenState extends ConsumerState<DoaHarianScreen> {
                     setState(() => _query = '');
                     _searchFocus.requestFocus();
                   },
-                  tooltip: S.cancel,
+                  tooltip: l10n.cancel,
                   icon: const Icon(Icons.close_rounded),
                 ),
           filled: true,
@@ -250,9 +251,10 @@ class _DoaAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.doaHarianTitle,
+      title: l10n.doaHarianTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -262,7 +264,7 @@ class _DoaAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: S.back,
+          tooltip: l10n.back,
           onPressed: onBack,
         ),
       ),
@@ -530,9 +532,10 @@ class _BookmarkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Tooltip(
-      message: bookmarked ? S.doaBookmarkRemove : S.doaBookmarkAdd,
+      message: bookmarked ? l10n.doaBookmarkRemove : l10n.doaBookmarkAdd,
       child: Material(
         color: bookmarked ? scheme.secondaryContainer : scheme.surface,
         shape: const CircleBorder(),
@@ -565,6 +568,7 @@ class _DoaEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -577,10 +581,10 @@ class _DoaEmpty extends StatelessWidget {
             color: scheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppLayout.sp3),
-          Text(S.doaEmpty, style: theme.textTheme.titleMedium),
+          Text(l10n.doaEmpty, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp1),
           Text(
-            S.doaEmptyHint,
+            l10n.doaEmptyHint,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,

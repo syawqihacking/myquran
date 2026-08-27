@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import 'reader_settings_menu.dart';
@@ -56,6 +56,7 @@ class ReaderTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -73,7 +74,7 @@ class ReaderTopBar extends StatelessWidget {
         children: [
           BarIconButton(
             icon: Icons.arrow_back_rounded,
-            tooltip: S.back,
+            tooltip: l10n.back,
             onPressed: onBack,
           ),
           Expanded(
@@ -93,7 +94,7 @@ class ReaderTopBar extends StatelessWidget {
                 ),
                 if (ayahCount != null)
                   Text(
-                    S.surahMeta(surah?.id ?? 0, ayahCount!),
+                    l10n.surahMeta(surah?.id ?? 0, ayahCount!),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.labelSmall?.copyWith(
@@ -105,14 +106,14 @@ class ReaderTopBar extends StatelessWidget {
           ),
           BarIconButton(
             icon: Icons.text_decrease_rounded,
-            tooltip: S.fontSmaller,
+            tooltip: l10n.fontSmaller,
             onPressed: fontStep > AppConstants.minQuranFontStep
                 ? onFontSmaller
                 : null,
           ),
           BarIconButton(
             icon: Icons.text_increase_rounded,
-            tooltip: S.fontLarger,
+            tooltip: l10n.fontLarger,
             onPressed: fontStep < AppConstants.maxQuranFontStep
                 ? onFontLarger
                 : null,
@@ -120,7 +121,7 @@ class ReaderTopBar extends StatelessWidget {
           const SizedBox(width: AppLayout.sp1),
           BarIconButton(
             icon: Icons.fullscreen_rounded,
-            tooltip: S.zenEnter,
+            tooltip: l10n.zenEnter,
             onPressed: onToggleZen,
           ),
           const SizedBox(width: AppLayout.sp1),

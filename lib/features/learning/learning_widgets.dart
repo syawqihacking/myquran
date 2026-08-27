@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
 import '../widgets/glass_pill.dart';
@@ -22,6 +22,7 @@ class LearningAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
       title: title,
@@ -35,7 +36,7 @@ class LearningAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -54,6 +55,7 @@ class CourseTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final progress = ref.watch(learningProgressProvider);
@@ -137,7 +139,7 @@ class CourseTile extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppLayout.sp3),
                   Text(
-                    '$done/$total ${S.learningLangkah}',
+                    '$done/$total ${l10n.learningLangkah}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontFeatures: const [FontFeature.tabularFigures()],

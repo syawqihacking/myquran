@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/tahlil_doa_data.dart';
 import '../hijri/hijri_calendar_screen.dart';
 import '../mosque/mosque_screen.dart';
@@ -35,6 +35,7 @@ class QuickActionsBento extends StatelessWidget {
         ),
       ),
       builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
         final theme = Theme.of(ctx);
         final scheme = theme.colorScheme;
         return SafeArea(
@@ -101,7 +102,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.monetization_on_rounded,
-                      label: S.qaZakat,
+                      label: l10n.qaZakat,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -113,7 +114,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.mosque_rounded,
-                      label: S.qaMasjidTerdekat,
+                      label: l10n.qaMasjidTerdekat,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -137,7 +138,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.calendar_month_rounded,
-                      label: S.qaKalenderHijriah,
+                      label: l10n.qaKalenderHijriah,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -149,14 +150,14 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.auto_stories_rounded,
-                      label: S.tahlilTitle,
+                      label: l10n.tahlilTitle,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
                             builder: (_) => SpiritualReaderScreen(
-                              title: S.tahlilTitle,
-                              subtitle: S.tahlilCaption,
+                              title: l10n.tahlilTitle,
+                              subtitle: l10n.tahlilCaption,
                               items: tahlilDoaItems,
                               icon: Icons.auto_stories_rounded,
                             ),
@@ -166,7 +167,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.brightness_5_rounded,
-                      label: S.ratibTitle,
+                      label: l10n.ratibTitle,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -178,7 +179,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.checklist_rounded,
-                      label: S.amalanIbadahTitle,
+                      label: l10n.amalanIbadahTitle,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -190,7 +191,7 @@ class QuickActionsBento extends StatelessWidget {
                     ),
                     QuickActionTile(
                       icon: Icons.stars_rounded,
-                      label: S.asmaulHusnaTitle,
+                      label: l10n.asmaulHusnaTitle,
                       onTap: () {
                         Navigator.of(ctx).pop();
                         Navigator.of(context).push(
@@ -212,13 +213,14 @@ class QuickActionsBento extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: QuickActionTile(
             icon: Icons.explore_rounded,
-            label: S.qaKiblat,
+            label: l10n.qaKiblat,
             onTap: onOpenPrayer,
           ),
         ),
@@ -226,7 +228,7 @@ class QuickActionsBento extends StatelessWidget {
         Expanded(
           child: QuickActionTile(
             icon: Icons.volunteer_activism_rounded,
-            label: S.qaDoaHarian,
+            label: l10n.qaDoaHarian,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const DoaHarianScreen(),

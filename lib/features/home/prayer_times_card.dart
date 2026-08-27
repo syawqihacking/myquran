@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/services/prayer_time_service.dart';
 
@@ -160,6 +160,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Row(
@@ -167,7 +168,7 @@ class _SectionHeader extends StatelessWidget {
         Icon(Icons.schedule_rounded, size: 20, color: scheme.primary),
         const SizedBox(width: AppLayout.sp2),
         Text(
-          S.prayerTimesEyebrow.toUpperCase(),
+          l10n.prayerTimesEyebrow.toUpperCase(),
           style: theme.textTheme.labelSmall?.copyWith(
             color: scheme.onSurfaceVariant,
             letterSpacing: 1.2,

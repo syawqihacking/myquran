@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/zakat_calculator.dart';
 
 /// Kalkulator Zakat — M3 form per jenis zakat (fitrah, mal, emas & perak,
@@ -105,10 +105,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
   }
 
   void _hitung() {
+    final l10n = AppLocalizations.of(context)!;
     if (!_fieldsValid) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(S.zakatFieldRequired)));
+        ..showSnackBar(SnackBar(content: Text(l10n.zakatFieldRequired)));
       return;
     }
     final result = switch (_type) {
@@ -155,8 +156,10 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
     return buf.toString();
   }
 
-  String _formatRupiah(num value) =>
-      '${S.zakatRupiah} ${_formatThousands(value)}';
+  String _formatRupiah(num value) {
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.zakatRupiah} ${_formatThousands(value)}';
+  }
 
   String _nisabText(ZakatResult r) => switch (_type) {
         ZakatType.fitrah =>
@@ -179,11 +182,12 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text(S.zakatTitle)),
+      appBar: AppBar(title: Text(l10n.zakatTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -194,7 +198,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
           ),
           children: [
             Text(
-              S.zakatSubtitle,
+              l10n.zakatSubtitle,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -206,11 +210,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
               tabAlignment: TabAlignment.start,
               onTap: (_) => setState(() => _result = null),
               tabs: [
-                Tab(text: S.zakatTabFitrah),
-                Tab(text: S.zakatTabMal),
-                Tab(text: S.zakatTabEmasPerak),
-                Tab(text: S.zakatTabPenghasilan),
-                Tab(text: S.zakatTabPertanian),
+                Tab(text: l10n.zakatTabFitrah),
+                Tab(text: l10n.zakatTabMal),
+                Tab(text: l10n.zakatTabEmasPerak),
+                Tab(text: l10n.zakatTabPenghasilan),
+                Tab(text: l10n.zakatTabPertanian),
               ],
             ),
             const SizedBox(height: AppLayout.sp4),
@@ -221,7 +225,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
               child: FilledButton.icon(
                 onPressed: _hitung,
                 icon: const Icon(Icons.calculate_rounded),
-                label: const Text(S.zakatHitung),
+                label: Text(l10n.zakatHitung),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppLayout.sp3),
                 ),
@@ -243,6 +247,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
   }
 
   Widget _buildForm() {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     switch (_type) {
       case ZakatType.fitrah:
@@ -251,13 +256,13 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
           children: [
             _field(
               controller: _jumlahJiwa,
-              label: S.zakatJumlahJiwa,
+              label: l10n.zakatJumlahJiwa,
               allowDecimal: false,
             ),
             const SizedBox(height: AppLayout.sp3),
             _field(
               controller: _hargaBeras,
-              label: S.zakatHargaBeras,
+              label: l10n.zakatHargaBeras,
               rupiah: true,
             ),
           ],
@@ -268,11 +273,11 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
           children: [
             _field(
               controller: _totalHarta,
-              label: S.zakatTotalHarta,
+              label: l10n.zakatTotalHarta,
               rupiah: true,
             ),
             const SizedBox(height: AppLayout.sp3),
-            _field(controller: _hargaEmas, label: S.zakatHargaEmas, rupiah: true),
+            _field(controller: _hargaEmas, label: l10n.zakatHargaEmas, rupiah: true),
           ],
         );
       case ZakatType.emasPerak:
@@ -285,22 +290,22 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
                 Expanded(
                   child: _field(
                     controller: _gramEmas,
-                    label: S.zakatGramEmas,
+                    label: l10n.zakatGramEmas,
                   ),
                 ),
                 const SizedBox(width: AppLayout.sp3),
                 Expanded(
                   child: _field(
                     controller: _gramPerak,
-                    label: S.zakatGramPerak,
+                    label: l10n.zakatGramPerak,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppLayout.sp3),
-            _field(controller: _hargaEmas, label: S.zakatHargaEmas, rupiah: true),
+            _field(controller: _hargaEmas, label: l10n.zakatHargaEmas, rupiah: true),
             const SizedBox(height: AppLayout.sp3),
-            _field(controller: _hargaPerak, label: S.zakatHargaPerak, rupiah: true),
+            _field(controller: _hargaPerak, label: l10n.zakatHargaPerak, rupiah: true),
           ],
         );
       case ZakatType.penghasilan:
@@ -309,37 +314,37 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
           children: [
             _field(
               controller: _penghasilan,
-              label: S.zakatPenghasilanBulanan,
+              label: l10n.zakatPenghasilanBulanan,
               rupiah: true,
             ),
             const SizedBox(height: AppLayout.sp3),
-            _field(controller: _hargaEmas, label: S.zakatHargaEmas, rupiah: true),
+            _field(controller: _hargaEmas, label: l10n.zakatHargaEmas, rupiah: true),
           ],
         );
       case ZakatType.pertanian:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _field(controller: _hasilPanen, label: S.zakatHasilPanen),
+            _field(controller: _hasilPanen, label: l10n.zakatHasilPanen),
             const SizedBox(height: AppLayout.sp3),
             _field(
               controller: _hargaHasil,
-              label: S.zakatHargaHasil,
+              label: l10n.zakatHargaHasil,
               rupiah: true,
-              helperText: S.zakatHargaHasilHint,
+              helperText: l10n.zakatHargaHasilHint,
             ),
             const SizedBox(height: AppLayout.sp4),
             SegmentedButton<bool>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: false,
                   icon: Icon(Icons.water_drop_outlined, size: 16),
-                  label: Text(S.zakatIrigasiAlami),
+                  label: Text(l10n.zakatIrigasiAlami),
                 ),
                 ButtonSegment(
                   value: true,
                   icon: Icon(Icons.water_drop_rounded, size: 16),
-                  label: Text(S.zakatIrigasiBerbayar),
+                  label: Text(l10n.zakatIrigasiBerbayar),
                 ),
               ],
               selected: {_irigasiBerbayar},
@@ -371,6 +376,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
     bool allowDecimal = true,
     String? helperText,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     return TextField(
@@ -380,7 +386,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,
-        prefixText: rupiah ? '${S.zakatRupiah} ' : null,
+        prefixText: rupiah ? '${l10n.zakatRupiah} ' : null,
         filled: true,
         fillColor: scheme.surfaceContainerLow.withValues(alpha: 0.5),
         border: OutlineInputBorder(
@@ -416,6 +422,7 @@ class _ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final statusColor = wajib ? scheme.primary : scheme.onSurfaceVariant;
@@ -456,7 +463,7 @@ class _ResultCard extends StatelessWidget {
                 ),
                 const SizedBox(width: AppLayout.sp1 + 2),
                 Text(
-                  wajib ? S.zakatWajib : S.zakatBelumWajib,
+                  wajib ? l10n.zakatWajib : l10n.zakatBelumWajib,
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.w600,
@@ -466,10 +473,10 @@ class _ResultCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppLayout.sp4),
-          _ResultRow(label: S.zakatNisab, value: nisabText),
+          _ResultRow(label: l10n.zakatNisab, value: nisabText),
           const SizedBox(height: AppLayout.sp2),
           _ResultRow(
-            label: S.zakatJumlahZakat,
+            label: l10n.zakatJumlahZakat,
             value: zakatText,
             valueStyle: theme.textTheme.titleLarge?.copyWith(
               color: scheme.onSurface,

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../../data/repositories/user_repositories.dart';
@@ -66,6 +66,7 @@ class _BookmarksAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -81,7 +82,7 @@ class _BookmarksAppBar extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          S.bookmarksTitle,
+          l10n.bookmarksTitle,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             color: scheme.primary,
@@ -100,6 +101,7 @@ class _Tabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
@@ -112,12 +114,12 @@ class _Tabs extends StatelessWidget {
       child: Row(
         children: [
           _TabButton(
-            label: S.favoritTab,
+            label: l10n.favoritTab,
             selected: tab == _BookmarksTab.favorit,
             onTap: () => onSelect(_BookmarksTab.favorit),
           ),
           _TabButton(
-            label: S.penandaTab,
+            label: l10n.penandaTab,
             selected: tab == _BookmarksTab.penanda,
             onTap: () => onSelect(_BookmarksTab.penanda),
           ),
@@ -180,6 +182,7 @@ class _FavoritContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final bookmarks = ref.watch(bookmarksProvider);
     final isMobile =
         MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
@@ -187,14 +190,14 @@ class _FavoritContent extends ConsumerWidget {
     return bookmarks.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => Center(
-        child: Text(S.statsError, style: Theme.of(context).textTheme.bodyMedium),
+        child: Text(l10n.statsError, style: Theme.of(context).textTheme.bodyMedium),
       ),
       data: (list) {
         if (list.isEmpty) {
           return _EmptyState(
             icon: Icons.favorite_border_rounded,
-            title: S.bookmarksFavoritEmptyTitle,
-            message: S.bookmarksFavoritEmptyMessage,
+            title: l10n.bookmarksFavoritEmptyTitle,
+            message: l10n.bookmarksFavoritEmptyMessage,
             onStart: () => _openSurah(context, 1),
           );
         }
@@ -251,6 +254,7 @@ class _FavoritCardState extends State<_FavoritCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final entry = widget.entry;
@@ -289,13 +293,13 @@ class _FavoritCardState extends State<_FavoritCard> {
                   const Spacer(),
                   _CardActionButton(
                     icon: Icons.favorite_rounded,
-                    tooltip: S.removeBookmark,
+                    tooltip: l10n.removeBookmark,
                     color: scheme.error,
                     onPressed: widget.onUnfavorite,
                   ),
                   _CardActionButton(
                     icon: Icons.share_rounded,
-                    tooltip: S.shareAyah,
+                    tooltip: l10n.shareAyah,
                     onPressed: widget.onShare,
                   ),
                 ],
@@ -361,6 +365,7 @@ class _PenandaContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final recent = ref.watch(recentSurahsProvider);
     final isMobile =
         MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
@@ -368,14 +373,14 @@ class _PenandaContent extends ConsumerWidget {
     return recent.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => Center(
-        child: Text(S.statsError, style: Theme.of(context).textTheme.bodyMedium),
+        child: Text(l10n.statsError, style: Theme.of(context).textTheme.bodyMedium),
       ),
       data: (list) {
         if (list.isEmpty) {
           return _EmptyState(
             icon: Icons.bookmark_border_rounded,
-            title: S.bookmarksPenandaEmptyTitle,
-            message: S.bookmarksPenandaEmptyMessage,
+            title: l10n.bookmarksPenandaEmptyTitle,
+            message: l10n.bookmarksPenandaEmptyMessage,
             onStart: () => _openSurah(context, 1),
           );
         }
@@ -432,6 +437,7 @@ class _PenandaRowState extends State<_PenandaRow> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final item = widget.item;
@@ -486,7 +492,7 @@ class _PenandaRowState extends State<_PenandaRow> {
                     ),
                     const SizedBox(height: AppLayout.sp1),
                     Text(
-                      S.juzPage(item.surah.firstJuz, item.surah.firstPage),
+                      l10n.juzPage(item.surah.firstJuz, item.surah.firstPage),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -496,7 +502,7 @@ class _PenandaRowState extends State<_PenandaRow> {
               ),
               const SizedBox(width: AppLayout.sp3),
               Text(
-                _relativeTime(item.lastReadAt),
+                _relativeTime(item.lastReadAt, l10n),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: scheme.outline,
                 ),
@@ -584,6 +590,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Center(
       child: Padding(
@@ -613,7 +620,7 @@ class _EmptyState extends StatelessWidget {
             LiquidGlassButton.filled(
               onPressed: onStart,
               icon: const Icon(Icons.menu_book_rounded, size: 18),
-              label: S.startReading,
+              label: l10n.startReading,
             ),
           ],
         ),
@@ -623,19 +630,20 @@ class _EmptyState extends StatelessWidget {
 }
 
 /// "Hari ini" / "Kemarin" / "N hari lalu" / "N mgg lalu" from epoch seconds.
-String _relativeTime(int epochSeconds) {
+String _relativeTime(int epochSeconds, AppLocalizations l10n) {
   final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   final diff = now - epochSeconds;
-  if (diff < 86400) return S.todayLabel;
-  if (diff < 172800) return S.yesterdayLabel;
+  if (diff < 86400) return l10n.todayLabel;
+  if (diff < 172800) return l10n.yesterdayLabel;
   final days = diff ~/ 86400;
-  if (days < 7) return S.daysAgo(days);
-  return S.weeksAgo(days ~/ 7);
+  if (days < 7) return l10n.daysAgo(days);
+  return l10n.weeksAgo(days ~/ 7);
 }
 
 /// No share_plus dependency yet — share copies the ayah and confirms with a
 /// SnackBar (same pattern as the home daily verse and reader cards).
 Future<void> _shareAyah(BuildContext context, BookmarkEntry entry) async {
+  final l10n = AppLocalizations.of(context)!;
   await Clipboard.setData(
     ClipboardData(
       text: '${entry.ayah.textUthmani}\n\n"${entry.ayah.translation}"\n'
@@ -647,7 +655,7 @@ Future<void> _shareAyah(BuildContext context, BookmarkEntry entry) async {
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(S.copyAyahDone),
+        content: Text(l10n.copyAyahDone),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(milliseconds: 1800),
       ),
@@ -661,10 +669,11 @@ Future<void> _confirmDelete(
   WidgetRef ref,
   BookmarkEntry entry,
 ) async {
+  final l10n = AppLocalizations.of(context)!;
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text(S.removeBookmarkConfirm),
+      title: Text(l10n.removeBookmarkConfirm),
       content: Text(
         '${entry.surah.nameLatin} • Ayat ${entry.ayah.ayahNumber}',
         style: Theme.of(ctx).textTheme.bodyMedium,
@@ -672,11 +681,11 @@ Future<void> _confirmDelete(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text(S.cancel),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text(S.remove),
+          child: Text(l10n.remove),
         ),
       ],
     ),

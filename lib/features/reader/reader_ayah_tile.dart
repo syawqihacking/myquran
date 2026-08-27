@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/quran_scale.dart';
 import '../../core/tajwid.dart';
 import '../../data/db/quran_database.dart';
@@ -88,6 +88,7 @@ class _TafsirPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(AppLayout.sp4),
@@ -102,7 +103,7 @@ class _TafsirPanel extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '$ayahNumber — ${S.tafsirHeader}',
+                  '$ayahNumber — ${l10n.tafsirHeader}',
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.tertiary,
                   ),
@@ -110,7 +111,7 @@ class _TafsirPanel extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onClose,
-                tooltip: S.cancel,
+                tooltip: l10n.cancel,
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.close_rounded, size: 18),
               ),
@@ -215,6 +216,7 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
   /// No share_plus dependency yet — the share action copies the ayah and
   /// confirms with a SnackBar (same pattern as the home daily verse).
   Future<void> _share() async {
+    final l10n = AppLocalizations.of(context)!;
     await Clipboard.setData(
       ClipboardData(
         text: '${widget.ayah.textUthmani}\n\n"${widget.ayah.translation}"\n'
@@ -226,7 +228,7 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.copyAyahDone),
+          content: Text(l10n.copyAyahDone),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 1800),
         ),
@@ -239,6 +241,7 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
   /// ayah that is currently playing.
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final ayah = widget.ayah;
@@ -284,7 +287,7 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
                   icon: widget.isPlaying
                       ? Icons.pause_rounded
                       : Icons.play_arrow_rounded,
-                  tooltip: widget.isPlaying ? S.audioPause : S.playAyah,
+                  tooltip: widget.isPlaying ? l10n.audioPause : l10n.playAyah,
                   color: widget.isPlaying
                       ? scheme.primary
                       : scheme.onSurfaceVariant,
@@ -295,7 +298,7 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
                       ? Icons.bookmark_rounded
                       : Icons.bookmark_border_rounded,
                   tooltip:
-                      widget.isBookmarked ? S.removeBookmark : S.bookmarkAyah,
+                      widget.isBookmarked ? l10n.removeBookmark : l10n.bookmarkAyah,
                   color: widget.isBookmarked
                       ? scheme.tertiaryFixedDim
                       : scheme.onSurfaceVariant,
@@ -303,12 +306,12 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
                 ),
                 _AyahActionButton(
                   icon: Icons.share_rounded,
-                  tooltip: S.shareAyah,
+                  tooltip: l10n.shareAyah,
                   onPressed: _share,
                 ),
                 _AyahActionButton(
                   icon: Icons.menu_book_rounded,
-                  tooltip: S.tafsirAction,
+                  tooltip: l10n.tafsirAction,
                   onPressed: widget.onOpenTafsir,
                 ),
               ],
@@ -332,8 +335,8 @@ class _ReaderAyahTileState extends State<ReaderAyahTile> {
                   const SizedBox(width: 6),
                   Tooltip(
                     message: widget.isSajdaDone
-                        ? S.sujudUnmark
-                        : S.sujudMark,
+                        ? l10n.sujudUnmark
+                        : l10n.sujudMark,
                     child: InkWell(
                       onTap: widget.onToggleSajda,
                       borderRadius: BorderRadius.circular(4),

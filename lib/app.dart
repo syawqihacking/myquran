@@ -7,7 +7,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'core/app_constants.dart';
 import 'core/app_layout.dart';
-import 'core/app_strings.dart';
+import 'l10n/app_localizations.dart';
 import 'core/error_boundary.dart';
 import 'core/quran_theme.dart';
 import 'data/providers.dart';
@@ -58,12 +58,15 @@ class MyQuranApp extends ConsumerWidget {
     ref.watch(hijriEventReminderSyncProvider);
     return ErrorBoundary(
       child: MaterialApp(
-        title: S.appName,
+        title: 'MyQuran',
         debugShowCheckedModeBanner: false,
         scrollBehavior: const AppScrollBehavior(),
         theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
         darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
         themeMode: settings.themeMode,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: settings.locale.toLocale(),
         // First launch shows onboarding; completing/skipping it flips
         // [onboardingDoneProvider] and this swaps to the app shell. On every
         // later launch the flag is already set, so onboarding never reappears.
@@ -202,6 +205,7 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     int selectedIndex = switch (view) {
       _View.home => 0,
       _View.browse => 1,
@@ -245,7 +249,7 @@ class _BottomNav extends StatelessWidget {
           activeIcon: Icon(Icons.home_rounded),
         ),
         GlassTab(
-          label: S.browseTitle,
+          label: l10n.browseTitle,
           icon: const Icon(Icons.menu_book_outlined),
           activeIcon: const Icon(Icons.menu_book_rounded),
         ),
@@ -260,7 +264,7 @@ class _BottomNav extends StatelessWidget {
           activeIcon: Icon(Icons.insights_rounded),
         ),
         GlassTab(
-          label: S.profileTitle,
+          label: l10n.profileTitle,
           icon: const Icon(Icons.person_outline_rounded),
           activeIcon: const Icon(Icons.person_rounded),
         ),
@@ -277,6 +281,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final rail =
         MediaQuery.sizeOf(context).width < AppConstants.sidebarBreakpoint;
@@ -320,7 +325,7 @@ class _Sidebar extends StatelessWidget {
           _NavItem(
             rail: rail,
             icon: Icons.menu_book_rounded,
-            label: S.browseTitle,
+            label: l10n.browseTitle,
             selected: view == _View.browse,
             onTap: () => onSelect(_View.browse),
           ),
@@ -355,7 +360,7 @@ class _Sidebar extends StatelessWidget {
           _NavItem(
             rail: rail,
             icon: Icons.person_rounded,
-            label: S.profileTitle,
+            label: l10n.profileTitle,
             selected: view == _View.profile,
             onTap: () => onSelect(_View.profile),
           ),
@@ -375,6 +380,7 @@ class _BrandTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(AppLayout.sp4),
@@ -394,7 +400,7 @@ class _BrandTile extends StatelessWidget {
           ),
           if (!rail) ...[
             const SizedBox(width: AppLayout.sp3),
-            Text(S.appName, style: theme.textTheme.titleLarge),
+            Text(l10n.appName, style: theme.textTheme.titleLarge),
           ],
         ],
       ),
@@ -492,6 +498,7 @@ class _SidebarFooter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final mode = ref.watch(settingsProvider).themeMode;
 
@@ -510,7 +517,7 @@ class _SidebarFooter extends ConsumerWidget {
         children: [
           IconButton(
             onPressed: cycle,
-            tooltip: S.changeTheme,
+            tooltip: l10n.changeTheme,
             icon: Icon(switch (mode) {
               ThemeMode.light => Icons.light_mode_rounded,
               ThemeMode.dark => Icons.dark_mode_rounded,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 
@@ -18,6 +18,7 @@ class HomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -36,7 +37,7 @@ class HomeAppBar extends StatelessWidget {
             // Title pill — compact, wraps only the text + its own padding.
             GlassPill(
               child: Text(
-                S.browseTitle,
+                l10n.browseTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: scheme.primary,
@@ -52,7 +53,7 @@ class HomeAppBar extends StatelessWidget {
                   radius: AppLayout.radiusFull,
                   child: IconButton(
                     onPressed: onOpenSearch,
-                    tooltip: S.openSearch,
+                    tooltip: l10n.openSearch,
                     icon: Icon(
                       Icons.search_rounded,
                       color: scheme.onSurfaceVariant,

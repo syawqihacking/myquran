@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/services/prayer_time_service.dart';
 import '../widgets/glass_pill.dart';
@@ -56,12 +56,13 @@ class _PrayerScreenState extends ConsumerState<PrayerScreen> {
   /// Best-effort re-request: re-runs the provider (GPS permission flow with
   /// the Jakarta fallback) and confirms. No location picker.
   void _changeLocation() {
+    final l10n = AppLocalizations.of(context)!;
     ref.invalidate(prayerScheduleProvider);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.locationUpdated),
+          content: Text(l10n.locationUpdated),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 1800),
         ),
@@ -127,9 +128,10 @@ class _PrayerAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.prayerScreenTitle,
+      title: l10n.prayerScreenTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w700,
         color: theme.colorScheme.primary,
@@ -138,7 +140,7 @@ class _PrayerAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: () => Navigator.of(context).maybePop(),
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -161,6 +163,7 @@ class _HeaderCountdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Column(
@@ -176,7 +179,7 @@ class _HeaderCountdown extends StatelessWidget {
         ),
         const SizedBox(height: AppLayout.sp2),
         Text(
-          '${S.prayerCountdownPrefix} ${_formatCountdown(countdown)}',
+          '${l10n.prayerCountdownPrefix} ${_formatCountdown(countdown)}',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: scheme.onSurfaceVariant,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -214,6 +217,7 @@ class _ChangeLocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return LiquidGlassCapsule(
@@ -229,7 +233,7 @@ class _ChangeLocationButton extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            S.changeLocation,
+            l10n.changeLocation,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.primary,
               fontWeight: FontWeight.w700,
@@ -296,6 +300,7 @@ class _QiblaCardState extends State<_QiblaCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -329,7 +334,7 @@ class _QiblaCardState extends State<_QiblaCard> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                S.qiblaTitle,
+                l10n.qiblaTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: 20,
                   height: 28 / 20,
@@ -361,7 +366,7 @@ class _QiblaCardState extends State<_QiblaCard> {
               ),
               const SizedBox(height: AppLayout.sp1),
               Text(
-                _sensorActive ? S.qiblaAlignHint : S.qiblaCaption,
+                _sensorActive ? l10n.qiblaAlignHint : l10n.qiblaCaption,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -659,6 +664,7 @@ class _PrayerListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final activeIdx = schedule.activePrayerIndex;
     final entries = schedule.entries;
@@ -666,7 +672,7 @@ class _PrayerListCard extends StatelessWidget {
     // The five prayers plus Terbit (sunrise). Sunrise is never "active".
     final rows = <({String label, DateTime? time, int? entryIndex})>[
       (label: entries[0].label, time: entries[0].time, entryIndex: 0),
-      (label: S.sunriseLabel, time: schedule.sunrise, entryIndex: null),
+      (label: l10n.sunriseLabel, time: schedule.sunrise, entryIndex: null),
       (label: entries[1].label, time: entries[1].time, entryIndex: 1),
       (label: entries[2].label, time: entries[2].time, entryIndex: 2),
       (label: entries[3].label, time: entries[3].time, entryIndex: 3),
@@ -788,6 +794,7 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Center(
@@ -802,12 +809,12 @@ class _ErrorState extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppLayout.sp3),
-            Text(S.prayerError, style: theme.textTheme.bodyMedium),
+            Text(l10n.prayerError, style: theme.textTheme.bodyMedium),
             const SizedBox(height: AppLayout.sp4),
             LiquidGlassButton.tonal(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: S.retry,
+              label: l10n.retry,
             ),
           ],
         ),

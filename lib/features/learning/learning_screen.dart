@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/learning_data.dart';
 import '../../data/providers.dart';
 import 'course_detail_screen.dart';
@@ -45,6 +45,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final searching = _query.trim().isNotEmpty;
@@ -97,7 +98,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
                                 const SizedBox(height: AppLayout.sp6),
                               ],
                               Text(
-                                S.learningKategoriTitle,
+                                l10n.learningKategoriTitle,
                                 style: theme.textTheme.titleMedium,
                               ),
                               const SizedBox(height: AppLayout.sp3),
@@ -130,7 +131,7 @@ class _LearningScreenState extends ConsumerState<LearningScreen> {
               left: 0,
               right: 0,
               child: LearningAppBar(
-                title: S.learningTitle,
+                title: l10n.learningTitle,
                 onBack: () => Navigator.of(context).maybePop(),
               ),
             ),
@@ -160,6 +161,7 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return TextField(
       controller: controller,
@@ -167,7 +169,7 @@ class _SearchField extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: S.learningSearchHint,
+        hintText: l10n.learningSearchHint,
         prefixIcon: const Icon(Icons.search_rounded),
         prefixIconColor: scheme.outline,
         suffixIcon: query.isEmpty
@@ -178,7 +180,7 @@ class _SearchField extends StatelessWidget {
                   onChanged('');
                   focusNode.requestFocus();
                 },
-                tooltip: S.cancel,
+                tooltip: l10n.cancel,
                 icon: const Icon(Icons.close_rounded),
               ),
         filled: true,
@@ -211,6 +213,7 @@ class _ContinueHero extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final progress = ref.watch(learningProgressProvider);
@@ -287,7 +290,7 @@ class _ContinueHero extends ConsumerWidget {
                       ),
                       const SizedBox(width: AppLayout.sp2),
                       Text(
-                        S.learningHeroLabel.toUpperCase(),
+                        l10n.learningHeroLabel.toUpperCase(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.6,
@@ -306,7 +309,7 @@ class _ContinueHero extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppLayout.sp1),
                   Text(
-                    '${S.learningLangkah} ${nextIndex + 1}: '
+                    '${l10n.learningLangkah} ${nextIndex + 1}: '
                     '${nextLesson.title}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -318,7 +321,7 @@ class _ContinueHero extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        '$pct% ${S.learningSelesai}',
+                        '$pct% ${l10n.learningSelesai}',
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: scheme.tertiaryFixed,
@@ -326,7 +329,7 @@ class _ContinueHero extends ConsumerWidget {
                       ),
                       const SizedBox(width: AppLayout.sp3),
                       Text(
-                        '$done/$total ${S.learningLangkah}',
+                        '$done/$total ${l10n.learningLangkah}',
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: scheme.primaryFixedDim,
@@ -370,6 +373,7 @@ class _CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final color = category.color(scheme);
@@ -428,7 +432,7 @@ class _CategoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppLayout.radiusFull),
                 ),
                 child: Text(
-                  '$courseCount ${S.learningCourseCount}',
+                  '$courseCount ${l10n.learningCourseCount}',
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: scheme.onSurfaceVariant,
@@ -454,6 +458,7 @@ class _SearchResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     if (results.isEmpty) {
@@ -469,10 +474,10 @@ class _SearchResults extends StatelessWidget {
                 color: scheme.onSurfaceVariant,
               ),
               const SizedBox(height: AppLayout.sp3),
-              Text(S.learningSearchEmpty, style: theme.textTheme.titleMedium),
+              Text(l10n.learningSearchEmpty, style: theme.textTheme.titleMedium),
               const SizedBox(height: AppLayout.sp1),
               Text(
-                S.learningSearchEmptyHint,
+                l10n.learningSearchEmptyHint,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

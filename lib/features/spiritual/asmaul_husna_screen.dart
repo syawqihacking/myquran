@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/asmaul_husna_data.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
@@ -60,6 +60,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final filtered = _filtered;
@@ -90,7 +91,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
                     ),
                     children: [
                       Text(
-                        S.asmaulHusnaTitle,
+                        l10n.asmaulHusnaTitle,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: scheme.primary,
@@ -98,7 +99,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
                       ),
                       const SizedBox(height: AppLayout.sp2),
                       Text(
-                        S.asmaulHusnaCaption,
+                        l10n.asmaulHusnaCaption,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -144,6 +145,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
   }
 
   Widget _buildSearch(ColorScheme scheme) {
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedContainer(
       duration: AppLayout.durBase,
       decoration: BoxDecoration(
@@ -165,7 +167,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
         onChanged: (v) => setState(() => _query = v),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
-          hintText: S.asmaulHusnaSearchHint,
+          hintText: l10n.asmaulHusnaSearchHint,
           prefixIcon: const Icon(Icons.search_rounded),
           prefixIconColor: scheme.outline,
           suffixIcon: _query.isEmpty
@@ -176,7 +178,7 @@ class _AsmaulHusnaScreenState extends State<AsmaulHusnaScreen> {
                     setState(() => _query = '');
                     _searchFocus.requestFocus();
                   },
-                  tooltip: S.cancel,
+                  tooltip: l10n.cancel,
                   icon: const Icon(Icons.close_rounded),
                 ),
           filled: true,
@@ -210,9 +212,10 @@ class _AsmaulHusnaAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.asmaulHusnaTitle,
+      title: l10n.asmaulHusnaTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -223,7 +226,7 @@ class _AsmaulHusnaAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -378,6 +381,7 @@ class _AsmaulHusnaDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final maxHeight = MediaQuery.of(context).size.height * 0.8;
@@ -416,7 +420,7 @@ class _AsmaulHusnaDetail extends StatelessWidget {
                   const SizedBox(width: AppLayout.sp3),
                   Expanded(
                     child: Text(
-                      S.asmaulHusnaTitle,
+                      l10n.asmaulHusnaTitle,
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
@@ -446,7 +450,7 @@ class _AsmaulHusnaDetail extends StatelessWidget {
               ),
               const SizedBox(height: AppLayout.sp6),
               _DetailSection(
-                label: S.asmaulHusnaArti,
+                label: l10n.asmaulHusnaArti,
                 child: Text(
                   name.translation,
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -460,7 +464,7 @@ class _AsmaulHusnaDetail extends StatelessWidget {
               if (name.note.isNotEmpty) ...[
                 const SizedBox(height: AppLayout.sp5),
                 _DetailSection(
-                  label: S.asmaulHusnaCatatan,
+                  label: l10n.asmaulHusnaCatatan,
                   child: Text(
                     name.note,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -474,7 +478,7 @@ class _AsmaulHusnaDetail extends StatelessWidget {
               const SizedBox(height: AppLayout.sp6),
               LiquidGlassButton.filled(
                 onPressed: () => Navigator.of(context).pop(),
-                label: S.asmaulHusnaClose,
+                label: l10n.asmaulHusnaClose,
               ),
             ],
           ),
@@ -528,6 +532,7 @@ class _AsmaulHusnaEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -540,10 +545,10 @@ class _AsmaulHusnaEmpty extends StatelessWidget {
             color: scheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppLayout.sp3),
-          Text(S.asmaulHusnaEmpty, style: theme.textTheme.titleMedium),
+          Text(l10n.asmaulHusnaEmpty, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppLayout.sp1),
           Text(
-            S.asmaulHusnaEmptyHint,
+            l10n.asmaulHusnaEmptyHint,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,

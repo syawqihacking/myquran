@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/providers.dart';
 import '../widgets/quran_text_view.dart';
@@ -19,6 +19,7 @@ class DailyVerseCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final verseAsync = ref.watch(dailyAyahProvider);
@@ -63,7 +64,7 @@ class DailyVerseCard extends ConsumerWidget {
               ),
               error: (_, __) => SizedBox(
                 height: 120,
-                child: Center(child: Text(S.dailyVerseError)),
+                child: Center(child: Text(l10n.dailyVerseError)),
               ),
               data: (d) => VerseContent(ayah: d.ayah, surah: d.surah),
             ),
@@ -82,6 +83,7 @@ class VerseContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Column(
@@ -92,7 +94,7 @@ class VerseContent extends StatelessWidget {
             Icon(Icons.auto_stories_rounded, size: 20, color: scheme.primary),
             const SizedBox(width: AppLayout.sp2),
             Text(
-              S.dailyVerseLabel.toUpperCase(),
+              l10n.dailyVerseLabel.toUpperCase(),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onSurfaceVariant,
                 letterSpacing: 1.2,
@@ -101,7 +103,7 @@ class VerseContent extends StatelessWidget {
             const Spacer(),
             IconButton(
               onPressed: () => _share(context),
-              tooltip: S.shareVerse,
+              tooltip: l10n.shareVerse,
               visualDensity: VisualDensity.compact,
               icon: Icon(
                 Icons.share_outlined,
@@ -140,6 +142,7 @@ class VerseContent extends StatelessWidget {
   /// No share_plus dependency yet — the share action copies the verse and
   /// confirms with a SnackBar.
   Future<void> _share(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     await Clipboard.setData(
       ClipboardData(
         text:
@@ -152,7 +155,7 @@ class VerseContent extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(S.copyAyahDone),
+          content: Text(l10n.copyAyahDone),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(milliseconds: 1800),
         ),

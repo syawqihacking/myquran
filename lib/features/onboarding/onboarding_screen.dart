@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../widgets/liquid_glass.dart';
 import 'onboarding_scenes.dart';
@@ -58,6 +58,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isLast = _page == _pageCount - 1;
@@ -82,7 +83,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     style: TextButton.styleFrom(
                       foregroundColor: scheme.onSurfaceVariant,
                     ),
-                    child: const Text(S.onboardingSkip),
+                    child: Text(l10n.onboardingSkip),
                   ),
                 ),
               ),
@@ -204,7 +205,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              isLast ? S.onboardingStart : S.onboardingNext,
+                              isLast ? l10n.onboardingStart : l10n.onboardingNext,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: scheme.primary,
@@ -423,6 +424,7 @@ class _WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return _SlideLayout(
@@ -443,7 +445,7 @@ class _WelcomePage extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                S.onboardingWelcomeEyebrow,
+                l10n.onboardingWelcomeEyebrow,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: scheme.tertiary,
                   letterSpacing: 2,
@@ -451,7 +453,7 @@ class _WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: AppLayout.sp2),
               Text(
-                S.onboardingWelcomeTitle,
+                l10n.onboardingWelcomeTitle,
                 style: theme.textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: scheme.primary,
@@ -466,7 +468,7 @@ class _WelcomePage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
-              S.onboardingWelcomeTagline,
+              l10n.onboardingWelcomeTagline,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -494,6 +496,7 @@ class _ReadPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return _SlideLayout(
@@ -512,7 +515,7 @@ class _ReadPage extends StatelessWidget {
           entrance: entrance,
           start: 0.2,
           child: Text(
-            S.onboardingReadTitle,
+            l10n.onboardingReadTitle,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: scheme.primary,
@@ -525,7 +528,7 @@ class _ReadPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
-              S.onboardingReadDesc,
+              l10n.onboardingReadDesc,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -541,10 +544,10 @@ class _ReadPage extends StatelessWidget {
             spacing: AppLayout.sp2,
             runSpacing: AppLayout.sp2,
             alignment: WrapAlignment.center,
-            children: const [
-              _Chip(label: S.onboardingChipTranslation),
-              _Chip(label: S.onboardingChipTafsir),
-              _Chip(label: S.onboardingChipTajwid),
+            children: [
+              _Chip(label: l10n.onboardingChipTranslation),
+              _Chip(label: l10n.onboardingChipTafsir),
+              _Chip(label: l10n.onboardingChipTajwid),
             ],
           ),
         ),
@@ -568,6 +571,7 @@ class _HijriPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return _SlideLayout(
@@ -586,7 +590,7 @@ class _HijriPage extends StatelessWidget {
           entrance: entrance,
           start: 0.2,
           child: Text(
-            S.onboardingHijriTitle,
+            l10n.onboardingHijriTitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
@@ -600,7 +604,7 @@ class _HijriPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
-              S.onboardingHijriDesc,
+              l10n.onboardingHijriDesc,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -616,9 +620,9 @@ class _HijriPage extends StatelessWidget {
             spacing: AppLayout.sp2,
             runSpacing: AppLayout.sp2,
             alignment: WrapAlignment.center,
-            children: const [
-              _Chip(label: S.onboardingChipHijriDate),
-              _Chip(label: S.onboardingChipKhatam),
+            children: [
+              _Chip(label: l10n.onboardingChipHijriDate),
+              _Chip(label: l10n.onboardingChipKhatam),
             ],
           ),
         ),
@@ -641,6 +645,7 @@ class _MosquePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return _SlideLayout(
@@ -659,7 +664,7 @@ class _MosquePage extends StatelessWidget {
           entrance: entrance,
           start: 0.2,
           child: Text(
-            S.onboardingMosqueTitle,
+            l10n.onboardingMosqueTitle,
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
@@ -673,7 +678,7 @@ class _MosquePage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: Text(
-              S.onboardingMosqueDesc,
+              l10n.onboardingMosqueDesc,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
@@ -689,9 +694,9 @@ class _MosquePage extends StatelessWidget {
             spacing: AppLayout.sp2,
             runSpacing: AppLayout.sp2,
             alignment: WrapAlignment.center,
-            children: const [
-              _Chip(label: S.onboardingChipNearbyMosque),
-              _Chip(label: S.onboardingChipQibla),
+            children: [
+              _Chip(label: l10n.onboardingChipNearbyMosque),
+              _Chip(label: l10n.onboardingChipQibla),
             ],
           ),
         ),

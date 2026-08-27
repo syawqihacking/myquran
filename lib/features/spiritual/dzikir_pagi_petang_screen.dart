@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/dzikir_content.dart';
 import '../../data/models/dzikir_pagi_petang_data.dart';
 import '../../data/models/spiritual_content.dart';
@@ -30,11 +30,12 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
   ];
 
   void _openReader(DzikirItem dzikir) {
+    final l10n = AppLocalizations.of(context)!;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SpiritualReaderScreen(
           title: dzikir.title,
-          subtitle: _time == DzikirTime.pagi ? S.dzikirPagi : S.dzikirPetang,
+          subtitle: _time == DzikirTime.pagi ? l10n.dzikirPagi : l10n.dzikirPetang,
           items: [
             SpiritualItem(
               id: dzikir.id,
@@ -56,6 +57,7 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final filtered = _filtered;
@@ -86,7 +88,7 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
                     ),
                     children: [
                       Text(
-                        S.dzikirTitle,
+                        l10n.dzikirTitle,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: scheme.primary,
@@ -94,7 +96,7 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
                       ),
                       const SizedBox(height: AppLayout.sp2),
                       Text(
-                        S.dzikirCaption,
+                        l10n.dzikirCaption,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -140,6 +142,7 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
   }
 
   Widget _buildChips() {
+    final l10n = AppLocalizations.of(context)!;
     return ScrollConfiguration(
       behavior: _ChipScrollBehavior(),
       child: SingleChildScrollView(
@@ -147,14 +150,14 @@ class _DzikirPagiPetangScreenState extends State<DzikirPagiPetangScreen> {
         child: Row(
           children: [
             _TimeChip(
-              label: S.dzikirPagi,
+              label: l10n.dzikirPagi,
               icon: Icons.wb_sunny_rounded,
               selected: _time == DzikirTime.pagi,
               onTap: () => setState(() => _time = DzikirTime.pagi),
             ),
             const SizedBox(width: AppLayout.sp3),
             _TimeChip(
-              label: S.dzikirPetang,
+              label: l10n.dzikirPetang,
               icon: Icons.nights_stay_rounded,
               selected: _time == DzikirTime.petang,
               onTap: () => setState(() => _time = DzikirTime.petang),
@@ -177,9 +180,10 @@ class _DzikirAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.dzikirTitle,
+      title: l10n.dzikirTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -190,7 +194,7 @@ class _DzikirAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -319,6 +323,7 @@ class _DzikirCardState extends State<_DzikirCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final dzikir = widget.dzikir;
@@ -409,7 +414,7 @@ class _DzikirCardState extends State<_DzikirCard> {
                               ),
                             ),
                             child: Text(
-                              S.readNTimes(dzikir.repeatCount),
+                              l10n.readNTimes(dzikir.repeatCount),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.6,
@@ -440,6 +445,7 @@ class _DzikirEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
@@ -452,7 +458,7 @@ class _DzikirEmpty extends StatelessWidget {
             color: scheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppLayout.sp3),
-          Text(S.dzikirEmpty, style: theme.textTheme.titleMedium),
+          Text(l10n.dzikirEmpty, style: theme.textTheme.titleMedium),
         ],
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Segments of the unified Al-Qur'an page (the list tabs). Pencarian bukan
 /// segmen — ia mode yang menimpa area daftar (lihat [BrowseState.searchOpen]).
@@ -17,6 +17,7 @@ class SegmentTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 48,
@@ -36,19 +37,19 @@ class SegmentTabs extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TabButton(
-                label: S.surahSegment,
+                label: l10n.surahSegment,
                 selected: segment == BrowseSegment.surah,
                 onTap: () => onChanged(BrowseSegment.surah),
               ),
               const SizedBox(width: AppLayout.sp6),
               TabButton(
-                label: S.juzSegment,
+                label: l10n.juzSegment,
                 selected: segment == BrowseSegment.juz,
                 onTap: () => onChanged(BrowseSegment.juz),
               ),
               const SizedBox(width: AppLayout.sp6),
               TabButton(
-                label: S.favoritSegment,
+                label: l10n.favoritSegment,
                 selected: segment == BrowseSegment.favorit,
                 onTap: () => onChanged(BrowseSegment.favorit),
               ),

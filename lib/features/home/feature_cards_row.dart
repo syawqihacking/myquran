@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../learning/learning_screen.dart';
 import '../spiritual/doa_setelah_sholat_screen.dart';
 
@@ -37,6 +37,7 @@ class LearningTileState extends State<LearningTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return MouseRegion(
@@ -96,14 +97,14 @@ class LearningTileState extends State<LearningTile> {
                     ),
                     const SizedBox(height: AppLayout.sp3),
                     Text(
-                      S.learningHomeEntryTitle,
+                      l10n.learningHomeEntryTitle,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      S.learningHomeEntrySubtitle,
+                      l10n.learningHomeEntrySubtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -136,6 +137,7 @@ class DoaSetelahSholatTileState extends State<DoaSetelahSholatTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return MouseRegion(
@@ -197,14 +199,14 @@ class DoaSetelahSholatTileState extends State<DoaSetelahSholatTile> {
                     ),
                     const SizedBox(height: AppLayout.sp3),
                     Text(
-                      S.doaSetelahSholatHomeTitle,
+                      l10n.doaSetelahSholatHomeTitle,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      S.doaSetelahSholatHomeSubtitle,
+                      l10n.doaSetelahSholatHomeSubtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(

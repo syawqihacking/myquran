@@ -9,20 +9,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/glass_pill.dart';
 import '../widgets/liquid_glass.dart';
 import 'mosque_models.dart';
 import 'mosque_providers.dart';
-
-/// Filter chips in the Stitch design's order (null = Semua).
-const List<(MosqueAmenity?, String)> _masjidFilters = [
-  (null, S.masjidCatSemua),
-  (MosqueAmenity.parking, S.masjidCatParkirLuas),
-  (MosqueAmenity.toilets, S.masjidCatToilet),
-  (MosqueAmenity.ac, S.masjidCatAc),
-  (MosqueAmenity.wheelchair, S.masjidCatDisabilitas),
-];
 
 /// "500m" below 1 km, "2.1km" above.
 String formatDistance(double meters) {
@@ -77,6 +68,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
   }
 
   Future<void> _openRoute(Mosque m) async {
+    final l10n = AppLocalizations.of(context)!;
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}',
     );
@@ -90,7 +82,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(S.masjidRouteError),
+            content: Text(l10n.masjidRouteError),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -113,6 +105,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final mosquesAsync = ref.watch(mosqueListProvider);
@@ -129,8 +122,8 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildSearch(theme, scheme),
-                  if (_showChips) _buildChips(theme, scheme),
+                  _buildSearch(theme, scheme, l10n),
+                  if (_showChips) _buildChips(theme, scheme, l10n),
                   Expanded(
                     child: mosquesAsync.when(
                       loading: () => const _LoadingState(),
@@ -200,7 +193,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
     );
   }
 
-  Widget _buildSearch(ThemeData theme, ColorScheme scheme) {
+  Widget _buildSearch(ThemeData theme, ColorScheme scheme, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppLayout.sp6,
@@ -231,7 +224,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: S.masjidSearchHint,
+                  hintText: l10n.masjidSearchHint,
                   prefixIcon: const Icon(Icons.search_rounded),
                   prefixIconColor: scheme.outline,
                   suffixIcon: _query.isEmpty
@@ -242,7 +235,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
                             setState(() => _query = '');
                             _searchFocus.requestFocus();
                           },
-                          tooltip: S.cancel,
+                          tooltip: l10n.cancel,
                           icon: const Icon(Icons.close_rounded),
                         ),
                   filled: true,
@@ -266,7 +259,7 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
           const SizedBox(width: AppLayout.sp3),
           // Tune (filter) button — toggles the chips row.
           Tooltip(
-            message: S.masjidFilterHint,
+            message: l10n.masjidFilterHint,
             child: Material(
               color: scheme.primary,
               shape: const CircleBorder(),
@@ -290,7 +283,16 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
     );
   }
 
-  Widget _buildChips(ThemeData theme, ColorScheme scheme) {
+  Widget _buildChips(ThemeData theme, ColorScheme scheme, AppLocalizations l10n) {
+    // Filter chips in the Stitch design's order (null = Semua).
+    final masjidFilters = <(MosqueAmenity?, String)>[
+      (null, l10n.masjidCatSemua),
+      (MosqueAmenity.parking, l10n.masjidCatParkirLuas),
+      (MosqueAmenity.toilets, l10n.masjidCatToilet),
+      (MosqueAmenity.ac, l10n.masjidCatAc),
+      (MosqueAmenity.wheelchair, l10n.masjidCatDisabilitas),
+    ];
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppLayout.sp4),
       child: ScrollConfiguration(
@@ -300,12 +302,12 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
           padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp6),
           child: Row(
             children: [
-              for (var i = 0; i < _masjidFilters.length; i++) ...[
+              for (var i = 0; i < masjidFilters.length; i++) ...[
                 if (i > 0) const SizedBox(width: AppLayout.sp3),
                 _MasjidFilterChip(
-                  label: _masjidFilters[i].$2,
-                  selected: _filter == _masjidFilters[i].$1,
-                  onTap: () => setState(() => _filter = _masjidFilters[i].$1),
+                  label: masjidFilters[i].$2,
+                  selected: _filter == masjidFilters[i].$1,
+                  onTap: () => setState(() => _filter = masjidFilters[i].$1),
                 ),
               ],
             ],
@@ -327,9 +329,10 @@ class _MasjidAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return GlassHeader(
-      title: S.masjidTerdekatTitle,
+      title: l10n.masjidTerdekatTitle,
       titleStyle: theme.textTheme.titleLarge?.copyWith(
         fontSize: 20,
         height: 28 / 20,
@@ -340,7 +343,7 @@ class _MasjidAppBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: IconButton(
           onPressed: onBack,
-          tooltip: S.back,
+          tooltip: l10n.back,
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -454,6 +457,7 @@ class _MapSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final wide =
@@ -521,7 +525,7 @@ class _MapSection extends StatelessWidget {
                   shadowColor: scheme.primary.withValues(alpha: 0.2),
                   shape: const CircleBorder(),
                   child: Tooltip(
-                    message: S.masjidRecenter,
+                    message: l10n.masjidRecenter,
                     child: InkWell(
                       onTap: onRecenter,
                       customBorder: const CircleBorder(),
@@ -780,6 +784,7 @@ class _MosqueCardState extends State<_MosqueCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final m = widget.mosque;
@@ -834,7 +839,7 @@ class _MosqueCardState extends State<_MosqueCard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          m.address.isEmpty ? S.masjidNoAddress : m.address,
+                          m.address.isEmpty ? l10n.masjidNoAddress : m.address,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -950,10 +955,11 @@ class _RouteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return LiquidGlassButton.tonal(
       onPressed: onTap,
       icon: const Icon(Icons.directions_rounded, size: 18),
-      label: S.masjidRute,
+      label: l10n.masjidRute,
       height: 38,
     );
   }
@@ -966,9 +972,10 @@ class _DetailButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return LiquidGlassButton.filled(
       onPressed: onTap,
-      label: S.masjidDetail,
+      label: l10n.masjidDetail,
       height: 38,
     );
   }
@@ -986,6 +993,7 @@ class _MosqueDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final m = mosque;
@@ -1019,20 +1027,20 @@ class _MosqueDetailSheet extends StatelessWidget {
             const SizedBox(height: AppLayout.sp5),
             _DetailRow(
               icon: Icons.location_on_outlined,
-              label: S.masjidDetailAddress,
-              value: m.address.isEmpty ? S.masjidNoAddress : m.address,
+              label: l10n.masjidDetailAddress,
+              value: m.address.isEmpty ? l10n.masjidNoAddress : m.address,
             ),
             const SizedBox(height: AppLayout.sp3),
             if (m.openingHours != null) ...[
               _DetailRow(
                 icon: Icons.schedule_rounded,
-                label: S.masjidDetailHours,
+                label: l10n.masjidDetailHours,
                 value: m.openingHours!,
               ),
               const SizedBox(height: AppLayout.sp3),
             ],
             Text(
-              S.masjidDetailAmenities,
+              l10n.masjidDetailAmenities,
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
@@ -1051,7 +1059,7 @@ class _MosqueDetailSheet extends StatelessWidget {
               )
             else
               Text(
-                S.masjidNoAmenities,
+                l10n.masjidNoAmenities,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -1062,7 +1070,7 @@ class _MosqueDetailSheet extends StatelessWidget {
               child: LiquidGlassButton.filled(
                 onPressed: onRoute,
                 icon: const Icon(Icons.directions_rounded, size: 20),
-                label: S.masjidRute,
+                label: l10n.masjidRute,
                 height: 48,
               ),
             ),
@@ -1130,6 +1138,7 @@ class _CachedNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -1158,7 +1167,7 @@ class _CachedNote extends StatelessWidget {
           const SizedBox(width: AppLayout.sp2),
           Expanded(
             child: Text(
-              S.masjidCachedNote,
+              l10n.masjidCachedNote,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -1175,6 +1184,7 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Center(
@@ -1184,7 +1194,7 @@ class _LoadingState extends StatelessWidget {
           const CircularProgressIndicator(),
           const SizedBox(height: AppLayout.sp4),
           Text(
-            S.masjidLoading,
+            l10n.masjidLoading,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -1211,15 +1221,16 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isLinux = defaultTargetPlatform == TargetPlatform.linux;
-    final title = isLocationError ? S.masjidLocationUnavailable : S.masjidError;
+    final title = isLocationError ? l10n.masjidLocationUnavailable : l10n.masjidError;
     final message = isLocationError
         ? (isLinux
-              ? S.masjidLocationLinuxHint
-              : S.masjidLocationUnavailableHint)
-        : S.masjidErrorHint;
+              ? l10n.masjidLocationLinuxHint
+              : l10n.masjidLocationUnavailableHint)
+        : l10n.masjidErrorHint;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppLayout.sp6),
@@ -1259,7 +1270,7 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: AppLayout.sp4),
             FilledButton.tonal(
               onPressed: onRetry,
-              child: const Text(S.masjidRetry),
+              child: Text(l10n.masjidRetry),
             ),
           ],
         ),
@@ -1273,6 +1284,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Center(
@@ -1287,10 +1299,10 @@ class _EmptyState extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppLayout.sp3),
-            Text(S.masjidEmpty, style: theme.textTheme.titleMedium),
+            Text(l10n.masjidEmpty, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppLayout.sp1),
             Text(
-              S.masjidEmptyHint,
+              l10n.masjidEmptyHint,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,

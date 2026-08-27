@@ -7,7 +7,7 @@ import 'package:hijri/hijri_calendar.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/models/asmaul_husna_data.dart';
 import '../../data/models/doa_harian_data.dart';
 import '../../data/providers.dart';
@@ -598,6 +598,7 @@ class HeroHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Column(
@@ -605,14 +606,14 @@ class HeroHint extends StatelessWidget {
       children: [
         const Spacer(),
         Text(
-          S.noHistoryTitle,
+          l10n.noHistoryTitle,
           style: theme.textTheme.titleMedium?.copyWith(color: scheme.onPrimary),
         ),
         const SizedBox(height: AppLayout.sp3),
         LiquidGlassButton.filled(
           onPressed: onStart,
           icon: const Icon(Icons.menu_book_rounded, size: 18),
-          label: S.startFromFatihah,
+          label: l10n.startFromFatihah,
         ),
       ],
     );
@@ -627,6 +628,7 @@ class ContinuePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return LiquidGlassCapsule(
@@ -642,7 +644,7 @@ class ContinuePill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            S.continueButton,
+            l10n.continueButton,
             style: theme.textTheme.labelSmall?.copyWith(
               color: scheme.onPrimaryContainer,
               fontWeight: FontWeight.w700,
@@ -706,6 +708,7 @@ class HeroTopInfoState extends ConsumerState<HeroTopInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final scheduleAsync = ref.watch(prayerScheduleProvider);
@@ -724,7 +727,7 @@ class HeroTopInfoState extends ConsumerState<HeroTopInfo> {
             Icon(Icons.history_rounded, size: 20, color: scheme.onPrimary),
             const SizedBox(width: AppLayout.sp2),
             Text(
-              S.lastReadLabel.toUpperCase(),
+              l10n.lastReadLabel.toUpperCase(),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: scheme.onPrimary,
                 letterSpacing: 1.2,

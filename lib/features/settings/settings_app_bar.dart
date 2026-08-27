@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/app_layout.dart';
-import '../../core/app_strings.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/liquid_glass.dart';
 
 /// App bar for the pushed Settings route: a quiet bar with just the back
@@ -15,6 +15,7 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     return PreferredSize(
       preferredSize: const Size.fromHeight(AppLayout.sp10),
@@ -35,7 +36,7 @@ class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
               radius: AppLayout.radiusFull,
               child: IconButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                tooltip: S.back,
+                tooltip: l10n.back,
                 icon: const Icon(Icons.arrow_back_rounded),
               ),
             ),
