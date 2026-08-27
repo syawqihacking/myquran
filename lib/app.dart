@@ -17,8 +17,19 @@ import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/prayer/prayer_screen.dart';
 import 'features/profile/profile_screen.dart';
+import 'features/splash/splash_screen.dart';
 import 'features/stats/stats_screen.dart';
 import 'features/widgets/liquid_glass.dart';
+
+class SplashScreenActiveNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+  void deactivate() => state = false;
+}
+
+final splashScreenActiveProvider =
+    NotifierProvider<SplashScreenActiveNotifier, bool>(
+        SplashScreenActiveNotifier.new);
 
 /// Provides ultra-smooth scrolling physics, overscroll bouncing, and mouse/touch drag support.
 class AppScrollBehavior extends MaterialScrollBehavior {
@@ -70,9 +81,14 @@ class MyQuranApp extends ConsumerWidget {
         // First launch shows onboarding; completing/skipping it flips
         // [onboardingDoneProvider] and this swaps to the app shell. On every
         // later launch the flag is already set, so onboarding never reappears.
-        home: ref.watch(onboardingDoneProvider)
-            ? const AppShell()
-            : const OnboardingScreen(),
+        home: AnimatedSwitcher(
+          duration: AppLayout.durBase,
+          child: ref.watch(splashScreenActiveProvider)
+              ? const SplashScreen(key: ValueKey('splash'))
+              : (ref.watch(onboardingDoneProvider)
+                  ? const AppShell(key: ValueKey('shell'))
+                  : const OnboardingScreen(key: ValueKey('onboarding'))),
+        ),
       ),
     );
   }

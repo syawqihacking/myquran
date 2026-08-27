@@ -735,6 +735,7 @@ class HeroTopInfoState extends ConsumerState<HeroTopInfo> {
             ),
           ],
         ),
+        const SizedBox(width: AppLayout.sp2),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -742,9 +743,12 @@ class HeroTopInfoState extends ConsumerState<HeroTopInfo> {
               Text(
                 hijriText,
                 textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: scheme.onPrimary,
                   fontWeight: FontWeight.w600,
+                  fontSize: 10,
                 ),
               ),
               const SizedBox(height: 2),
@@ -764,13 +768,17 @@ class HeroTopInfoState extends ConsumerState<HeroTopInfo> {
                         color: scheme.onPrimary.withValues(alpha: 0.8),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${next.label} ${_formatCountdown(_countdown)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onPrimary.withValues(alpha: 0.9),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                      Flexible(
+                        child: Text(
+                          '${next.label} ${_formatCountdown(_countdown)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onPrimary.withValues(alpha: 0.9),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
                     ],

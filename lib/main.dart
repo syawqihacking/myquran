@@ -75,7 +75,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize liquid glass widgets & warm up shaders
-  await LiquidGlassWidgets.initialize();
+  await LiquidGlassWidgets.initialize(enablePerformanceMonitor: false);
   ensureNavBubbleShader();
 
   _registerHijriLocale();

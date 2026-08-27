@@ -86,7 +86,7 @@ class QuickActionsBento extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: AppLayout.sp3,
                   crossAxisSpacing: AppLayout.sp2,
-                  childAspectRatio: 0.82,
+                  childAspectRatio: 0.68,
                   children: [
                     QuickActionTile(
                       icon: Icons.category_rounded,

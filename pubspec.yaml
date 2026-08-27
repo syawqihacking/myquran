@@ -97,6 +97,7 @@ flutter:
     - assets/shaders/nav_bubble.frag
 
   assets:
+    - assets/images/
     - assets/db/quran.db.gz
     - assets/wudu'/
     - assets/doa_bada_sholat/

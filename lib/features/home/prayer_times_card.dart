@@ -73,7 +73,7 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
             SizedBox(
               // Tall enough for the active card's three lines (label, time,
               // countdown) to fit without overflowing vertically.
-              height: 100,
+              height: 116,
               child: ScrollConfiguration(
                 // Match the design: no visible scrollbar on the strip.
                 behavior:
@@ -122,7 +122,7 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
         const _SectionHeader(locationName: ''),
         const SizedBox(height: AppLayout.sp3),
         SizedBox(
-          height: 100,
+          height: 116,
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLow,

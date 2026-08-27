@@ -229,25 +229,22 @@ class _BottomBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: completed
-            ? Row(
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: LiquidGlassButton.tonal(
-                      onPressed: onMarkUndone,
-                      label: l10n.learningMarkUndone,
-                      height: 48,
-                    ),
+                  LiquidGlassButton.filled(
+                    onPressed: isLast ? onBackToCourse : onNext,
+                    label: isLast
+                        ? l10n.learningBackToCourse
+                        : l10n.learningNextLesson,
+                    height: 48,
                   ),
-                  const SizedBox(width: AppLayout.sp3),
-                  Expanded(
-                    flex: 2,
-                    child: LiquidGlassButton.filled(
-                      onPressed: isLast ? onBackToCourse : onNext,
-                      label: isLast
-                          ? l10n.learningBackToCourse
-                          : l10n.learningNextLesson,
-                      height: 48,
-                    ),
+                  const SizedBox(height: AppLayout.sp3),
+                  LiquidGlassButton.tonal(
+                    onPressed: onMarkUndone,
+                    label: l10n.learningMarkUndone,
+                    height: 48,
                   ),
                 ],
               )

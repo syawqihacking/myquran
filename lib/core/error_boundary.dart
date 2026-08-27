@@ -16,7 +16,9 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   @override
   void initState() {
     super.initState();
+    final originalOnError = FlutterError.onError;
     FlutterError.onError = (details) {
+      originalOnError?.call(details);
       if (mounted) {
         setState(() => _error = details);
       }
@@ -65,11 +67,20 @@ class _ErrorScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aplikasi mengalami error yang tidak terduga.',
+                  error.exceptionAsString(),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: theme.colorScheme.error,
                   ),
                   textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Stacktrace: ${error.stack.toString().split('\n').take(3).join('\n')}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: 24),
                 FilledButton.icon(
