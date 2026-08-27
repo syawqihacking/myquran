@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -97,7 +98,8 @@ class AdzanTaskHandler extends TaskHandler {
           return;
         }
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('AdzanForegroundHandler._handleEvent: error processing event — $e');
       // Ignore: never crash the isolate on bad data or playback failure.
     }
   }
@@ -107,7 +109,8 @@ class AdzanTaskHandler extends TaskHandler {
       final player = _player ??= AudioPlayer();
       await player.setFilePath(path);
       await player.play();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('AdzanForegroundHandler._playAdzan: playback failed for $path — $e');
       // Ignore: a playback failure must not crash the isolate.
     }
   }

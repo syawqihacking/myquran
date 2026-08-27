@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -205,7 +206,8 @@ class MosqueService {
         for (final e in list)
           if (e is Map<String, dynamic>) Mosque.fromCacheJson(e),
       ];
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MosqueService._fromCache: failed to decode cached mosques JSON — $e');
       return null;
     }
   }

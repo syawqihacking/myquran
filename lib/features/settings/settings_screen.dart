@@ -9,6 +9,9 @@ import '../../data/db/user_database.dart';
 import '../../data/models/adzan_voice.dart';
 import '../../data/providers.dart';
 import '../widgets/liquid_glass.dart';
+import 'adzan_voice_widgets.dart';
+import 'settings_app_bar.dart';
+import 'settings_widgets.dart';
 
 /// Settings (design §21).
 class SettingsScreen extends ConsumerWidget {
@@ -29,7 +32,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      appBar: _SettingsAppBar(),
+      appBar: const SettingsAppBar(),
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: isMobile ? AppLayout.sp4 : AppLayout.sp6,
@@ -52,10 +55,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppLayout.sp6),
-          _Section(
+          Section(
             title: S.appearanceSection,
             children: [
-              _SettingRow(
+              SettingRow(
                 icon: Icons.brightness_6_rounded,
                 title: S.themeModeLabel,
                 subtitle: S.themeModeSublabel,
@@ -105,8 +108,8 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.format_size_rounded,
                 title: S.quranFontSizeLabel,
                 subtitle: S.quranFontSizeSublabel,
@@ -131,8 +134,8 @@ class SettingsScreen extends ConsumerWidget {
                   onChanged: (v) => controller.setFontStep(v.round()),
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.translate_rounded,
                 title: S.showTranslationLabel,
                 trailing: GlassSwitch(
@@ -141,8 +144,8 @@ class SettingsScreen extends ConsumerWidget {
                   useOwnLayer: true,
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.format_align_right_rounded,
                 title: S.alignLabel,
                 subtitle: S.alignNote,
@@ -174,10 +177,10 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          _Section(
+          Section(
             title: S.readingSection,
             children: [
-              _SettingRow(
+              SettingRow(
                 icon: Icons.menu_book_rounded,
                 title: S.tafsirDefaultLabel,
                 trailing: GlassSwitch(
@@ -186,8 +189,8 @@ class SettingsScreen extends ConsumerWidget {
                   useOwnLayer: true,
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.palette_rounded,
                 title: S.tajwidColorLabel,
                 subtitle: S.tajwidColorSublabel,
@@ -197,8 +200,8 @@ class SettingsScreen extends ConsumerWidget {
                   useOwnLayer: true,
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.history_rounded,
                 title: S.restoreLastReadLabel,
                 trailing: GlassSwitch(
@@ -207,8 +210,8 @@ class SettingsScreen extends ConsumerWidget {
                   useOwnLayer: true,
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.record_voice_over_rounded,
                 title: S.reciterLabel,
                 subtitle: _reciterName(ref),
@@ -225,10 +228,10 @@ class SettingsScreen extends ConsumerWidget {
           // hidden on desktop where scheduling is not supported.
           if (defaultTargetPlatform == TargetPlatform.android ||
               defaultTargetPlatform == TargetPlatform.iOS) ...[
-            _Section(
+            Section(
               title: S.notificationsSection,
               children: [
-                _SettingRow(
+                SettingRow(
                   icon: Icons.notifications_active_rounded,
                   title: S.prayerNotificationsLabel,
                   subtitle: S.prayerNotificationsSublabel,
@@ -247,8 +250,8 @@ class SettingsScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-                const _DividerRow(),
-                _SettingRow(
+                const DividerRow(),
+                SettingRow(
                   icon: Icons.self_improvement_rounded,
                   title: S.dzikirReminderLabel,
                   subtitle: S.dzikirReminderSublabel,
@@ -267,8 +270,8 @@ class SettingsScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-                const _DividerRow(),
-                _SettingRow(
+                const DividerRow(),
+                SettingRow(
                   icon: Icons.event_rounded,
                   title: S.hijriEventReminderLabel,
                   subtitle: S.hijriEventReminderSublabel,
@@ -287,8 +290,8 @@ class SettingsScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-                const _DividerRow(),
-                _SettingRow(
+                const DividerRow(),
+                SettingRow(
                   icon: Icons.notifications_rounded,
                   title: S.prayerNotificationsTest,
                   subtitle: S.prayerNotificationsTestSublabel,
@@ -367,7 +370,7 @@ class SettingsScreen extends ConsumerWidget {
               child: _buildAdzanVoiceCard(context, ref),
             ),
           ],
-          _Section(
+          Section(
             title: S.dataSection,
             children: [
               Padding(
@@ -396,51 +399,51 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const _DividerRow(),
-              _SettingRow(
+              const DividerRow(),
+              SettingRow(
                 icon: Icons.storage_rounded,
                 title: S.dataVersionLabel,
-                trailing: _ValueChip(
+                trailing: ValueChip(
                   text: 'v${AppConstants.quranDbSchemaVersion}',
                 ),
               ),
-              const _DividerRow(),
-              const _SettingRow(
+              const DividerRow(),
+              const SettingRow(
                 icon: Icons.balance_rounded,
                 title: S.licenseLabel,
-                trailing: _ValueChip(text: 'CC BY-SA 4.0'),
+                trailing: ValueChip(text: 'CC BY-SA 4.0'),
               ),
             ],
           ),
-          _Section(
+          Section(
             title: S.shortcutsSection,
             children: const [
-              _ShortcutRow(
+              ShortcutRow(
                 icon: Icons.search_rounded,
                 label: S.shortcutSearch,
                 keys: ['Ctrl', 'K'],
               ),
-              _ShortcutRow(
+              ShortcutRow(
                 icon: Icons.zoom_in_rounded,
                 label: S.shortcutZoomIn,
                 keys: ['Ctrl', '+'],
               ),
-              _ShortcutRow(
+              ShortcutRow(
                 icon: Icons.zoom_out_rounded,
                 label: S.shortcutZoomOut,
                 keys: ['Ctrl', '−'],
               ),
-              _ShortcutRow(
+              ShortcutRow(
                 icon: Icons.close_rounded,
                 label: S.shortcutClose,
                 keys: ['Esc'],
               ),
             ],
           ),
-          _Section(
+          Section(
             title: S.resetDataSection,
             children: [
-              _SettingRow(
+              SettingRow(
                 icon: Icons.delete_forever_rounded,
                 title: S.resetDataLabel,
                 subtitle: S.resetDataSublabel,
@@ -638,7 +641,8 @@ class SettingsScreen extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(S.adzanVoiceChanged)));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('SettingsScreen._selectAdzanVoice: voice download/selection failed — $e');
       if (!context.mounted) return;
       Navigator.of(context).pop(); // close the progress dialog
       ScaffoldMessenger.of(
@@ -689,7 +693,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildAdzanVoiceCard(BuildContext context, WidgetRef ref) {
     final regularVoice = adzanVoiceById(ref.watch(selectedAdzanVoiceProvider));
     final fajrVoice = adzanVoiceById(ref.watch(selectedFajrAdzanVoiceProvider));
-    return _AdzanVoiceCard(
+    return AdzanVoiceCard(
       regularVoiceName: regularVoice.name,
       fajrVoiceName: fajrVoice.name,
       onRegularTap: () => _pickAdzanVoice(context, ref, AdzanCategory.regular),
@@ -718,7 +722,8 @@ class SettingsScreen extends ConsumerWidget {
     final List<Reciter> reciters;
     try {
       reciters = await ref.read(recitersProvider.future);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('SettingsScreen._pickReciter: failed to load reciters — $e');
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -790,457 +795,5 @@ class SettingsScreen extends ConsumerWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(S.reciterChanged)));
-  }
-}
-
-/// App bar for the pushed Settings route: a quiet bar with just the back
-/// button. The page title lives in the body header (eyebrow + display title
-/// + caption), so it is not repeated here.
-class _SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _SettingsAppBar();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(AppLayout.sp10);
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(AppLayout.sp10),
-      child: Container(
-        height: AppLayout.sp10,
-        padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
-        decoration: BoxDecoration(
-          color: scheme.surface.withValues(alpha: 0.9),
-          border: Border(
-            bottom: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: 0.4),
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            GlassTouchButton(
-              radius: AppLayout.radiusFull,
-              child: IconButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                tooltip: S.back,
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
-
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title.toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.tertiary,
-          ),
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        Container(
-          margin: const EdgeInsets.only(bottom: AppLayout.sp6),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(alpha: 0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(children: children),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingRow extends StatefulWidget {
-  const _SettingRow({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    this.bottom,
-    this.destructive = false,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final Widget? bottom;
-  final bool destructive;
-  final VoidCallback? onTap;
-
-  @override
-  State<_SettingRow> createState() => _SettingRowState();
-}
-
-class _SettingRowState extends State<_SettingRow> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    final isDestructive = widget.destructive;
-    final iconBg = isDestructive
-        ? scheme.errorContainer.withValues(alpha: 0.5)
-        : scheme.primaryContainer.withValues(alpha: 0.3);
-    final iconColor = isDestructive ? scheme.error : scheme.primary;
-
-    final content = AnimatedContainer(
-      duration: AppLayout.durBase,
-      color: _hovered && widget.onTap != null
-          ? scheme.surfaceContainerHigh.withValues(alpha: 0.5)
-          : Colors.transparent,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp4,
-        vertical: AppLayout.sp4,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-            ),
-            child: Icon(widget.icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(width: AppLayout.sp4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isDestructive ? scheme.error : null,
-                  ),
-                ),
-                if (widget.subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    widget.subtitle!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                if (widget.bottom != null) ...[
-                  const SizedBox(height: AppLayout.sp3),
-                  widget.bottom!,
-                ],
-              ],
-            ),
-          ),
-          if (widget.trailing != null) ...[
-            const SizedBox(width: AppLayout.sp3),
-            widget.trailing!,
-          ],
-        ],
-      ),
-    );
-
-    if (widget.onTap == null) return content;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: widget.onTap,
-        onHover: (v) => setState(() => _hovered = v),
-        child: content,
-      ),
-    );
-  }
-}
-
-/// A grouped card for choosing the adzan voices: a small header plus one
-/// tappable row per category (regular prayers vs fajr), each showing the
-/// currently selected voice.
-class _AdzanVoiceCard extends StatelessWidget {
-  const _AdzanVoiceCard({
-    required this.regularVoiceName,
-    required this.fajrVoiceName,
-    required this.onRegularTap,
-    required this.onFajrTap,
-  });
-
-  final String regularVoiceName;
-  final String fajrVoiceName;
-  final VoidCallback onRegularTap;
-  final VoidCallback onFajrTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return GlassTouchButton(
-      radius: AppLayout.radiusLg,
-      style: glassChromeStyle(context, cornerRadius: AppLayout.radiusLg),
-      child: Material(
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppLayout.sp4,
-                AppLayout.sp3,
-                AppLayout.sp4,
-                AppLayout.sp2,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.campaign_rounded,
-                    size: 18,
-                    color: scheme.tertiary,
-                  ),
-                  const SizedBox(width: AppLayout.sp2),
-                  Text(
-                    S.adzanVoiceLabel,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              height: 1,
-              indent: AppLayout.sp4,
-              endIndent: AppLayout.sp4,
-              color: scheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-            _AdzanVoiceOption(
-              icon: Icons.volume_up_rounded,
-              iconBackground: scheme.secondaryContainer,
-              iconColor: scheme.onSecondaryContainer,
-              title: S.adzanVoiceSholatLabel,
-              voiceName: regularVoiceName,
-              onTap: onRegularTap,
-            ),
-            Divider(
-              height: 1,
-              indent: AppLayout.sp4 + 40 + AppLayout.sp3,
-              endIndent: AppLayout.sp4,
-              color: scheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-            _AdzanVoiceOption(
-              icon: Icons.wb_twilight_rounded,
-              iconBackground: scheme.tertiaryContainer,
-              iconColor: scheme.onTertiaryContainer,
-              title: S.adzanVoiceFajrLabel,
-              voiceName: fajrVoiceName,
-              onTap: onFajrTap,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A tappable row inside [_AdzanVoiceCard]: a tinted category icon, the
-/// category title, the current voice name, and a chevron.
-class _AdzanVoiceOption extends StatelessWidget {
-  const _AdzanVoiceOption({
-    required this.icon,
-    required this.iconBackground,
-    required this.iconColor,
-    required this.title,
-    required this.voiceName,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconBackground;
-  final Color iconColor;
-  final String title;
-  final String voiceName;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppLayout.sp4,
-          vertical: AppLayout.sp3,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(AppLayout.radiusMd),
-              ),
-              child: Icon(icon, size: 22, color: iconColor),
-            ),
-            const SizedBox(width: AppLayout.sp3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(
-                    voiceName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppLayout.sp3),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: scheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ShortcutRow extends StatelessWidget {
-  const _ShortcutRow({
-    required this.icon,
-    required this.label,
-    required this.keys,
-  });
-
-  final IconData icon;
-  final String label;
-  final List<String> keys;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp4,
-        vertical: AppLayout.sp3,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: theme.colorScheme.primary),
-          const SizedBox(width: AppLayout.sp3),
-          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
-          for (final k in keys) ...[
-            Container(
-              margin: const EdgeInsets.only(left: AppLayout.sp1),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppLayout.sp2,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-              ),
-              child: Text(
-                k,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// A small pill showing a status value (e.g. data version, license) on the
-/// trailing side of a [_SettingRow].
-class _ValueChip extends StatelessWidget {
-  const _ValueChip({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppLayout.sp2,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(AppLayout.radiusFull),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.labelMedium?.copyWith(
-          color: scheme.onSurfaceVariant,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      ),
-    );
-  }
-}
-
-class _DividerRow extends StatelessWidget {
-  const _DividerRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      indent: AppLayout.sp4 + 20 + AppLayout.sp3,
-      endIndent: AppLayout.sp4,
-      color: Theme.of(context).colorScheme.outlineVariant,
-    );
   }
 }

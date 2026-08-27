@@ -83,7 +83,8 @@ class _MosqueScreenState extends ConsumerState<MosqueScreen> {
     try {
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!ok) throw Exception('launchUrl returned false');
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MosqueScreen._openRoute: failed to launch directions URI — $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()

@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -129,7 +130,8 @@ class JustAudioService implements AudioService {
         await _player.play();
         _emit();
         return;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('JustAudioService.playAyahFrom: local file load failed for $local — $e');
         // Fall through to streaming if the local file fails to load.
       }
     }
@@ -150,7 +152,8 @@ class JustAudioService implements AudioService {
         await _player.play();
         _emit();
         return;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('JustAudioService.playAyahFrom: streaming failed for template $template — $e');
         // Try the next template (the qurancdn fallback), then give up.
       }
     }
@@ -219,7 +222,8 @@ class JustAudioService implements AudioService {
         await _player.play();
         _emit();
         return;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('JustAudioService.playSurahFrom: playlist load failed for template $template — $e');
         // Try the next fallback template if available.
       }
     }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -92,7 +93,8 @@ class QuranDatabase extends _$QuranDatabase {
       final buf = raf.readSync(4);
       if (buf.length < 4) return 0;
       return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
-    } catch (_) {
+    } catch (e) {
+      debugPrint('QuranDatabase._readUserVersion: failed to read header — $e');
       return 0;
     } finally {
       raf.closeSync();

@@ -71,7 +71,8 @@ class NotificationService {
     try {
       final info = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(info.identifier));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('NotificationService._ensureInitialized: timezone lookup failed — $e');
       // Fall back to WIB if the timezone lookup fails.
       tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
     }
@@ -132,7 +133,8 @@ class NotificationService {
       final uri = await channel
           .invokeMethod<String>('getUriForFile', {'path': path});
       return uri;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('NotificationService._contentUriForFile: failed to resolve URI for $path — $e');
       return null;
     }
   }
@@ -158,7 +160,8 @@ class NotificationService {
               : UriAndroidNotificationSound(soundUri),
         ),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('NotificationService._createChannel: failed to create channel for voice $voiceId — $e');
       // Ignore: the notification still shows with the default sound.
     }
   }
@@ -180,7 +183,8 @@ class NotificationService {
           playSound: false,
         ),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('NotificationService._createSilentChannel: failed to create silent channel for voice $voiceId — $e');
       // Ignore: the notification still shows.
     }
   }

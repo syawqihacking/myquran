@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'audio_service.dart';
@@ -65,7 +66,8 @@ class RatibAudioService {
         await _player.play();
         _emit();
         return;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('RatibAudioService: failed to load $url — $e');
         // Try the fallback URL, then give up.
       }
     }

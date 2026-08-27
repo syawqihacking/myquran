@@ -13,6 +13,7 @@ import 'dart:io';
 
 import 'app.dart';
 import 'core/app_constants.dart';
+import 'core/error_boundary.dart';
 import 'data/providers.dart';
 import 'features/widgets/nav_glass_bubble.dart';
 
@@ -124,6 +125,8 @@ Future<void> main() async {
   }
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  setupErrorBoundary();
 
   final prefs = await SharedPreferences.getInstance();
   final container = ProviderContainer(overrides: [

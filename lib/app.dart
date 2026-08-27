@@ -8,6 +8,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'core/app_constants.dart';
 import 'core/app_layout.dart';
 import 'core/app_strings.dart';
+import 'core/error_boundary.dart';
 import 'core/quran_theme.dart';
 import 'data/providers.dart';
 import 'features/bookmarks/bookmarks_screen.dart';
@@ -55,19 +56,21 @@ class MyQuranApp extends ConsumerWidget {
     ref.watch(dzikirReminderSyncProvider);
     // Keep the hijri event reminders in sync for the whole session.
     ref.watch(hijriEventReminderSyncProvider);
-    return MaterialApp(
-      title: S.appName,
-      debugShowCheckedModeBanner: false,
-      scrollBehavior: const AppScrollBehavior(),
-      theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
-      darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
-      themeMode: settings.themeMode,
-      // First launch shows onboarding; completing/skipping it flips
-      // [onboardingDoneProvider] and this swaps to the app shell. On every
-      // later launch the flag is already set, so onboarding never reappears.
-      home: ref.watch(onboardingDoneProvider)
-          ? const AppShell()
-          : const OnboardingScreen(),
+    return ErrorBoundary(
+      child: MaterialApp(
+        title: S.appName,
+        debugShowCheckedModeBanner: false,
+        scrollBehavior: const AppScrollBehavior(),
+        theme: buildAppTheme(Brightness.light, paper: settings.paperTheme),
+        darkTheme: buildAppTheme(Brightness.dark, paper: settings.paperTheme),
+        themeMode: settings.themeMode,
+        // First launch shows onboarding; completing/skipping it flips
+        // [onboardingDoneProvider] and this swaps to the app shell. On every
+        // later launch the flag is already set, so onboarding never reappears.
+        home: ref.watch(onboardingDoneProvider)
+            ? const AppShell()
+            : const OnboardingScreen(),
+      ),
     );
   }
 }
