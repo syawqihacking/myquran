@@ -62,11 +62,13 @@ class MyQuranApp extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     // Keep prayer notifications in sync with the toggle + schedule for the
     // whole session (the service skips redundant rescheduling).
-    ref.watch(prayerNotificationSyncProvider);
+    ref.listen(prayerNotificationSyncProvider, (_, __) {});
     // Keep the dzikir reminders in sync with their toggle for the whole session.
-    ref.watch(dzikirReminderSyncProvider);
+    ref.listen(dzikirReminderSyncProvider, (_, __) {});
     // Keep the hijri event reminders in sync for the whole session.
-    ref.watch(hijriEventReminderSyncProvider);
+    ref.listen(hijriEventReminderSyncProvider, (_, __) {});
+    // Keep the fasting reminders in sync for the whole session.
+    ref.listen(fastingReminderSyncProvider, (_, __) {});
     return ErrorBoundary(
       child: MaterialApp(
         title: 'MyQuran',

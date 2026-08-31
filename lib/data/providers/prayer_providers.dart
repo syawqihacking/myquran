@@ -287,3 +287,40 @@ final hijriEventReminderSyncProvider = Provider<void>((ref) {
     service.cancelHijriEvents();
   }
 });
+
+/// Whether the Fasting reminder notifications are enabled (persisted).
+final fastingReminderEnabledProvider =
+    NotifierProvider<FastingReminderController, bool>(
+        FastingReminderController.new);
+
+class FastingReminderController extends Notifier<bool> {
+  static const _key = 'fasting_reminder_enabled';
+
+  @override
+  bool build() {
+    return ref.watch(sharedPreferencesProvider).getBool(_key) ?? false;
+  }
+
+  /// Enables/disables the Fasting reminders.
+  Future<bool> setEnabled(bool enabled) async {
+    if (enabled) {
+      final ok =
+          await ref.read(prayerNotificationsProvider).requestPermissions();
+      if (!ok) return false;
+    }
+    state = enabled;
+    await ref.read(sharedPreferencesProvider).setBool(_key, enabled);
+    return true;
+  }
+}
+
+/// Keeps the Fasting reminder notifications in sync with the toggle.
+final fastingReminderSyncProvider = Provider<void>((ref) {
+  final enabled = ref.watch(fastingReminderEnabledProvider);
+  final service = ref.watch(prayerNotificationsProvider);
+  if (enabled) {
+    service.scheduleFastingReminders();
+  } else {
+    service.cancelFastingReminders();
+  }
+});

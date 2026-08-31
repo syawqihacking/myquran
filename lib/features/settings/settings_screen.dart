@@ -293,70 +293,125 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const DividerRow(),
                 SettingRow(
+                  icon: Icons.fastfood_rounded,
+                  title: 'Pengingat Puasa Sunnah',
+                  subtitle: 'Notifikasi jadwal puasa Senin-Kamis, Ayyamul Bidh, dll',
+                  trailing: GlassSwitch(
+                    value: ref.watch(fastingReminderEnabledProvider),
+                    useOwnLayer: true,
+                    onChanged: (v) async {
+                      final ok = await ref
+                          .read(fastingReminderEnabledProvider.notifier)
+                          .setEnabled(v);
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Izin notifikasi ditolak. Aktifkan di pengaturan sistem.')),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const DividerRow(),
+                SettingRow(
                   icon: Icons.notifications_rounded,
                   title: l10n.prayerNotificationsTest,
                   subtitle: l10n.prayerNotificationsTestSublabel,
                   bottom: Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Wrap(
-                      spacing: AppLayout.sp2,
-                      runSpacing: AppLayout.sp2,
+                    child: Column(
                       children: [
-                        GlassChip(
-                          useOwnLayer: true,
-                          icon: Icon(
-                            Icons.volume_up_rounded,
-                            size: 18,
-                            color: activeGreen,
-                          ),
-                          label: l10n.adzanTestSholat,
-                          labelStyle: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          onTap: () => _sendTestNotification(
-                            context,
-                            ref,
-                            ref.read(selectedAdzanVoiceProvider),
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GlassChip(
+                                useOwnLayer: true,
+                                icon: Icon(
+                                  Icons.volume_up_rounded,
+                                  size: 18,
+                                  color: activeGreen,
+                                ),
+                                label: l10n.adzanTestSholat,
+                                labelStyle: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                onTap: () => _sendTestNotification(
+                                  context,
+                                  ref,
+                                  ref.read(selectedAdzanVoiceProvider),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppLayout.sp2),
+                            Expanded(
+                              child: GlassChip(
+                                useOwnLayer: true,
+                                icon: Icon(
+                                  Icons.wb_twilight_rounded,
+                                  size: 18,
+                                  color: activeGreen,
+                                ),
+                                label: l10n.adzanTestFajr,
+                                labelStyle: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                onTap: () => _sendTestNotification(
+                                  context,
+                                  ref,
+                                  ref.read(selectedFajrAdzanVoiceProvider),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        GlassChip(
-                          useOwnLayer: true,
-                          icon: Icon(
-                            Icons.wb_twilight_rounded,
-                            size: 18,
-                            color: activeGreen,
-                          ),
-                          label: l10n.adzanTestFajr,
-                          labelStyle: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          onTap: () => _sendTestNotification(
-                            context,
-                            ref,
-                            ref.read(selectedFajrAdzanVoiceProvider),
-                          ),
-                        ),
-                        GlassChip(
-                          useOwnLayer: true,
-                          icon: Icon(
-                            Icons.event_rounded,
-                            size: 18,
-                            color: activeGreen,
-                          ),
-                          label: l10n.testHijriEvent,
-                          labelStyle: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          onTap: () => _sendHijriTestNotification(
-                            context,
-                            ref,
-                          ),
+                        const SizedBox(height: AppLayout.sp2),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GlassChip(
+                                useOwnLayer: true,
+                                icon: Icon(
+                                  Icons.event_rounded,
+                                  size: 18,
+                                  color: activeGreen,
+                                ),
+                                label: 'Test Hijriah',
+                                labelStyle: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                onTap: () => _sendHijriTestNotification(
+                                  context,
+                                  ref,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppLayout.sp2),
+                            Expanded(
+                              child: GlassChip(
+                                useOwnLayer: true,
+                                icon: Icon(
+                                  Icons.fastfood_rounded,
+                                  size: 18,
+                                  color: activeGreen,
+                                ),
+                                label: 'Test Puasa',
+                                labelStyle: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                onTap: () => _sendFastingTestNotification(
+                                  context,
+                                  ref,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -690,6 +745,27 @@ class SettingsScreen extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.prayerNotificationsTestSent)));
+    }
+  }
+
+  /// Sends a test notification for Fasting Reminders, then confirms.
+  Future<void> _sendFastingTestNotification(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final ok = await ref.read(prayerNotificationsProvider).requestPermissions();
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Izin notifikasi ditolak. Aktifkan di pengaturan sistem.')),
+      );
+      return;
+    }
+
+    await ref.read(prayerNotificationsProvider).showFastingTestNotification();
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Notifikasi uji coba dikirim')));
     }
   }
 

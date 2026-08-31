@@ -214,49 +214,51 @@ class QuickActionsBento extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: QuickActionTile(
-            icon: Icons.explore_rounded,
-            label: l10n.qaKiblat,
-            onTap: onOpenPrayer,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: QuickActionTile(
+              icon: Icons.explore_rounded,
+              label: l10n.qaKiblat,
+              onTap: onOpenPrayer,
+            ),
           ),
-        ),
-        const SizedBox(width: AppLayout.sp2),
-        Expanded(
-          child: QuickActionTile(
-            icon: Icons.volunteer_activism_rounded,
-            label: l10n.qaDoaHarian,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const DoaHarianScreen(),
+          const SizedBox(width: AppLayout.sp2),
+          Expanded(
+            child: QuickActionTile(
+              icon: Icons.volunteer_activism_rounded,
+              label: l10n.qaDoaHarian,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DoaHarianScreen(),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: AppLayout.sp2),
-        Expanded(
-          child: QuickActionTile(
-            icon: Icons.fingerprint_rounded,
-            label: 'Tasbih Digital',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const TasbihDigitalScreen(),
+          const SizedBox(width: AppLayout.sp2),
+          Expanded(
+            child: QuickActionTile(
+              icon: Icons.fingerprint_rounded,
+              label: 'Tasbih Digital',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const TasbihDigitalScreen(),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: AppLayout.sp2),
-        Expanded(
-          child: QuickActionTile(
-            icon: Icons.grid_view_rounded,
-            label: 'Lainnya',
-            onTap: () => _showMoreFeatures(context),
+          const SizedBox(width: AppLayout.sp2),
+          Expanded(
+            child: QuickActionTile(
+              icon: Icons.grid_view_rounded,
+              label: 'Lainnya',
+              onTap: () => _showMoreFeatures(context),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

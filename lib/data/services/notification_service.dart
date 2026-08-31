@@ -13,6 +13,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'package:hijri/hijri_calendar.dart';
 
+import '../../core/utils/fasting_logic.dart';
 import '../../features/hijri/hijri_event.dart';
 import '../models/adzan_voice.dart';
 import 'adzan_foreground_handler.dart';
@@ -481,6 +482,95 @@ class NotificationService {
     for (int i = 2000; i < 2200; i++) {
       await _plugin.cancel(id: i);
     }
+  }
+
+  /// Schedules fasting reminder notifications for the next 30 days.
+  /// Checks each day; if it's a fasting day, schedules a reminder at 19:00
+  /// on the day BEFORE. IDs start from 3000.
+  Future<void> scheduleFastingReminders() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+
+    final android = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    _exactAllowed = await android?.requestExactAlarmsPermission() ?? false;
+
+    final now = tz.TZDateTime.now(tz.local);
+    int notificationId = 3000;
+
+    // Check the next 30 days
+    for (int i = 0; i < 30; i++) {
+      final targetDate = now.add(Duration(days: i));
+      final fastingInfo = FastingLogic.getFastingFor(targetDate);
+      
+      if (fastingInfo != null) {
+        // Schedule for the day before at 19:00
+        final scheduleDate = targetDate.subtract(const Duration(days: 1));
+        final scheduled = tz.TZDateTime(
+          tz.local,
+          scheduleDate.year,
+          scheduleDate.month,
+          scheduleDate.day,
+          19, // 19:00 (7 PM)
+          0,
+        );
+
+        if (scheduled.isAfter(now)) {
+          await _plugin.zonedSchedule(
+            id: notificationId,
+            title: 'Pengingat Puasa Sunnah',
+            body: 'Besok adalah jadwal ${fastingInfo.title}. Jangan lupa niat dan sahur.',
+            scheduledDate: scheduled,
+            notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                'fasting_reminders',
+                'Pengingat Puasa Sunnah',
+                channelDescription: 'Notifikasi puasa sunnah (Senin-Kamis, Ayyamul Bidh, dll)',
+                importance: Importance.high,
+                priority: Priority.high,
+              ),
+              iOS: DarwinNotificationDetails(),
+            ),
+            androidScheduleMode: _exactAllowed
+                ? AndroidScheduleMode.exactAllowWhileIdle
+                : AndroidScheduleMode.inexactAllowWhileIdle,
+          );
+        }
+        notificationId++;
+      }
+    }
+  }
+
+  /// Cancels all scheduled Fasting event notifications (IDs 3000 to 3050).
+  Future<void> cancelFastingReminders() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+    
+    for (int i = 3000; i < 3050; i++) {
+      await _plugin.cancel(id: i);
+    }
+  }
+
+  /// Shows an immediate test notification for Fasting Reminders.
+  Future<void> showFastingTestNotification() async {
+    await _ensureInitialized();
+    if (!_isMobile) return;
+
+    await _plugin.show(
+      id: 3999,
+      title: 'Pengingat Puasa Sunnah',
+      body: 'Ini adalah uji coba pengingat puasa. Notifikasi puasa sunnah aktif.',
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'fasting_reminders',
+          'Pengingat Puasa Sunnah',
+          channelDescription: 'Notifikasi puasa sunnah (Senin-Kamis, Ayyamul Bidh, dll)',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
   }
 
   /// Starts (or updates) the foreground service that plays the full adzan at

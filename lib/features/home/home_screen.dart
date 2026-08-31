@@ -5,6 +5,7 @@ import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
 import '../widgets/liquid_glass.dart';
 import 'daily_verse_card.dart';
+import 'fasting_reminder_card.dart';
 import 'feature_cards_row.dart';
 import 'hero_carousel.dart';
 import 'home_app_bar.dart';
@@ -64,6 +65,8 @@ class HomeScreen extends ConsumerWidget {
               const FeatureCardsRow(),
               const SizedBox(height: AppLayout.sp7),
               const PrayerTimesCard(),
+              const SizedBox(height: AppLayout.sp7),
+              const FastingReminderCard(),
               const SizedBox(height: AppLayout.sp7),
               const DailyVerseCard(),
               const SizedBox(height: AppLayout.sp7),
