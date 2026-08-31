@@ -101,6 +101,7 @@ flutter:
     - assets/db/quran.db.gz
     - assets/wudu'/
     - assets/doa_bada_sholat/
+    - assets/shalat/
 
   fonts:
     - family: AmiriQuran

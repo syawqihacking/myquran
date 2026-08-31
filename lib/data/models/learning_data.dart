@@ -165,6 +165,7 @@ const List<Course> learningCourses = [
     lessons: [
       Lesson(
         title: 'Takbiratul Ihram',
+        imageAsset: 'assets/shalat/takbiratul_ihram.jpg',
         content:
             'Angkat kedua tangan sejajar bahu atau telinga, lalu ucapkan '
             '"Allahu Akbar". Setelah takbir, kedua tangan dilipat di dada '
@@ -174,6 +175,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Berdiri & Membaca Al-Fatihah',
+        imageAsset: 'assets/shalat/berdiri_alfatihah.jpg',
         content:
             'Berdiri tegak bagi yang mampu, lalu membaca Al-Fatihah pada '
             'setiap rakaat. Membaca Al-Fatihah adalah rukun shalat.\n\n'
@@ -183,6 +185,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Ruku',
+        imageAsset: 'assets/shalat/ruku.jpg',
         content:
             'Membungkuk dengan punggung lurus, kedua tangan bertumpu di lutut, '
             'sambil membaca "Subhana Rabbiyal \'Azhim" (Maha Suci Tuhanku Yang '
@@ -192,6 +195,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'I\'tidal',
+        imageAsset: 'assets/shalat/itidal.jpg',
         content:
             'Bangkit dari ruku sambil mengucapkan "Sami\'allahu liman '
             'hamidah" (Semoga Allah mendengar orang yang memuji-Nya), lalu '
@@ -201,6 +205,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Sujud',
+        imageAsset: 'assets/shalat/sujud.jpg',
         content:
             'Sujud dengan tujuh anggota badan menyentuh tempat sujud: dahi, '
             'dua telapak tangan, dua lutut, dan dua ujung kaki. Bacaan: '
@@ -211,6 +216,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Duduk antara Dua Sujud',
+        imageAsset: 'assets/shalat/duduk_antara_sujud.jpg',
         content:
             'Duduk iftirasy — duduk di atas kaki kiri dengan kaki kanan tegak — '
             'sambil membaca "Rabbighfirli" (Wahai Tuhanku, ampunilah aku). '
@@ -220,6 +226,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Tasyahud Akhir',
+        imageAsset: 'assets/shalat/tasyahud_akhir.png',
         content:
             'Pada rakaat terakhir, duduk tawarruk — duduk dengan pantat di '
             'lantai dan kaki kiri di bawah kaki kanan — lalu membaca tasyahud '
@@ -229,6 +236,7 @@ const List<Course> learningCourses = [
       ),
       Lesson(
         title: 'Salam',
+        imageAsset: 'assets/shalat/Salam.png',
         content:
             'Menoleh ke kanan lalu ke kiri sambil mengucapkan "Assalamu\'alaikum '
             'warahmatullah" (Semoga keselamatan dan rahmat Allah atas kalian).\n\n'

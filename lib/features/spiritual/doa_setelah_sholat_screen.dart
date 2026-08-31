@@ -462,14 +462,14 @@ class _PrayerCardState extends State<_PrayerCard>
                       color: scheme.primaryContainer.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(AppLayout.radiusFull),
                     ),
-                    child: Text(
-                      '${info.items.length} doa & dzikir',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10,
-                      ),
-                    ),
+                    // child: Text(
+                    //   '${info.items.length} doa & dzikir',
+                    //   style: theme.textTheme.labelSmall?.copyWith(
+                    //     color: scheme.primary,
+                    //     fontWeight: FontWeight.w600,
+                    //     fontSize: 10,
+                    //   ),
+                    // ),
                   ),
                 ],
               ),

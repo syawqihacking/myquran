@@ -117,10 +117,15 @@ class LessonScreen extends ConsumerWidget {
                               width: double.infinity,
                               height: 220,
                               color: scheme.surfaceContainerLowest,
-                              child: SvgPicture.asset(
-                                lesson.imageAsset!,
-                                fit: BoxFit.contain,
-                              ),
+                              child: lesson.imageAsset!.endsWith('.svg')
+                                  ? SvgPicture.asset(
+                                      lesson.imageAsset!,
+                                      fit: BoxFit.contain,
+                                    )
+                                  : Image.asset(
+                                      lesson.imageAsset!,
+                                      fit: BoxFit.contain,
+                                    ),
                             ),
                           ),
                           const SizedBox(height: AppLayout.sp4),
