@@ -8,7 +8,7 @@ import '../spiritual/doa_setelah_sholat_screen.dart';
 /// Two side-by-side feature cards: Pusat Belajar (left) and Doa Setelah
 /// Sholat (right). Both use the app's primary/theme-consistent green palette.
 class FeatureCardsRow extends StatelessWidget {
-  const FeatureCardsRow();
+  const FeatureCardsRow({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class FeatureCardsRow extends StatelessWidget {
 
 /// Compact vertical tile for Pusat Belajar.
 class LearningTile extends StatefulWidget {
-  const LearningTile();
+  const LearningTile({super.key});
 
   @override
   State<LearningTile> createState() => LearningTileState();
@@ -125,7 +125,7 @@ class LearningTileState extends State<LearningTile> {
 
 /// Compact vertical tile for Doa Setelah Sholat.
 class DoaSetelahSholatTile extends StatefulWidget {
-  const DoaSetelahSholatTile();
+  const DoaSetelahSholatTile({super.key});
 
   @override
   State<DoaSetelahSholatTile> createState() => DoaSetelahSholatTileState();

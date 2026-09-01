@@ -37,21 +37,7 @@ class StatsScreen extends ConsumerWidget {
             : AppLayout.sp8,
       ),
       children: [
-        Text(
-          l10n.statsEyebrow,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.tertiary,
-          ),
-        ),
-        const SizedBox(height: AppLayout.sp2),
-        Text(l10n.statsTitle, style: theme.textTheme.displaySmall),
-        const SizedBox(height: AppLayout.sp2),
-        Text(
-          l10n.statsCaption,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
+        const _HeaderBanner(),
         const SizedBox(height: AppLayout.sp6),
         ...stats.when(
           loading: () => const [
@@ -88,6 +74,70 @@ class StatsScreen extends ConsumerWidget {
   }
 }
 
+/// Premium banner header for the Stats Screen.
+class _HeaderBanner extends StatelessWidget {
+  const _HeaderBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppLayout.sp2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.statsEyebrow.toUpperCase(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2.0,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp2),
+          Text(
+            l10n.statsTitle,
+            style: theme.textTheme.displayMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: scheme.onSurface,
+              height: 1.1,
+              letterSpacing: -1.0,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp3),
+          Container(
+            height: 6,
+            width: 80,
+            decoration: BoxDecoration(
+              color: scheme.primary,
+              borderRadius: BorderRadius.circular(3),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp5),
+          Text(
+            l10n.statsCaption,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.5,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Hero card: streak (hari beruntun) + ayat dibaca hari ini.
 /// Uses the continue-reading hero gradient (surfaceContainerLow →
 /// primaryContainer@40%, radius-lg) from the home screen.
@@ -104,44 +154,71 @@ class _StreakCard extends StatelessWidget {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        theme.colorScheme.surfaceContainerLow,
-        theme.colorScheme.primaryContainer.withValues(alpha: 0.40),
+        theme.colorScheme.primary,
+        theme.colorScheme.primary.withValues(alpha: 0.8),
       ],
     );
 
+    final textColor = theme.colorScheme.onPrimary;
+
     return Container(
-      padding: const EdgeInsets.all(AppLayout.sp6),
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _StatBlock(
-                icon: Icons.local_fire_department_rounded,
-                value: _formatCount(stats.streakDays),
-                label: l10n.statsStreakLabel,
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -20,
+            bottom: -20,
+            child: Icon(
+              Icons.local_fire_department_rounded,
+              size: 140,
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppLayout.sp6),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _StatBlock(
+                      icon: Icons.local_fire_department_rounded,
+                      value: _formatCount(stats.streakDays),
+                      label: l10n.statsStreakLabel,
+                      textColor: textColor,
+                    ),
+                  ),
+                  const SizedBox(width: AppLayout.sp5),
+                  VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: textColor.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(width: AppLayout.sp5),
+                  Expanded(
+                    child: _StatBlock(
+                      icon: Icons.auto_stories_rounded,
+                      value: _formatCount(stats.todayAyahs),
+                      label: l10n.statsTodayLabel,
+                      textColor: textColor,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: AppLayout.sp5),
-            VerticalDivider(
-              width: 1,
-              thickness: 1,
-              color: theme.colorScheme.outlineVariant,
-            ),
-            const SizedBox(width: AppLayout.sp5),
-            Expanded(
-              child: _StatBlock(
-                icon: Icons.auto_stories_rounded,
-                value: _formatCount(stats.todayAyahs),
-                label: l10n.statsTodayLabel,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -153,11 +230,13 @@ class _StatBlock extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
+    required this.textColor,
   });
 
   final IconData icon;
   final String value;
   final String label;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -165,11 +244,13 @@ class _StatBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: theme.colorScheme.primary),
+        Icon(icon, size: 24, color: textColor.withValues(alpha: 0.8)),
         const SizedBox(height: AppLayout.sp2),
         Text(
           value,
           style: theme.textTheme.displaySmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: textColor,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
@@ -177,7 +258,7 @@ class _StatBlock extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: textColor.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -208,7 +289,16 @@ class _KhatamCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,13 +316,24 @@ class _KhatamCard extends ConsumerWidget {
                     alignment: Alignment.center,
                     children: [
                       SizedBox.expand(
-                        child: CircularProgressIndicator(
-                          value: v,
-                          strokeWidth: 10,
-                          strokeCap: StrokeCap.round,
-                          backgroundColor:
-                              theme.colorScheme.surfaceContainerHighest,
-                          color: theme.colorScheme.primary,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                                blurRadius: 16,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: CircularProgressIndicator(
+                            value: v,
+                            strokeWidth: 10,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                       Column(
@@ -324,18 +425,24 @@ class _KhatamPlanner extends ConsumerWidget {
         spacing: AppLayout.sp3,
         runSpacing: AppLayout.sp2,
         children: [
-          LiquidGlassButton.tonal(
+          FilledButton.tonalIcon(
             onPressed: () => ref.read(khatamRepositoryProvider).setTarget(
                   targetDate: null,
                   startDate: DateTime.now(),
                 ),
             icon: const Icon(Icons.event_available_rounded, size: 18),
-            label: l10n.khatamPlan30,
+            label: Text(l10n.khatamPlan30),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
           ),
-          LiquidGlassButton.tonal(
+          FilledButton.tonalIcon(
             onPressed: () => _pickTargetDate(context, ref),
             icon: const Icon(Icons.calendar_month_rounded, size: 18),
-            label: l10n.khatamPickDate,
+            label: Text(l10n.khatamPickDate),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
           ),
         ],
       );
@@ -392,24 +499,21 @@ class _KhatamPlanner extends ConsumerWidget {
             ],
           ),
         ),
-        LiquidGlassCapsule(
-          onTap: () => _confirmClearTarget(context, ref),
-          backgroundColor: theme.colorScheme.error.withValues(alpha: 0.12),
-          glowColor: theme.colorScheme.error,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outline_rounded, size: 16, color: theme.colorScheme.error),
-              const SizedBox(width: 4),
-              Text(
-                l10n.khatamClear,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ],
+        FilledButton.tonalIcon(
+          onPressed: () => _confirmClearTarget(context, ref),
+          icon: Icon(Icons.delete_outline_rounded, size: 16, color: theme.colorScheme.error),
+          label: Text(
+            l10n.khatamClear,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.error,
+            ),
+          ),
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.colorScheme.error.withValues(alpha: 0.12),
+            foregroundColor: theme.colorScheme.error,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            minimumSize: Size.zero,
           ),
         ),
       ],
@@ -617,7 +721,7 @@ class _HeatCell extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(4),
+          shape: BoxShape.circle,
         ),
       ),
     );
@@ -636,7 +740,7 @@ class _LegendDot extends StatelessWidget {
       height: 12,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(3),
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -658,22 +762,27 @@ class _SummaryRow extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _SummaryTile(
-                value: _formatCount(stats.totalDays),
-                label: l10n.statsTotalDaysLabel,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _SummaryTile(
+                  value: _formatCount(stats.totalDays),
+                  label: l10n.statsTotalDaysLabel,
+                  icon: Icons.event_available_rounded,
+                ),
               ),
-            ),
-            const SizedBox(width: AppLayout.sp4),
-            Expanded(
-              child: _SummaryTile(
-                value: _formatCount(stats.totalAyahs),
-                label: l10n.statsTotalAyahsLabel,
+              const SizedBox(width: AppLayout.sp4),
+              Expanded(
+                child: _SummaryTile(
+                  value: _formatCount(stats.totalAyahs),
+                  label: l10n.statsTotalAyahsLabel,
+                  icon: Icons.menu_book_rounded,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: AppLayout.sp3),
         sujud.when(
@@ -706,34 +815,67 @@ class _SummaryRow extends ConsumerWidget {
 }
 
 class _SummaryTile extends StatelessWidget {
-  const _SummaryTile({required this.value, required this.label});
+  const _SummaryTile({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
 
   final String value;
   final String label;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
+
     return Container(
       padding: const EdgeInsets.all(AppLayout.sp5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
+        color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(AppLayout.sp2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppLayout.radiusSm),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp4),
           Text(
             value,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(height: AppLayout.sp1),
           Text(
             label,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: theme.textTheme.labelMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              height: 1.2,
             ),
           ),
         ],
@@ -786,8 +928,19 @@ class _PersonalityCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppLayout.sp5),
           decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-            border: Border.all(color: scheme.outlineVariant),
+            border: Border.all(
+              color: scheme.primary.withValues(alpha: 0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.05),
+                blurRadius: 16,
+                spreadRadius: -4,
+              ),
+            ],
           ),
           child: Row(
             children: [

@@ -139,10 +139,9 @@ class SettingsScreen extends ConsumerWidget {
               SettingRow(
                 icon: Icons.translate_rounded,
                 title: l10n.showTranslationLabel,
-                trailing: GlassSwitch(
+                trailing: Switch(
                   value: settings.showTranslation,
                   onChanged: controller.setShowTranslation,
-                  useOwnLayer: true,
                 ),
               ),
               const DividerRow(),
@@ -184,10 +183,9 @@ class SettingsScreen extends ConsumerWidget {
               SettingRow(
                 icon: Icons.menu_book_rounded,
                 title: l10n.tafsirDefaultLabel,
-                trailing: GlassSwitch(
+                trailing: Switch(
                   value: settings.tafsirOpenByDefault,
                   onChanged: controller.setTafsirOpenByDefault,
-                  useOwnLayer: true,
                 ),
               ),
               const DividerRow(),
@@ -195,20 +193,18 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.palette_rounded,
                 title: l10n.tajwidColorLabel,
                 subtitle: l10n.tajwidColorSublabel,
-                trailing: GlassSwitch(
+                trailing: Switch(
                   value: settings.tajwidColor,
                   onChanged: controller.setTajwidColor,
-                  useOwnLayer: true,
                 ),
               ),
               const DividerRow(),
               SettingRow(
                 icon: Icons.history_rounded,
                 title: l10n.restoreLastReadLabel,
-                trailing: GlassSwitch(
+                trailing: Switch(
                   value: settings.restoreLastRead,
                   onChanged: controller.setRestoreLastRead,
-                  useOwnLayer: true,
                 ),
               ),
               const DividerRow(),
@@ -236,9 +232,8 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.notifications_active_rounded,
                   title: l10n.prayerNotificationsLabel,
                   subtitle: l10n.prayerNotificationsSublabel,
-                  trailing: GlassSwitch(
+                  trailing: Switch(
                     value: ref.watch(prayerNotificationsEnabledProvider),
-                    useOwnLayer: true,
                     onChanged: (v) async {
                       final ok = await ref
                           .read(prayerNotificationsEnabledProvider.notifier)
@@ -256,9 +251,8 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.self_improvement_rounded,
                   title: l10n.dzikirReminderLabel,
                   subtitle: l10n.dzikirReminderSublabel,
-                  trailing: GlassSwitch(
+                  trailing: Switch(
                     value: ref.watch(dzikirReminderEnabledProvider),
-                    useOwnLayer: true,
                     onChanged: (v) async {
                       final ok = await ref
                           .read(dzikirReminderEnabledProvider.notifier)
@@ -276,9 +270,8 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.event_rounded,
                   title: l10n.hijriEventReminderLabel,
                   subtitle: l10n.hijriEventReminderSublabel,
-                  trailing: GlassSwitch(
+                  trailing: Switch(
                     value: ref.watch(hijriEventReminderEnabledProvider),
-                    useOwnLayer: true,
                     onChanged: (v) async {
                       final ok = await ref
                           .read(hijriEventReminderEnabledProvider.notifier)
@@ -296,9 +289,8 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.fastfood_rounded,
                   title: 'Pengingat Puasa Sunnah',
                   subtitle: 'Notifikasi jadwal puasa Senin-Kamis, Ayyamul Bidh, dll',
-                  trailing: GlassSwitch(
+                  trailing: Switch(
                     value: ref.watch(fastingReminderEnabledProvider),
-                    useOwnLayer: true,
                     onChanged: (v) async {
                       final ok = await ref
                           .read(fastingReminderEnabledProvider.notifier)
@@ -323,19 +315,11 @@ class SettingsScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: GlassChip(
-                                useOwnLayer: true,
-                                icon: Icon(
-                                  Icons.volume_up_rounded,
-                                  size: 18,
-                                  color: activeGreen,
-                                ),
+                              child: _TestButton(
+                                icon: Icons.volume_up_rounded,
                                 label: l10n.adzanTestSholat,
-                                labelStyle: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                iconColor: activeGreen,
+                                isDark: isDark,
                                 onTap: () => _sendTestNotification(
                                   context,
                                   ref,
@@ -345,19 +329,11 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: AppLayout.sp2),
                             Expanded(
-                              child: GlassChip(
-                                useOwnLayer: true,
-                                icon: Icon(
-                                  Icons.wb_twilight_rounded,
-                                  size: 18,
-                                  color: activeGreen,
-                                ),
+                              child: _TestButton(
+                                icon: Icons.wb_twilight_rounded,
                                 label: l10n.adzanTestFajr,
-                                labelStyle: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                iconColor: activeGreen,
+                                isDark: isDark,
                                 onTap: () => _sendTestNotification(
                                   context,
                                   ref,
@@ -371,19 +347,11 @@ class SettingsScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: GlassChip(
-                                useOwnLayer: true,
-                                icon: Icon(
-                                  Icons.event_rounded,
-                                  size: 18,
-                                  color: activeGreen,
-                                ),
+                              child: _TestButton(
+                                icon: Icons.event_rounded,
                                 label: 'Test Hijriah',
-                                labelStyle: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                iconColor: activeGreen,
+                                isDark: isDark,
                                 onTap: () => _sendHijriTestNotification(
                                   context,
                                   ref,
@@ -392,19 +360,11 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: AppLayout.sp2),
                             Expanded(
-                              child: GlassChip(
-                                useOwnLayer: true,
-                                icon: Icon(
-                                  Icons.fastfood_rounded,
-                                  size: 18,
-                                  color: activeGreen,
-                                ),
+                              child: _TestButton(
+                                icon: Icons.fastfood_rounded,
                                 label: 'Test Puasa',
-                                labelStyle: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                iconColor: activeGreen,
+                                isDark: isDark,
                                 onTap: () => _sendFastingTestNotification(
                                   context,
                                   ref,
@@ -878,5 +838,62 @@ class SettingsScreen extends ConsumerWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.reciterChanged)));
+  }
+}
+
+class _TestButton extends StatelessWidget {
+  const _TestButton({
+    required this.icon,
+    required this.label,
+    required this.iconColor,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color iconColor;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.sp2,
+          vertical: AppLayout.sp3,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppLayout.radiusMd),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: iconColor),
+            const SizedBox(width: AppLayout.sp2),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

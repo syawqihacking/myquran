@@ -18,7 +18,7 @@ import '../widgets/liquid_glass.dart';
 
 /// A sliding carousel that displays the last-read hero and other features.
 class HeroCarousel extends ConsumerStatefulWidget {
-  const HeroCarousel();
+  const HeroCarousel({super.key});
 
   @override
   ConsumerState<HeroCarousel> createState() => HeroCarouselState();
@@ -136,7 +136,7 @@ class HeroCarouselState extends ConsumerState<HeroCarousel> {
 /// surah name, ayah/juz position, a "Lanjutkan" pill, and a watermark open
 /// book at 10% opacity (Stitch Beranda §3).
 class LastReadHero extends ConsumerWidget {
-  const LastReadHero();
+  const LastReadHero({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -261,7 +261,7 @@ class LastReadHero extends ConsumerWidget {
 }
 
 class RandomDoaHeroSlide extends ConsumerStatefulWidget {
-  const RandomDoaHeroSlide();
+  const RandomDoaHeroSlide({super.key});
 
   @override
   ConsumerState<RandomDoaHeroSlide> createState() =>
@@ -377,7 +377,7 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
 }
 
 class RandomAsmaulHusnaHeroSlide extends ConsumerStatefulWidget {
-  const RandomAsmaulHusnaHeroSlide();
+  const RandomAsmaulHusnaHeroSlide({super.key});
 
   @override
   ConsumerState<RandomAsmaulHusnaHeroSlide> createState() =>
@@ -498,7 +498,7 @@ class RandomAsmaulHusnaHeroSlideState
 }
 
 class TasbihHeroSlide extends StatelessWidget {
-  const TasbihHeroSlide();
+  const TasbihHeroSlide({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -592,7 +592,7 @@ class TasbihHeroSlide extends StatelessWidget {
 
 /// Friendly empty state shown inside the hero before the first reading.
 class HeroHint extends StatelessWidget {
-  const HeroHint({required this.onStart});
+  const HeroHint({super.key, required this.onStart});
 
   final VoidCallback onStart;
 
@@ -622,7 +622,7 @@ class HeroHint extends StatelessWidget {
 
 /// The "Lanjutkan" pill on the hero — 3D liquid glass capsule.
 class ContinuePill extends StatelessWidget {
-  const ContinuePill({required this.onTap});
+  const ContinuePill({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
@@ -663,7 +663,7 @@ class ContinuePill extends StatelessWidget {
 }
 
 class HeroTopInfo extends ConsumerStatefulWidget {
-  const HeroTopInfo();
+  const HeroTopInfo({super.key});
 
   @override
   ConsumerState<HeroTopInfo> createState() => HeroTopInfoState();

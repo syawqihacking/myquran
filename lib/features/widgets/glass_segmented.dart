@@ -184,90 +184,87 @@ class _GlassCapsule extends StatelessWidget {
         );
         return ClipRRect(
           borderRadius: BorderRadius.circular(h / 2),
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(h / 2),
-                color: activeTint,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withValues(alpha: isDark ? 0.20 : 0.35),
-                    activeTint,
-                    scheme.primary.withValues(alpha: isDark ? 0.14 : 0.10),
-                  ],
-                  stops: const [0.0, 0.45, 1.0],
-                ),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: isDark ? 0.40 : 0.65),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
-                    blurRadius: 6.0,
-                    offset: const Offset(0, 2.0),
-                  ),
-                  BoxShadow(
-                    color: scheme.primary.withValues(
-                      alpha: isDark ? 0.35 : 0.20,
-                    ),
-                    blurRadius: 12.0,
-                    spreadRadius: 0.5,
-                    offset: const Offset(0, 1.0),
-                  ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(h / 2),
+              color: activeTint,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: isDark ? 0.20 : 0.35),
+                  activeTint,
+                  scheme.primary.withValues(alpha: isDark ? 0.14 : 0.10),
                 ],
+                stops: const [0.0, 0.45, 1.0],
               ),
-              child: Stack(
-                children: [
-                  // Top specular highlight arc (convex dome reflection).
-                  Positioned(
-                    top: 1.5,
-                    left: 6.0,
-                    right: 6.0,
-                    height: h * 0.38,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(h * 0.19),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.white.withValues(
-                              alpha: isDark ? 0.55 : 0.75,
-                            ),
-                            Colors.white.withValues(alpha: 0.0),
-                          ],
-                        ),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: isDark ? 0.40 : 0.65),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
+                  blurRadius: 6.0,
+                  offset: const Offset(0, 2.0),
+                ),
+                BoxShadow(
+                  color: scheme.primary.withValues(
+                    alpha: isDark ? 0.35 : 0.20,
+                  ),
+                  blurRadius: 12.0,
+                  spreadRadius: 0.5,
+                  offset: const Offset(0, 1.0),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Top specular highlight arc (convex dome reflection).
+                Positioned(
+                  top: 1.5,
+                  left: 6.0,
+                  right: 6.0,
+                  height: h * 0.38,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(h * 0.19),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(
+                            alpha: isDark ? 0.55 : 0.75,
+                          ),
+                          Colors.white.withValues(alpha: 0.0),
+                        ],
                       ),
                     ),
                   ),
-                  // Bottom ambient caustic bounce.
-                  Positioned(
-                    bottom: 1.5,
-                    left: 8.0,
-                    right: 8.0,
-                    height: h * 0.25,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(h * 0.12),
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            scheme.primary.withValues(
-                              alpha: isDark ? 0.30 : 0.40,
-                            ),
-                            Colors.white.withValues(alpha: 0.0),
-                          ],
-                        ),
+                ),
+                // Bottom ambient caustic bounce.
+                Positioned(
+                  bottom: 1.5,
+                  left: 8.0,
+                  right: 8.0,
+                  height: h * 0.25,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(h * 0.12),
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          scheme.primary.withValues(
+                            alpha: isDark ? 0.30 : 0.40,
+                          ),
+                          Colors.white.withValues(alpha: 0.0),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

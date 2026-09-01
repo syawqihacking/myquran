@@ -20,7 +20,7 @@ import '../thematic/thematic_verse_screen.dart';
 /// the rest are not built yet and show a "Segera hadir" SnackBar rather than
 /// a placeholder screen.
 class QuickActionsBento extends StatelessWidget {
-  const QuickActionsBento({required this.onOpenPrayer});
+  const QuickActionsBento({super.key, required this.onOpenPrayer});
 
   final VoidCallback onOpenPrayer;
 
@@ -267,7 +267,7 @@ class QuickActionsBento extends StatelessWidget {
 /// on a `surfaceContainerLowest` card with a soft shadow. The circle gently
 /// scales up on hover (desktop delight).
 class QuickActionTile extends StatefulWidget {
-  const QuickActionTile({
+  const QuickActionTile({super.key, 
     required this.icon,
     required this.label,
     required this.onTap,

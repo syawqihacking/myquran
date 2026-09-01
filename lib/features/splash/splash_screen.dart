@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app.dart';
 import '../../core/app_layout.dart';
-import '../../data/providers.dart';
-import '../onboarding/onboarding_screen.dart';
 
 /// A lightweight welcoming screen shown on every app launch.
 /// 

@@ -204,10 +204,8 @@ class _LiquidGlassCapsuleState extends State<LiquidGlassCapsule>
                       ),
                       child: ClipRRect(
                         borderRadius: radius,
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
+                        child: Container(
+                          decoration: BoxDecoration(
                               borderRadius: radius,
                               color: activeBase,
                               gradient: LinearGradient(
@@ -289,7 +287,6 @@ class _LiquidGlassCapsuleState extends State<LiquidGlassCapsule>
                                   child: widget.child,
                                 ),
                               ],
-                            ),
                           ),
                         ),
                       ),

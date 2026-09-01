@@ -15,7 +15,7 @@ import '../widgets/quran_text_view.dart';
 /// rotated mosque watermark (Stitch Beranda §6). Wired to the offline DB via
 /// [dailyAyahProvider] (a day-of-year rotation over beloved ayahs).
 class DailyVerseCard extends ConsumerWidget {
-  const DailyVerseCard();
+  const DailyVerseCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +76,7 @@ class DailyVerseCard extends ConsumerWidget {
 }
 
 class VerseContent extends StatelessWidget {
-  const VerseContent({required this.ayah, required this.surah});
+  const VerseContent({super.key, required this.ayah, required this.surah});
 
   final Ayah ayah;
   final Surah surah;

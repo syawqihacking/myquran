@@ -5,7 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 
 class Greeting extends ConsumerWidget {
-  const Greeting();
+  const Greeting({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

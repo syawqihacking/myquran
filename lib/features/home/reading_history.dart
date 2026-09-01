@@ -12,7 +12,7 @@ import '../widgets/quran_text_view.dart';
 /// hero above), each with a thin progress bar and a jump back to the last read
 /// ayah. Renders nothing when there is no history beyond the hero.
 class ReadingHistory extends ConsumerWidget {
-  const ReadingHistory();
+  const ReadingHistory({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +48,7 @@ class ReadingHistory extends ConsumerWidget {
 }
 
 class HistoryRow extends StatelessWidget {
-  const HistoryRow({required this.item});
+  const HistoryRow({super.key, required this.item});
 
   final RecentSurahRead item;
 
@@ -108,7 +108,7 @@ class HistoryRow extends StatelessWidget {
 
 /// 3px reading progress bar (echoes the reader's progress strip).
 class ThinProgress extends StatelessWidget {
-  const ThinProgress({required this.progress});
+  const ThinProgress({super.key, required this.progress});
 
   final double progress;
 

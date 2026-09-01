@@ -12,7 +12,7 @@ import '../widgets/liquid_glass.dart';
 /// scrolling content refracts through the glass behind them while the
 /// title stays centered and the search button keeps working as before.
 class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({required this.onOpenSearch});
+  const HomeAppBar({super.key, required this.onOpenSearch});
 
   final VoidCallback onOpenSearch;
 
