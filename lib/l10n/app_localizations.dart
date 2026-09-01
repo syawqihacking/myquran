@@ -2536,6 +2536,120 @@ abstract class AppLocalizations {
   /// **'hari lalu'**
   String get profileTimeDaysAgo;
 
+  /// No description provided for @authTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk'**
+  String get authTitle;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk'**
+  String get authSignIn;
+
+  /// No description provided for @authSignUp.
+  ///
+  /// In id, this message translates to:
+  /// **'Daftar'**
+  String get authSignUp;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Email'**
+  String get authEmailLabel;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kata Sandi'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authNameLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Nama'**
+  String get authNameLabel;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum punya akun? Daftar'**
+  String get authNoAccount;
+
+  /// No description provided for @authHasAccount.
+  ///
+  /// In id, this message translates to:
+  /// **'Sudah punya akun? Masuk'**
+  String get authHasAccount;
+
+  /// No description provided for @authContinueAsGuest.
+  ///
+  /// In id, this message translates to:
+  /// **'Lanjut sebagai Tamu'**
+  String get authContinueAsGuest;
+
+  /// No description provided for @authSignInWithFacebook.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk dengan Facebook'**
+  String get authSignInWithFacebook;
+
+  /// No description provided for @authErrorGeneric.
+  ///
+  /// In id, this message translates to:
+  /// **'Terjadi kesalahan. Silakan coba lagi.'**
+  String get authErrorGeneric;
+
+  /// No description provided for @authErrorEmailInUse.
+  ///
+  /// In id, this message translates to:
+  /// **'Email sudah terdaftar'**
+  String get authErrorEmailInUse;
+
+  /// No description provided for @authErrorInvalidCredentials.
+  ///
+  /// In id, this message translates to:
+  /// **'Email atau kata sandi salah'**
+  String get authErrorInvalidCredentials;
+
+  /// No description provided for @authErrorWeakPassword.
+  ///
+  /// In id, this message translates to:
+  /// **'Kata sandi terlalu lemah (minimal 6 karakter)'**
+  String get authErrorWeakPassword;
+
+  /// No description provided for @authErrorInvalidEmail.
+  ///
+  /// In id, this message translates to:
+  /// **'Format email tidak valid'**
+  String get authErrorInvalidEmail;
+
+  /// No description provided for @authConfirmEmail.
+  ///
+  /// In id, this message translates to:
+  /// **'Cek email kamu untuk konfirmasi pendaftaran.'**
+  String get authConfirmEmail;
+
+  /// No description provided for @authRequiredForAudio.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk untuk memutar audio dan mengunduh murottal.'**
+  String get authRequiredForAudio;
+
+  /// No description provided for @authSignOut.
+  ///
+  /// In id, this message translates to:
+  /// **'Keluar'**
+  String get authSignOut;
+
+  /// No description provided for @authSignedInAs.
+  ///
+  /// In id, this message translates to:
+  /// **'Masuk sebagai {name}'**
+  String authSignedInAs(String name);
+
   /// No description provided for @zakatTitle.
   ///
   /// In id, this message translates to:

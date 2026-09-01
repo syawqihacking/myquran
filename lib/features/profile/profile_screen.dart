@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/reading_history_repository.dart';
 import '../../data/repositories/reading_stats_repository.dart';
+import '../auth/login_screen.dart';
 import '../browse/browse_screen.dart';
 import '../settings/settings_screen.dart';
 import '../widgets/glass_pill.dart';
@@ -50,6 +51,8 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 children: [
                   const _ProfileHeader(),
+                  const SizedBox(height: AppLayout.sp4),
+                  const _AuthCard(),
                   const SizedBox(height: AppLayout.sp6),
                   _StatsGrid(surahCount: surahCount, stats: stats),
                   const SizedBox(height: AppLayout.sp7),
@@ -133,11 +136,18 @@ class _ProfileHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final name = ref.watch(profileNameProvider);
+    final auth = ref.watch(authControllerProvider);
+    // When signed in the name shown comes from the auth state; in guest mode
+    // the locally-edited profileNameProvider stays in charge.
+    final name = auth.status == AuthStatus.signedIn && auth.name != null
+        ? auth.name!
+        : ref.watch(profileNameProvider);
 
     return Column(
       children: [
         // Avatar (icon-based — no fabricated photo) with a live edit badge.
+        // The badge stays hidden while signed in — the account name comes
+        // from auth and isn't locally editable.
         Stack(
           clipBehavior: Clip.none,
           children: [
@@ -154,29 +164,30 @@ class _ProfileHeader extends ConsumerWidget {
                 color: scheme.onPrimaryContainer,
               ),
             ),
-            Positioned(
-              right: -2,
-              bottom: -2,
-              child: GlassTouchButton(
-                radius: AppLayout.radiusFull,
-                child: Material(
-                  color: scheme.primary,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () => _editName(context, ref),
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Icon(
-                        Icons.edit_rounded,
-                        size: 16,
-                        color: scheme.onPrimary,
+            if (auth.status != AuthStatus.signedIn)
+              Positioned(
+                right: -2,
+                bottom: -2,
+                child: GlassTouchButton(
+                  radius: AppLayout.radiusFull,
+                  child: Material(
+                    color: scheme.primary,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => _editName(context, ref),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: scheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: AppLayout.sp3),
@@ -228,6 +239,138 @@ class _ProfileHeader extends ConsumerWidget {
     if (newName != null) {
       ref.read(profileNameProvider.notifier).setName(newName);
     }
+  }
+}
+
+// ── Auth / account ─────────────────────────────────────────────────────────
+
+/// Compact account card — the profile's auth seam. Three honest states:
+///  * signed in: "Masuk sebagai {name}" + email + a "Keluar" button.
+///  * guest: a short hint that browsing continues as a guest + "Masuk".
+///  * signed out / not configured: "Masuk" pushes the login screen.
+class _AuthCard extends ConsumerWidget {
+  const _AuthCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final auth = ref.watch(authControllerProvider);
+
+    final isSignedIn = auth.status == AuthStatus.signedIn;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp4,
+        vertical: AppLayout.sp4,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isSignedIn
+                  ? scheme.primaryContainer
+                  : scheme.surfaceContainerHigh,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isSignedIn ? Icons.verified_user_rounded : Icons.person_outline_rounded,
+              size: 20,
+              color: isSignedIn
+                  ? scheme.onPrimaryContainer
+                  : scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: AppLayout.sp3),
+          Expanded(
+            child: isSignedIn
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.authSignedInAs(auth.name ?? ''),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scheme.primary,
+                        ),
+                      ),
+                      if (auth.email != null && auth.email!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          auth.email!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.authContinueAsGuest,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Masuk untuk menyimpan riwayat baca di akunmu.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(width: AppLayout.sp2),
+          if (isSignedIn)
+            OutlinedButton(
+              onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+              style: OutlinedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppLayout.sp3,
+                  vertical: AppLayout.sp1 + 2,
+                ),
+              ),
+              child: Text(l10n.authSignOut),
+            )
+          else
+            FilledButton.tonal(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+              ),
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppLayout.sp3,
+                  vertical: AppLayout.sp1 + 2,
+                ),
+              ),
+              child: Text(l10n.authSignIn),
+            ),
+        ],
+      ),
+    );
   }
 }
 

@@ -1284,6 +1284,67 @@ class AppLocalizationsId extends AppLocalizations {
   String get profileTimeDaysAgo => 'hari lalu';
 
   @override
+  String get authTitle => 'Masuk';
+
+  @override
+  String get authSignIn => 'Masuk';
+
+  @override
+  String get authSignUp => 'Daftar';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authPasswordLabel => 'Kata Sandi';
+
+  @override
+  String get authNameLabel => 'Nama';
+
+  @override
+  String get authNoAccount => 'Belum punya akun? Daftar';
+
+  @override
+  String get authHasAccount => 'Sudah punya akun? Masuk';
+
+  @override
+  String get authContinueAsGuest => 'Lanjut sebagai Tamu';
+
+  @override
+  String get authSignInWithFacebook => 'Masuk dengan Facebook';
+
+  @override
+  String get authErrorGeneric => 'Terjadi kesalahan. Silakan coba lagi.';
+
+  @override
+  String get authErrorEmailInUse => 'Email sudah terdaftar';
+
+  @override
+  String get authErrorInvalidCredentials => 'Email atau kata sandi salah';
+
+  @override
+  String get authErrorWeakPassword =>
+      'Kata sandi terlalu lemah (minimal 6 karakter)';
+
+  @override
+  String get authErrorInvalidEmail => 'Format email tidak valid';
+
+  @override
+  String get authConfirmEmail => 'Cek email kamu untuk konfirmasi pendaftaran.';
+
+  @override
+  String get authRequiredForAudio =>
+      'Masuk untuk memutar audio dan mengunduh murottal.';
+
+  @override
+  String get authSignOut => 'Keluar';
+
+  @override
+  String authSignedInAs(String name) {
+    return 'Masuk sebagai $name';
+  }
+
+  @override
   String get zakatTitle => 'Kalkulator Zakat';
 
   @override

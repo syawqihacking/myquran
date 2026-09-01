@@ -1282,6 +1282,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTimeDaysAgo => 'days ago';
 
   @override
+  String get authTitle => 'Sign in';
+
+  @override
+  String get authSignIn => 'Sign in';
+
+  @override
+  String get authSignUp => 'Sign up';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authNameLabel => 'Name';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account? Sign up';
+
+  @override
+  String get authHasAccount => 'Already have an account? Sign in';
+
+  @override
+  String get authContinueAsGuest => 'Continue as Guest';
+
+  @override
+  String get authSignInWithFacebook => 'Continue with Facebook';
+
+  @override
+  String get authErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get authErrorEmailInUse => 'Email is already registered';
+
+  @override
+  String get authErrorInvalidCredentials => 'Incorrect email or password';
+
+  @override
+  String get authErrorWeakPassword => 'Password is too weak (min 6 characters)';
+
+  @override
+  String get authErrorInvalidEmail => 'Invalid email format';
+
+  @override
+  String get authConfirmEmail =>
+      'Check your email to confirm your registration.';
+
+  @override
+  String get authRequiredForAudio =>
+      'Sign in to play audio and download murottal.';
+
+  @override
+  String get authSignOut => 'Sign out';
+
+  @override
+  String authSignedInAs(String name) {
+    return 'Signed in as $name';
+  }
+
+  @override
   String get zakatTitle => 'Zakat Calculator';
 
   @override

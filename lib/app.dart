@@ -7,10 +7,12 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'core/app_constants.dart';
 import 'core/app_layout.dart';
-import 'l10n/app_localizations.dart';
 import 'core/error_boundary.dart';
 import 'core/quran_theme.dart';
+import 'core/supabase_config.dart';
+import 'l10n/app_localizations.dart';
 import 'data/providers.dart';
+import 'features/auth/login_screen.dart';
 import 'features/bookmarks/bookmarks_screen.dart';
 import 'features/browse/browse_screen.dart';
 import 'features/home/home_screen.dart';
@@ -87,12 +89,39 @@ class MyQuranApp extends ConsumerWidget {
           duration: AppLayout.durBase,
           child: ref.watch(splashScreenActiveProvider)
               ? const SplashScreen(key: ValueKey('splash'))
-              : (ref.watch(onboardingDoneProvider)
-                  ? const AppShell(key: ValueKey('shell'))
-                  : const OnboardingScreen(key: ValueKey('onboarding'))),
+              : const _AuthGate(),
         ),
       ),
     );
+  }
+}
+
+/// Routes the app home through the auth gate.
+///
+/// Onboarding always takes priority — it runs before any auth decision,
+/// regardless of Supabase configuration or sign-in status. Once the
+/// onboarding flag is set (via completion or skip) the gate proceeds:
+///
+/// * Without Supabase configuration → AppShell (offline guest mode).
+/// * With auth configured: signedIn or guest → AppShell; signedOut → the
+///   designer-owned [LoginScreen].
+class _AuthGate extends ConsumerWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Onboarding always comes first — before any auth gate logic.
+    if (!ref.watch(onboardingDoneProvider)) {
+      return const OnboardingScreen(key: ValueKey('onboarding'));
+    }
+    if (!SupabaseConfig.isConfigured) {
+      return const AppShell(key: ValueKey('shell'));
+    }
+    final status = ref.watch(authControllerProvider).status;
+    if (status == AuthStatus.signedOut) {
+      return const LoginScreen(key: ValueKey('login'));
+    }
+    return const AppShell(key: ValueKey('shell'));
   }
 }
 

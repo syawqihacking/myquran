@@ -1,0 +1,117 @@
+╔══════════════════════════════════════════════════════════════╗
+║       PROMPT SETUP AUTH SUPABASE — EMAIL & GOOGLE            ║
+║      (Copy-paste ke opencode setelah restart / sesi baru)     ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+────────────────────────────────────────────────────────────────
+CARA PAKAI
+────────────────────────────────────────────────────────────────
+1. Restart opencode terlebih dahulu (keluar & masuk lagi)
+2. Pastikan MCP Supabase sudah "connected":
+     opencode mcp list   →   supabase  ✓ connected
+3. Copy seluruh isi blok PROMPT di bawah ini, paste ke chat
+4. Kirim. Saya akan kerjakan semuanya otomatis.
+
+
+────────────────────────────────────────────────────────────────
+PROMPT (copy dari sini sampai "END OF PROMPT")
+────────────────────────────────────────────────────────────────
+
+Buatkan setup Supabase Auth untuk aplikasi Flutter MyQuran.
+Project ref: gcrhhdvfjgzwwokcfjxx (sudah terhubung via MCP).
+
+Konteks aplikasi:
+- Aplikasi Al-Qur'an offline (Flutter 3.47, Dart 3.13)
+- Package: supabase_flutter ^2.17.2 (sudah ada di pubspec)
+- Kode auth sudah siap di lib/ (login_screen, signup_screen,
+  auth_service, auth_providers, auth gate, mode tamu/guest)
+- Yang dibutuhkan hanya sisi SERVER: tabel, provider auth,
+  dan kredensial untuk dijalankan.
+
+TUGAS:
+
+1. CEK KONDISI AWAL
+   - list_tables untuk melihat tabel yang sudah ada di schema public
+   - Periksa konfigurasi auth saat ini (provider mana yang aktif)
+
+2. BUAT TABEL "profiles" (jika belum ada)
+   - id uuid primary key references auth.users(id) on delete cascade
+   - name text not null default ''
+   - created_at timestamptz default now()
+   - updated_at timestamptz default now()
+   - Aktifkan ROW LEVEL SECURITY (RLS)
+   - Buat policy:
+       - insert: pengguna bisa membuat baris miliknya sendiri
+       - select: pengguna hanya bisa membaca baris miliknya
+       - update: pengguna hanya bisa mengubah baris miliknya
+   - Buat trigger: setelah user daftar (on auth.users insert),
+     otomatis buat baris profiles dengan nama dari raw_user_meta_data
+     (jika ada) atau nama default.
+
+3. AKTIFKAN AUTH EMAIL/PASSWORD
+   - Pastikan provider Email aktif (sign up + sign in password)
+   - Set konfigurasi yang masuk akal:
+       - Konfirmasi email: OFF untuk development (atau ON sesuai
+         kebutuhan, jelaskan perbedaannya)
+       - JWT expiry: 3600 detik (default)
+   - Jika perlu, set Site URL dan tambahkan redirect URLs:
+       - io.supabase.flutter://callback
+       - http://localhost:3000
+
+4. AKTIFKAN AUTH GOOGLE (OAuth)
+   - Buka halaman konfigurasi provider Google via MCP/API
+   - Beri tahu saya apa saja yang PERLU diisi manual di
+     Google Cloud Console (Client ID & Secret Web),
+     karena itu butuh akses ke dashboard Google milik user
+   - Tandai "Skip nonce check" ON (untuk dukungan iOS native)
+   - Berikan instruksi langkah demi langkah yang jelas untuk
+     membuat OAuth Client ID di Google Cloud Console
+     (Web + Android + iOS)
+
+5. AMBIL KREDENSIAL UNTUK APLIKASI
+   - Tampilkan SUPABASE_URL
+   - Tampilkan anon/publishable key
+   - Jelaskan cara menjalankan Flutter app:
+       flutter run --dart-define=SUPABASE_URL=... \
+         --dart-define=SUPABASE_ANON_KEY=...
+   - PERINGATAN: jangan tampilkan service_role key ke publik
+
+6. VERIFIKASI AKHIR
+   - Jalankan get_advisors (security) untuk memastikan tidak ada
+     masalah RLS
+   - Ringkas semua yang sudah dibuat/aktifkan
+   - Beri tahu langkah selanjutnya yang harus user lakukan manual
+
+SELESAIKAN SEMUA YANG BISA DILAKUKAN VIA MCP. Hal yang butuh
+aksi manual user (misal: membuat OAuth client di Google Cloud
+Console) cukup diberi instruksi yang jelas, jangan diblokir.
+
+END OF PROMPT
+
+
+────────────────────────────────────────────────────────────────
+HASIL YANG DIHARAPKAN (checklist)
+────────────────────────────────────────────────────────────────
+Setelah prompt dijalankan, seharusnya:
+
+[ ] Tabel "profiles" dibuat + RLS aktif + policy benar
+[ ] Trigger otomatis buat profil saat signup
+[ ] Provider Email aktif (sign up + password)
+[ ] Provider Google dikonfigurasi / instruksi manual diberikan
+[ ] SUPABASE_URL + anon key ditampilkan
+[ ] Perintah flutter run --dart-define diberikan
+[ ] Security advisor tidak menemukan masalah kritis
+
+────────────────────────────────────────────────────────────────
+CATATAN PENTING
+────────────────────────────────────────────────────────────────
+- Jika MCP belum connected: jalankan "opencode mcp auth supabase"
+  lalu restart opencode.
+- Tabel profiles tidak wajib untuk fitur login/signup saat ini
+  (nama disimpan di user metadata), tapi berguna untuk sync
+  profil di masa depan.
+- Google OAuth butuh setup eksternal di Google Cloud Console —
+  bagian ini tidak bisa 100% otomatis.
+
+─── END OF FILE ───

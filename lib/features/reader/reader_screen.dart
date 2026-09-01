@@ -6,14 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_constants.dart';
 import '../../core/app_layout.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/quran_scale.dart';
+import '../../core/supabase_config.dart';
 import '../../core/tajwid.dart';
 import '../../data/db/quran_database.dart';
 import '../../data/db/user_database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/user_repositories.dart';
 import '../../data/services/audio_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../auth/login_screen.dart';
 import '../widgets/quran_text_view.dart';
 import 'reader_ayah_tile.dart';
 import 'reader_audio_player.dart';
@@ -759,10 +761,36 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       );
   }
 
+  /// True saat gate login aktif (Supabase ada tetapi user belum signed-in).
+  bool get _requireLoginGate =>
+      SupabaseConfig.isConfigured &&
+      ref.read(authControllerProvider).status != AuthStatus.signedIn;
+
+  /// Arahkan ke login screen jika gate aktif. Tampilkan SnackBar singkat, lalu
+  /// push [LoginScreen]. Return true jika gate aktif (dan aksi dibatalkan).
+  bool _redirectToLoginIfNeeded() {
+    if (!_requireLoginGate) return false;
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l10n.authRequiredForAudio),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 1800),
+        ),
+      );
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+    );
+    return true;
+  }
+
   /// Requests playback of [ayah]. Plays the whole surah continuously from this
   /// ayah onward (the audio service builds a playlist of the remaining ayahs
   /// and auto-advances).
   Future<void> _requestPlay(Ayah ayah) async {
+    if (_redirectToLoginIfNeeded()) return;
     setState(() => _audioTarget = ayah);
     try {
       await ref
@@ -857,6 +885,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         _confirmDeleteMurottal(surahId);
       case MurottalDownloadStatus.notDownloaded:
       case MurottalDownloadStatus.error:
+        if (_redirectToLoginIfNeeded()) return;
         _startMurottalDownload(surahId);
     }
   }

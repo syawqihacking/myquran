@@ -7,6 +7,7 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'dart:io';
@@ -14,6 +15,7 @@ import 'dart:io';
 import 'app.dart';
 import 'core/app_constants.dart';
 import 'core/error_boundary.dart';
+import 'core/supabase_config.dart';
 import 'data/providers.dart';
 import 'features/widgets/nav_glass_bubble.dart';
 
@@ -73,6 +75,16 @@ void _registerHijriLocale() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Supabase Auth — only when configured (SUPABASE_URL / SUPABASE_ANON_KEY
+  // passed via --dart-define). Without them the app runs fully offline.
+  if (SupabaseConfig.isConfigured) {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      // ignore: deprecated_member_use — contract requires anonKey
+      anonKey: SupabaseConfig.anonKey,
+    );
+  }
 
   // Initialize liquid glass widgets & warm up shaders
   await LiquidGlassWidgets.initialize(enablePerformanceMonitor: false);

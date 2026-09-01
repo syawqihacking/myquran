@@ -2,6 +2,7 @@
 /// (`import 'data/providers.dart'`) continue to work unchanged.
 library;
 
+export 'providers/auth_providers.dart';
 export 'providers/database_providers.dart';
 export 'providers/reading_providers.dart';
 export 'providers/audio_providers.dart';

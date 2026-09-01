@@ -1271,6 +1271,67 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileTimeDaysAgo => 'أيام مضت';
 
   @override
+  String get authTitle => 'تسجيل الدخول';
+
+  @override
+  String get authSignIn => 'دخول';
+
+  @override
+  String get authSignUp => 'إنشاء حساب';
+
+  @override
+  String get authEmailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get authPasswordLabel => 'كلمة المرور';
+
+  @override
+  String get authNameLabel => 'الاسم';
+
+  @override
+  String get authNoAccount => 'ليس لديك حساب؟ سجّل الآن';
+
+  @override
+  String get authHasAccount => 'لديك حساب بالفعل؟ سجّل الدخول';
+
+  @override
+  String get authContinueAsGuest => 'متابعة كضيف';
+
+  @override
+  String get authSignInWithFacebook => 'المتابعة عبر فيسبوك';
+
+  @override
+  String get authErrorGeneric => 'حدث خطأ ما. حاول مرة أخرى.';
+
+  @override
+  String get authErrorEmailInUse => 'البريد الإلكتروني مسجّل بالفعل';
+
+  @override
+  String get authErrorInvalidCredentials =>
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+  @override
+  String get authErrorWeakPassword =>
+      'كلمة المرور ضعيفة جدًا (6 أحرف على الأقل)';
+
+  @override
+  String get authErrorInvalidEmail => 'صيغة البريد الإلكتروني غير صحيحة';
+
+  @override
+  String get authConfirmEmail => 'تحقق من بريدك الإلكتروني لتأكيد التسجيل.';
+
+  @override
+  String get authRequiredForAudio => 'سجّل الدخول لتشغيل الصوت وتنزيل التلاوة.';
+
+  @override
+  String get authSignOut => 'تسجيل الخروج';
+
+  @override
+  String authSignedInAs(String name) {
+    return 'تم الدخول باسم $name';
+  }
+
+  @override
   String get zakatTitle => 'حاسبة الزكاة';
 
   @override

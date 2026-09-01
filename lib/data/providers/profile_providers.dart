@@ -2,19 +2,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_strings.dart';
 import '../repositories/reading_history_repository.dart';
+import 'auth_providers.dart';
 import 'database_providers.dart';
 
 // ---- Profil Pengguna ---------------------------------------------------------
 
-/// The user's display name, persisted in shared_preferences under
-/// `profile_name`. Defaults to "Pengguna" — honest, no fabricated identity.
+/// The user's display name.
+///
+/// When signed in the name comes from the Supabase auth state (user metadata
+/// `name`); otherwise it falls back to the locally-edited shared_preferences
+/// `profile_name`, defaulting to "Pengguna".
 class ProfileNameController extends Notifier<String> {
   static const _kName = 'profile_name';
 
   @override
-  String build() =>
-      ref.read(sharedPreferencesProvider).getString(_kName) ??
-      S.profileNameDefault;
+  String build() {
+    final auth = ref.watch(authControllerProvider);
+    final authName = auth.name?.trim() ?? '';
+    if (auth.status == AuthStatus.signedIn && authName.isNotEmpty) {
+      return authName;
+    }
+    return ref.read(sharedPreferencesProvider).getString(_kName) ??
+        S.profileNameDefault;
+  }
 
   /// Saves the trimmed name; empty input falls back to the default.
   void setName(String name) {

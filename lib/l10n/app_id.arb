@@ -492,6 +492,31 @@
   "profileTimeYesterday": "Kemarin",
   "profileTimeDaysAgo": "hari lalu",
 
+  "authTitle": "Masuk",
+  "authSignIn": "Masuk",
+  "authSignUp": "Daftar",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Kata Sandi",
+  "authNameLabel": "Nama",
+  "authNoAccount": "Belum punya akun? Daftar",
+  "authHasAccount": "Sudah punya akun? Masuk",
+  "authContinueAsGuest": "Lanjut sebagai Tamu",
+  "authSignInWithFacebook": "Masuk dengan Facebook",
+  "authErrorGeneric": "Terjadi kesalahan. Silakan coba lagi.",
+  "authErrorEmailInUse": "Email sudah terdaftar",
+  "authErrorInvalidCredentials": "Email atau kata sandi salah",
+  "authErrorWeakPassword": "Kata sandi terlalu lemah (minimal 6 karakter)",
+  "authErrorInvalidEmail": "Format email tidak valid",
+  "authConfirmEmail": "Cek email kamu untuk konfirmasi pendaftaran.",
+  "authRequiredForAudio": "Masuk untuk memutar audio dan mengunduh murottal.",
+  "authSignOut": "Keluar",
+  "authSignedInAs": "Masuk sebagai {name}",
+  "@authSignedInAs": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
   "zakatTitle": "Kalkulator Zakat",
   "zakatSubtitle": "Hitung zakat fitrah, mal, emas & perak, penghasilan, dan pertanian",
   "zakatTabFitrah": "Fitrah",
