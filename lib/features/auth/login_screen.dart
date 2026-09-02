@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -127,39 +128,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final isMobile =
         MediaQuery.sizeOf(context).width < AppConstants.mobileBreakpoint;
 
     return Scaffold(
-      backgroundColor: scheme.surface,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Faint decorative glow behind the card, like the reader's paper
-            // header glow — atmospheric but never loud.
-            Positioned(
-              top: -160,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: Container(
-                  height: 360,
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: const Alignment(0, -0.4),
-                      radius: 0.9,
-                      colors: [
-                        scheme.primary.withValues(alpha: 0.10),
-                        scheme.primary.withValues(alpha: 0.0),
-                      ],
-                    ),
-                  ),
-                ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image from Splash
+          Image.asset(
+            'assets/images/splash_bg.jpg',
+            fit: BoxFit.cover,
+          ),
+          // Overlay to ensure text readability, adapting to theme
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF0B1A13).withValues(alpha: 0.85),
+                  const Color(0xFF08130E).withValues(alpha: 0.95),
+                ],
               ),
             ),
-            // Centered, capped column — mobile-first, comfortable on desktop.
-            SingleChildScrollView(
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 isMobile ? AppLayout.sp5 : AppLayout.sp6,
                 AppLayout.sp7,
@@ -173,14 +170,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const _AuthBranding(),
                       const SizedBox(height: AppLayout.sp7),
-                      _buildFormCard(theme, scheme, l10n, isMobile),
+                      _buildFormCard(theme, scheme, l10n, isMobile, isDark),
                       const SizedBox(height: AppLayout.sp6),
                       TextButton(
                         onPressed: _submitting ? null : _openSignup,
                         child: Text(
                           l10n.authNoAccount,
                           style: theme.textTheme.labelLarge?.copyWith(
-                            color: scheme.primary,
+                            color: isDark ? Colors.white : scheme.primary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -189,8 +187,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -200,156 +198,224 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ColorScheme scheme,
     AppLocalizations l10n,
     bool isMobile,
+    bool isDark,
   ) {
-    final fieldColor = scheme.surfaceContainerHighest.withValues(alpha: 0.55);
+    final colorGold = const Color(0xFFD6B560);
+    final colorSage = const Color(0xFFA2C6AC);
+    final colorCardBg = const Color(0xFF29322D).withValues(alpha: 0.95);
+    final colorFieldBg = const Color(0xFF1D2420);
+    final colorOutline = const Color(0xFF3B4640);
 
-    InputDecoration fieldDecoration(String label, {Widget? suffix}) {
+    InputDecoration fieldDecoration(String hint, IconData prefixIcon, {Widget? suffix}) {
       return InputDecoration(
-        labelText: label,
-        labelStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: scheme.onSurfaceVariant,
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.6),
+          fontSize: 15,
         ),
         filled: true,
-        fillColor: fieldColor,
+        fillColor: colorFieldBg,
+        prefixIcon: Icon(prefixIcon, color: colorGold, size: 22),
         suffixIcon: suffix,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppLayout.sp4,
-          vertical: AppLayout.sp4,
+          vertical: 18,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          borderSide: BorderSide(color: scheme.primary, width: 1.4),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorGold.withValues(alpha: 0.5), width: 1),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: scheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-          borderSide: BorderSide(color: scheme.error, width: 1.4),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: scheme.error, width: 1),
         ),
       );
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppLayout.radiusLg),
-        border: Border.all(color: scheme.outlineVariant),
+        color: colorCardBg,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: scheme.primary.withValues(alpha: 0.06),
-            blurRadius: 32,
-            offset: const Offset(0, 16),
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      padding: EdgeInsets.all(isMobile ? AppLayout.sp5 : AppLayout.sp6),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _emailController,
-              enabled: !_submitting,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              autocorrect: false,
-              validator: _validateEmail,
-              decoration: fieldDecoration(l10n.authEmailLabel),
+      child: Stack(
+        children: [
+          // Corner ornament
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _CornerOrnamentPainter(color: colorGold.withValues(alpha: 0.4)),
             ),
-            const SizedBox(height: AppLayout.sp4),
-            TextFormField(
-              controller: _passwordController,
-              enabled: !_submitting,
-              obscureText: _obscurePassword,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.done,
-              autofillHints: const [AutofillHints.password],
-              onFieldSubmitted: (_) => _submit(),
-              validator: _validatePassword,
-              decoration: fieldDecoration(
-                l10n.authPasswordLabel,
-                suffix: IconButton(
-                  onPressed: () => setState(
-                    () => _obscurePassword = !_obscurePassword,
+          ),
+          Padding(
+            padding: EdgeInsets.all(isMobile ? AppLayout.sp5 : AppLayout.sp6),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _emailController,
+                    enabled: !_submitting,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autofillHints: const [AutofillHints.email],
+                    autocorrect: false,
+                    validator: _validateEmail,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: fieldDecoration('Email', Icons.email_outlined),
                   ),
-                  tooltip: _obscurePassword ? 'Lihat' : 'Sembunyikan',
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: AppLayout.sp4),
-              _ErrorBanner(message: _error!),
-            ],
-            const SizedBox(height: AppLayout.sp6),
-            FilledButton(
-              onPressed: _submitting ? null : _submit,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppLayout.sp5,
-                  vertical: 16,
-                ),
-              ),
-              child: _submitting
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.4,
-                        color: scheme.onPrimary,
+                  const SizedBox(height: AppLayout.sp4),
+                  TextFormField(
+                    controller: _passwordController,
+                    enabled: !_submitting,
+                    obscureText: _obscurePassword,
+                    keyboardType: TextInputType.visiblePassword,
+                    textInputAction: TextInputAction.done,
+                    autofillHints: const [AutofillHints.password],
+                    onFieldSubmitted: (_) => _submit(),
+                    validator: _validatePassword,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: fieldDecoration(
+                      'Kata Sandi',
+                      Icons.lock_outline,
+                      suffix: IconButton(
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                          color: Colors.white54,
+                          size: 20,
+                        ),
                       ),
-                    )
-                  : Text(l10n.authSignIn),
-            ),
-            const SizedBox(height: AppLayout.sp4),
-            // Secondary path — outlined so it reads as the quieter option.
-            OutlinedButton.icon(
-              onPressed: _submitting ? null : _continueAsGuest,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppLayout.sp5,
-                  vertical: 14,
-                ),
-                foregroundColor: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppLayout.sp2),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {}, // Placeholder for forgot password
+                      style: TextButton.styleFrom(
+                        foregroundColor: colorGold,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Lupa kata sandi?',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: AppLayout.sp4),
+                    _ErrorBanner(message: _error!),
+                  ],
+                  const SizedBox(height: AppLayout.sp5),
+                  FilledButton(
+                    onPressed: _submitting ? null : _submit,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colorSage,
+                      foregroundColor: const Color(0xFF111A15),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Color(0xFF111A15),
+                            ),
+                          )
+                        : const Text(
+                            'Masuk',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: AppLayout.sp6),
+                  
+                  // Divider
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: colorOutline, thickness: 1)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Icon(Icons.diamond_outlined, color: colorGold, size: 16),
+                      ),
+                      Expanded(child: Divider(color: colorOutline, thickness: 1)),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: AppLayout.sp6),
+                  
+                  // Secondary path
+                  OutlinedButton.icon(
+                    onPressed: _submitting ? null : _continueAsGuest,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: colorOutline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.person_outline_rounded, size: 20),
+                    label: const Text(
+                      'Lanjut sebagai Tamu',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  const SizedBox(height: AppLayout.sp4),
+                  // Facebook sign-in
+                  OutlinedButton.icon(
+                    onPressed: _submitting ? null : _signInWithFacebook,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: const Color(0xFF4C75D2),
+                      side: BorderSide(color: colorOutline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.facebook_rounded, size: 20),
+                    label: const Text(
+                      'Masuk dengan Facebook',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
-              icon: const Icon(Icons.person_outline_rounded, size: 18),
-              label: Text(l10n.authContinueAsGuest),
             ),
-            const SizedBox(height: AppLayout.sp3),
-            // Facebook sign-in — branded blue, same outlined style as the
-            // guest path so the hierarchy stays consistent.
-            OutlinedButton.icon(
-              onPressed: _submitting ? null : _signInWithFacebook,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppLayout.sp5,
-                  vertical: 14,
-                ),
-                foregroundColor: const Color(0xFF1877F2),
-                side: const BorderSide(color: Color(0xFF1877F2)),
-              ),
-              icon: const Icon(Icons.facebook_rounded, size: 18),
-              label: Text(l10n.authSignInWithFacebook),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -368,35 +434,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-/// App branding — Rub el Hizb mark + "Al-Qur'an" + quiet caption.
+/// App branding — App Logo + "Selamat Datang"
 class _AuthBranding extends StatelessWidget {
   const _AuthBranding();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-
     return Column(
       children: [
-        const _RubElHizbMark(),
-        const SizedBox(height: AppLayout.sp4),
-        Text(
-          l10n.authTitle,
+        const _AppLogo(),
+        const SizedBox(height: AppLayout.sp6),
+        const Text(
+          'Selamat Datang',
           textAlign: TextAlign.center,
-          style: theme.textTheme.displaySmall?.copyWith(
+          style: TextStyle(
+            fontFamily: 'Serif',
+            fontSize: 34,
             fontWeight: FontWeight.w700,
-            color: scheme.primary,
+            color: Color(0xFFD6B560),
+            letterSpacing: 0.5,
           ),
         ),
         const SizedBox(height: AppLayout.sp2),
-        Text(
-          'Baca Al-Qur\'an dengan tenang — kapan saja, di mana saja.',
+        const Text(
+          'Memulai perjalanan spiritual Anda',
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: scheme.onSurfaceVariant,
-            height: 1.5,
+          style: TextStyle(
+            fontSize: 15,
+            color: Color(0xFF8B9990),
           ),
         ),
       ],
@@ -404,80 +469,36 @@ class _AuthBranding extends StatelessWidget {
   }
 }
 
-/// Rub el Hizb — the Islamic end-of-verse star: two rotated squares (an
-/// octagram) with a small center dot. Painted with hairline strokes in the
-/// tertiary (gold) family so it reads as a quiet heritage detail.
-class _RubElHizbMark extends StatelessWidget {
-  const _RubElHizbMark();
+/// Circular App Logo
+class _AppLogo extends StatelessWidget {
+  const _AppLogo();
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
-      width: 84,
-      height: 84,
+      width: 90,
+      height: 90,
       decoration: BoxDecoration(
-        color: scheme.primaryContainer.withValues(alpha: 0.5),
         shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: CustomPaint(
-          size: const Size.square(52),
-          painter: _RubElHizbPainter(
-            color: scheme.tertiary,
-            dark: Theme.of(context).brightness == Brightness.dark,
+        color: const Color(0xFF1D2420),
+        border: Border.all(
+          color: const Color(0xFFD6B560),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
+        ],
+        image: const DecorationImage(
+          image: AssetImage('assets/images/app_logo.jpg'),
+          fit: BoxFit.cover,
         ),
       ),
     );
   }
-}
-
-class _RubElHizbPainter extends CustomPainter {
-  _RubElHizbPainter({required this.color, required this.dark});
-
-  final Color color;
-  final bool dark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final half = size.width / 2;
-    final inset = half * 0.18;
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = dark ? 1.6 : 1.4
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
-
-    // Two overlapping squares, second rotated 45° — the octagram silhouette.
-    final rect = Rect.fromCenter(
-      center: center,
-      width: size.width - inset * 2,
-      height: size.height - inset * 2,
-    );
-    canvas.drawRect(rect, paint);
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(0.7853981633974483); // 45°
-    canvas.translate(-center.dx, -center.dy);
-    canvas.drawRect(rect, paint);
-    canvas.restore();
-
-    // Center dot, filled.
-    canvas.drawCircle(
-      center,
-      size.width * 0.045,
-      Paint()..color = color,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_RubElHizbPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.dark != dark;
 }
 
 /// Inline localized error banner inside the form card.
@@ -550,4 +571,34 @@ class _StaggerIn extends StatelessWidget {
       ],
     );
   }
+}
+
+/// A subtle corner ornament matching the reference design.
+class _CornerOrnamentPainter extends CustomPainter {
+  _CornerOrnamentPainter({required this.color});
+  
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    // Top left curve
+    final path1 = Path()
+      ..moveTo(0, 30)
+      ..quadraticBezierTo(20, 20, 30, 0);
+    canvas.drawPath(path1, paint);
+
+    // Top right curve
+    final path2 = Path()
+      ..moveTo(size.width, 30)
+      ..quadraticBezierTo(size.width - 20, 20, size.width - 30, 0);
+    canvas.drawPath(path2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CornerOrnamentPainter oldDelegate) => oldDelegate.color != color;
 }
