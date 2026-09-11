@@ -11,8 +11,9 @@ import '../../data/providers.dart';
 ///
 /// Shows a muted looping video that matches the current time of day (pagi /
 /// siang / sore / malam) behind the "Assalamu'alaikum," + name text. The
-/// video plays at low opacity (~0.4) as a decorative atmosphere, with a
-/// gradient overlay at the bottom so the text remains readable.
+/// video plays at near-full visibility (0.9) so the animation is clearly
+/// seen, with a multi-stop gradient overlay and text shadows ensuring the
+/// greeting text stays readable over any scene.
 ///
 /// A single-shot [Timer] is scheduled for each time boundary (05, 12, 17, 19)
 /// so the video switches automatically when the hour window changes — no
@@ -169,13 +170,13 @@ class _GreetingState extends ConsumerState<Greeting> {
                     );
                   }
                   return Opacity(
-                    opacity: 0.4,
+                    opacity: 0.9,
                     child: VideoPlayer(_controller!),
                   );
                 },
               ),
             // Gradient overlay — darkens the bottom so the text lifts off
-            // the video cleanly.
+            // the video cleanly, with a mid-stop to ease the transition.
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -184,8 +185,10 @@ class _GreetingState extends ConsumerState<Greeting> {
                     end: Alignment.topCenter,
                     colors: [
                       scheme.surface.withValues(alpha: 0.85),
+                      scheme.surface.withValues(alpha: 0.35),
                       Colors.transparent,
                     ],
+                    stops: const [0.0, 0.45, 1.0],
                   ),
                 ),
               ),
@@ -202,6 +205,9 @@ class _GreetingState extends ConsumerState<Greeting> {
                     l10n.homeGreeting,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurface,
+                      shadows: const [
+                        Shadow(color: Colors.black45, blurRadius: 6),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -212,6 +218,9 @@ class _GreetingState extends ConsumerState<Greeting> {
                       height: 32 / 24,
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface,
+                      shadows: const [
+                        Shadow(color: Colors.black45, blurRadius: 6),
+                      ],
                     ),
                   ),
                 ],

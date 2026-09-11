@@ -73,7 +73,7 @@ class HeroCarouselState extends ConsumerState<HeroCarousel> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 180,
+          height: 128,
           child: OverflowBox(
             maxWidth: width + gap,
             alignment: Alignment.centerLeft,
@@ -107,7 +107,7 @@ class HeroCarouselState extends ConsumerState<HeroCarousel> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(_pageCount, (index) {
@@ -145,7 +145,10 @@ class LastReadHero extends ConsumerWidget {
     final detail = ref.watch(lastReadDetailProvider);
 
     return Container(
-      padding: const EdgeInsets.all(AppLayout.sp5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp5,
+        vertical: AppLayout.sp3,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -166,17 +169,17 @@ class LastReadHero extends ConsumerWidget {
         children: [
           // Watermark — open book in the bottom-right corner.
           Positioned(
-            right: -36,
-            bottom: -40,
+            right: -28,
+            bottom: -32,
             child: Icon(
               Icons.menu_book_rounded,
-              size: 150,
+              size: 120,
               color: scheme.onPrimary.withValues(alpha: 0.10),
             ),
           ),
           detail.when(
             loading: () => const SizedBox(
-              height: 128,
+              height: 90,
               child: Center(
                 child: SizedBox(
                   width: 22,
@@ -210,7 +213,7 @@ class LastReadHero extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontFamily: AppConstants.fontQuran,
-                                fontSize: 22,
+                                fontSize: 20,
                                 height: 1.25,
                                 color: scheme.onPrimary.withValues(alpha: 0.95),
                                 letterSpacing: 0, // never letter-space Arabic
@@ -222,13 +225,13 @@ class LastReadHero extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.titleLarge?.copyWith(
-                                fontSize: 24,
+                                fontSize: 22,
                                 height: 1.2,
                                 fontWeight: FontWeight.w700,
                                 color: scheme.onPrimary,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               'Ayat ${toArabicIndic(ayah.ayahNumber)} • '
                               'Juz ${toArabicIndic(ayah.juz)}',
@@ -284,7 +287,10 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(AppLayout.sp5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp5,
+        vertical: AppLayout.sp3,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -304,11 +310,11 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
       child: Stack(
         children: [
           Positioned(
-            right: -24,
-            bottom: -32,
+            right: -20,
+            bottom: -24,
             child: Icon(
               Icons.volunteer_activism_rounded,
-              size: 150,
+              size: 120,
               color: scheme.onPrimary.withValues(alpha: 0.06),
             ),
           ),
@@ -341,7 +347,7 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontFamily: AppConstants.fontQuran,
-                        fontSize: 22,
+                        fontSize: 20,
                         height: 1.5,
                         color: scheme.onPrimary.withValues(alpha: 0.95),
                       ),
@@ -349,7 +355,7 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
                 _doa.title,
                 maxLines: 1,
@@ -362,7 +368,7 @@ class RandomDoaHeroSlideState extends ConsumerState<RandomDoaHeroSlide> {
               const SizedBox(height: 2),
               Text(
                 _doa.translation,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onPrimary.withValues(alpha: 0.8),
@@ -401,7 +407,10 @@ class RandomAsmaulHusnaHeroSlideState
     final scheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(AppLayout.sp5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppLayout.sp5,
+        vertical: AppLayout.sp3,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -421,11 +430,11 @@ class RandomAsmaulHusnaHeroSlideState
       child: Stack(
         children: [
           Positioned(
-            right: -24,
-            bottom: -32,
+            right: -20,
+            bottom: -24,
             child: Icon(
               Icons.stars_rounded,
-              size: 150,
+              size: 120,
               color: scheme.onPrimary.withValues(alpha: 0.08),
             ),
           ),
@@ -462,7 +471,7 @@ class RandomAsmaulHusnaHeroSlideState
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontFamily: AppConstants.fontQuran,
-                        fontSize: 28,
+                        fontSize: 24,
                         height: 1.5,
                         color: scheme.onPrimary,
                       ),
@@ -470,7 +479,7 @@ class RandomAsmaulHusnaHeroSlideState
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 _asma.transliteration,
                 maxLines: 1,
@@ -483,7 +492,7 @@ class RandomAsmaulHusnaHeroSlideState
               const SizedBox(height: 2),
               Text(
                 _asma.translation,
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onPrimary.withValues(alpha: 0.85),
@@ -510,7 +519,10 @@ class TasbihHeroSlide extends StatelessWidget {
         MaterialPageRoute<void>(builder: (_) => const TasbihDigitalScreen()),
       ),
       child: Container(
-        padding: const EdgeInsets.all(AppLayout.sp5),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppLayout.sp5,
+          vertical: AppLayout.sp3,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -533,11 +545,11 @@ class TasbihHeroSlide extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              right: -24,
-              bottom: -32,
+              right: -20,
+              bottom: -24,
               child: Icon(
                 Icons.fingerprint_rounded,
-                size: 150,
+                size: 120,
                 color: scheme.onPrimary.withValues(alpha: 0.08),
               ),
             ),
@@ -572,7 +584,7 @@ class TasbihHeroSlide extends StatelessWidget {
                     color: scheme.onPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   'Berdzikir mengingat Allah dengan mudah',
                   maxLines: 2,

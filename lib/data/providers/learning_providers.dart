@@ -2,9 +2,27 @@ import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/learning_data.dart';
+import '../services/learning_asset_service.dart';
 import 'database_providers.dart';
+
+// ---- Learning assets (shalat/wudhu images from GitHub Release) ---------------
+
+final learningAssetServiceProvider = Provider<LearningAssetService>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return LearningAssetService(client: client);
+});
+
+/// Resolves a lesson image asset path (`assets/shalat/...` etc.) to an absolute
+/// local file, downloading it on first use. AsyncValue is null when the asset
+/// isn't recognised or the download failed.
+final lessonImageFileProvider =
+    FutureProvider.family<String?, String>((ref, imageAsset) {
+  return ref.watch(learningAssetServiceProvider).localFileFor(imageAsset);
+});
 
 // ---- Pusat Belajar progress -------------------------------------------------
 

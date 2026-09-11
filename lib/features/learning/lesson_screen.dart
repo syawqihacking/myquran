@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -109,25 +111,7 @@ class LessonScreen extends ConsumerWidget {
                         ],
                         if (lesson.imageAsset != null) ...[
                           const SizedBox(height: AppLayout.sp4),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              AppLayout.radiusLg,
-                            ),
-                            child: Container(
-                              width: double.infinity,
-                              height: 220,
-                              color: scheme.surfaceContainerLowest,
-                              child: lesson.imageAsset!.endsWith('.svg')
-                                  ? SvgPicture.asset(
-                                      lesson.imageAsset!,
-                                      fit: BoxFit.contain,
-                                    )
-                                  : Image.asset(
-                                      lesson.imageAsset!,
-                                      fit: BoxFit.contain,
-                                    ),
-                            ),
-                          ),
+                          _LessonImage(assetPath: lesson.imageAsset!),
                           const SizedBox(height: AppLayout.sp4),
                         ],
                         const SizedBox(height: AppLayout.sp5),
@@ -196,8 +180,98 @@ class LessonScreen extends ConsumerWidget {
 
 /// Bottom action bar: "Tandai Selesai" when not done; when done, a
 /// "Tandai Belum Selesai" toggle plus a primary continue action.
-class _BottomBar extends StatelessWidget {
-  const _BottomBar({
+class _LessonImage extends ConsumerWidget {
+  const _LessonImage({required this.assetPath});
+
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final fileAsync = ref.watch(lessonImageFileProvider(assetPath));
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppLayout.radiusLg),
+      child: Container(
+        width: double.infinity,
+        height: 220,
+        color: scheme.surfaceContainerLowest,
+        child: fileAsync.when(
+          data: (path) {
+            if (path == null) {
+              return _ImagePlaceholder(
+                message: l10n.learningImageUnavailable,
+                onRetry: () => ref.invalidate(lessonImageFileProvider(assetPath)),
+              );
+            }
+            final file = File(path);
+            if (!file.existsSync()) {
+              return _ImagePlaceholder(
+                message: l10n.learningImageUnavailable,
+                onRetry: () => ref.invalidate(lessonImageFileProvider(assetPath)),
+              );
+            }
+            return assetPath.endsWith('.svg')
+                ? SvgPicture.file(file, fit: BoxFit.contain)
+                : Image.file(file, fit: BoxFit.contain);
+          },
+          loading: () => const Center(
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+          error: (_, __) => _ImagePlaceholder(
+            message: l10n.learningImageUnavailable,
+            onRetry: () => ref.invalidate(lessonImageFileProvider(assetPath)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Quiet placeholder shown while an image fails to download — with a retry.
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.image_not_supported_outlined,
+              size: 32, color: scheme.onSurfaceVariant),
+          const SizedBox(height: AppLayout.sp2),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppLayout.sp2),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: Text(l10nRetry(context)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String l10nRetry(BuildContext context) =>
+      AppLocalizations.of(context)!.retry;
+}
+
+/// Bottom action bar: "Tandai Selesai" when not done; when done, a
+/// "Tandai Belum Selesai" toggle plus a primary continue action.
+class _BottomBar extends StatelessWidget {  const _BottomBar({
     required this.completed,
     required this.isLast,
     required this.onMarkDone,

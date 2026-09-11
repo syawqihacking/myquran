@@ -509,6 +509,7 @@
   "authErrorInvalidEmail": "Invalid email format",
   "authConfirmEmail": "Check your email to confirm your registration.",
   "authRequiredForAudio": "Sign in to play audio and download murottal.",
+  "learningImageUnavailable": "Image unavailable. Check your internet connection.",
   "authSignOut": "Sign out",
   "authSignedInAs": "Signed in as {name}",
 

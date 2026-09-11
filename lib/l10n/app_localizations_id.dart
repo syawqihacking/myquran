@@ -1337,6 +1337,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Masuk untuk memutar audio dan mengunduh murottal.';
 
   @override
+  String get learningImageUnavailable =>
+      'Gambar tidak tersedia. Periksa koneksi internet.';
+
+  @override
   String get authSignOut => 'Keluar';
 
   @override

@@ -1335,6 +1335,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in to play audio and download murottal.';
 
   @override
+  String get learningImageUnavailable =>
+      'Image unavailable. Check your internet connection.';
+
+  @override
   String get authSignOut => 'Sign out';
 
   @override

@@ -2638,6 +2638,12 @@ abstract class AppLocalizations {
   /// **'Masuk untuk memutar audio dan mengunduh murottal.'**
   String get authRequiredForAudio;
 
+  /// No description provided for @learningImageUnavailable.
+  ///
+  /// In id, this message translates to:
+  /// **'Gambar tidak tersedia. Periksa koneksi internet.'**
+  String get learningImageUnavailable;
+
   /// No description provided for @authSignOut.
   ///
   /// In id, this message translates to:

@@ -509,6 +509,7 @@
   "authErrorInvalidEmail": "Format email tidak valid",
   "authConfirmEmail": "Cek email kamu untuk konfirmasi pendaftaran.",
   "authRequiredForAudio": "Masuk untuk memutar audio dan mengunduh murottal.",
+  "learningImageUnavailable": "Gambar tidak tersedia. Periksa koneksi internet.",
   "authSignOut": "Keluar",
   "authSignedInAs": "Masuk sebagai {name}",
   "@authSignedInAs": {

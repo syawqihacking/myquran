@@ -509,6 +509,7 @@
   "authErrorInvalidEmail": "صيغة البريد الإلكتروني غير صحيحة",
   "authConfirmEmail": "تحقق من بريدك الإلكتروني لتأكيد التسجيل.",
   "authRequiredForAudio": "سجّل الدخول لتشغيل الصوت وتنزيل التلاوة.",
+  "learningImageUnavailable": "الصورة غير متوفرة. تحقق من اتصال الإنترنت.",
   "authSignOut": "تسجيل الخروج",
   "authSignedInAs": "تم الدخول باسم {name}",
 

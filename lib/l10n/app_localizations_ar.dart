@@ -1324,6 +1324,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authRequiredForAudio => 'سجّل الدخول لتشغيل الصوت وتنزيل التلاوة.';
 
   @override
+  String get learningImageUnavailable =>
+      'الصورة غير متوفرة. تحقق من اتصال الإنترنت.';
+
+  @override
   String get authSignOut => 'تسجيل الخروج';
 
   @override
